@@ -1,0 +1,21 @@
+.vh-100 {
+    height: 100vh
+}
+.main-bg {
+    background: rgb(241 245 249);
+}
+.invalid-feedback {
+    color: #D34053;
+    font-size: 14px;
+    min-height: 21px;
+}
+.is-invalid {
+    border-color: #D34053 !important;
+    color: #D34053 !important;
+    transition: transform 0.5s ease;
+}
+.disabled-button {
+    background: rgba(0, 0, 0, .12);
+    color: rgba(0, 0, 0, .26);
+    border-color: rgba(0, 0, 0, .12);
+}

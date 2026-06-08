@@ -1,0 +1,90 @@
+<?php
+
+/**
+ * See LICENSE.md for license details.
+ */
+
+declare(strict_types=1);
+
+namespace App\Libraries\dhl\Service\ShipmentService;
+
+use App\Libraries\dhl\Api\Data\OrderConfigurationInterface;
+
+class OrderConfiguration implements OrderConfigurationInterface
+{
+    /**
+     * @var bool|null
+     */
+    private $mustEncode;
+
+    /**
+     * @var bool|null
+     */
+    private $combinedPrinting;
+
+    /**
+     * @var string|null
+     */
+    private $docFormat;
+
+    /**
+     * @var string|null
+     */
+    private $printFormat;
+
+    /**
+     * @var string|null
+     */
+    private $printFormatReturn;
+
+    /**
+     * @var string|null
+     */
+    private $profile;
+
+    public function __construct(
+        bool $mustEncode = null,
+        bool $combinedPrinting = null,
+        string $docFormat = null,
+        string $printFormat = null,
+        string $printFormatReturn = null,
+        string $profile = null
+    ) {
+        $this->mustEncode = $mustEncode;
+        $this->combinedPrinting = $combinedPrinting;
+        $this->docFormat = $docFormat;
+        $this->printFormat = $printFormat;
+        $this->printFormatReturn = $printFormatReturn;
+        $this->profile = $profile;
+    }
+
+    public function mustEncode(): ?bool
+    {
+        return $this->mustEncode;
+    }
+
+    public function isCombinedPrinting(): ?bool
+    {
+        return $this->combinedPrinting;
+    }
+
+    public function getDocFormat(): ?string
+    {
+        return $this->docFormat;
+    }
+
+    public function getPrintFormat(): ?string
+    {
+        return $this->printFormat;
+    }
+
+    public function getPrintFormatReturn(): ?string
+    {
+        return $this->printFormatReturn;
+    }
+
+    public function getProfile(): string
+    {
+        return $this->profile ?: OrderConfigurationInterface::DEFAULT_PROFILE;
+    }
+}

@@ -1,0 +1,13 @@
+.thead>th:first-child {
+    //padding-left: 2rem !important;
+}
+.thead:first-child>th {
+    border-color: transparent;
+    padding: 1rem 0.65rem ;
+    font-weight: 500;
+}
+.thead>th {
+    vertical-align: bottom;
+    text-align: left;
+    border-bottom: 1px solid #d9d9d9;
+}

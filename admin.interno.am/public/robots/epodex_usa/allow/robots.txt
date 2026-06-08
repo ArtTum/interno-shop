@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://usa.epodex.com/sitemap.xml
