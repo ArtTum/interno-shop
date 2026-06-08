@@ -83,6 +83,7 @@ import incoming from "@store/modules/incoming/index.js";
 import hospitalsBase from "@store/modules/hospitalsBase/index.js";
 import trash from "@store/modules/trash/index.js";
 import note from "@store/modules/note/index.js";
+import shopFrontend from "@store/modules/shopFrontend/index.js";
 
 const store = createStore({
     modules: {
@@ -169,6 +170,7 @@ const store = createStore({
         hospitalsBase,
         trash,
         note,
+        shopFrontend,
     }
 });
 export default store;

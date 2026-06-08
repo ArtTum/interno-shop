@@ -4,6 +4,21 @@ const routes = [
         redirect: '/recommendations',
     },
     {
+        path: '/shop-frontend',
+        meta: { requiresAuth: true },
+        children: [
+            {
+                path: '',
+                component: () => import('@pages/shopFrontend/index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'languages',
+                    permission_type: 'can_view',
+                },
+            },
+        ],
+    },
+    {
         path: '/notes',
         meta: { requiresAuth: true },
         children: [

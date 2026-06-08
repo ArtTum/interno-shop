@@ -2,6 +2,12 @@ export const routes = [
     {
         menuItems: [
             {
+                icon: ['far', 'store'],
+                label: 'Shop Frontend',
+                name: 'languages',
+                route: '/shop-frontend',
+            },
+            {
                 icon: ['far', 'calendar-check'],
                 label: 'Հերթագրումներ',
                 name: 'recommendations',

@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-const { copy } = useCatalog()
+const { copy, shopSettings } = useCatalog()
 </script>
 
 <template>
@@ -14,9 +14,9 @@ const { copy } = useCatalog()
       <section class="contact-card contact-info-card" :aria-label="copy.contactInfoTitle">
         <h2>{{ copy.contactInfoTitle }}</h2>
         <div class="contact-info-list">
-          <a href="tel:+37410234567"><span>{{ copy.contactPhone }}</span><strong>+374 10 234 567</strong></a>
-          <a href="mailto:info@interino.am"><span>{{ copy.contactEmail }}</span><strong>info@interino.am</strong></a>
-          <a href="https://maps.google.com/?q=Yerevan" target="_blank" rel="noopener noreferrer"><span>{{ copy.contactAddress }}</span><strong>123 Ceiling Ave, Yerevan</strong></a>
+          <a :href="`tel:${shopSettings.contactPhone.replace(/\\s/g, '')}`"><span>{{ copy.contactPhone }}</span><strong>{{ shopSettings.contactPhone }}</strong></a>
+          <a :href="`mailto:${shopSettings.contactEmail}`"><span>{{ copy.contactEmail }}</span><strong>{{ shopSettings.contactEmail }}</strong></a>
+          <a :href="shopSettings.contactMapUrl" target="_blank" rel="noopener noreferrer"><span>{{ copy.contactAddress }}</span><strong>{{ shopSettings.contactAddress }}</strong></a>
         </div>
 
         <div class="contact-hours">

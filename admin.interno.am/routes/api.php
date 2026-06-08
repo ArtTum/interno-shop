@@ -17,5 +17,5 @@ Route::middleware([SetTenantDatabase::class, 'optional.sanctum'])
             return Broadcast::auth($request);
         });
     });
+require __DIR__ . '/front.php';
 require __DIR__ . '/erp.php';
-

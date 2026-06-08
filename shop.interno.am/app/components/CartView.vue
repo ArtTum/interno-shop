@@ -11,6 +11,7 @@ const {
   currentLanguageCode,
   localizedPath,
   removeFromCart,
+  submitOrder,
   updateCartQuantity
 } = useCatalog()
 
@@ -64,11 +65,12 @@ function clearCheckoutError(field: keyof typeof checkoutForm) {
   checkoutErrors[field] = ''
 }
 
-function submitCheckout() {
+async function submitCheckout() {
   if (!validateCheckout()) {
     return
   }
 
+  await submitOrder({ ...checkoutForm })
   isCheckoutOpen.value = false
   router.push(localizedPath('/checkout-success'))
 }

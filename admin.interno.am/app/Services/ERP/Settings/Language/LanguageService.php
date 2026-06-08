@@ -76,6 +76,8 @@ class LanguageService implements LanguageServiceInterface
 
         if ($data['default_hreflang']) $this->repository->updateDefaultHreflangForAllFalse();
 
+        $this->repository->create($data);
+
         CountryTranslations::dispatch($vendorName, []);
 
         return response()->json([

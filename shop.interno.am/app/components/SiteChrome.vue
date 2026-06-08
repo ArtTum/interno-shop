@@ -22,6 +22,7 @@ const {
   scrollProductSlider,
   searchTerm,
   selectLanguage,
+  shopSettings,
   socialLinks,
   submitSearch,
   toggleMenuGroup,
@@ -32,7 +33,7 @@ const {
 const isMenuOpen = ref(false)
 const isLanguageOpen = ref(false)
 
-function chooseLanguage(language: (typeof languages)[number]) {
+function chooseLanguage(language: any) {
   selectLanguage(language)
   isLanguageOpen.value = false
 }
@@ -49,7 +50,7 @@ function openMobileCategory(groupKey: string, childIndex?: number) {
   <div class="site-shell" :class="{ 'menu-is-open': isMenuOpen }">
     <header class="topbar">
       <NuxtLink class="brand" :to="localizedPath('/')" aria-label="Interino homepage">
-        <img src="/assets/brand/logo.png" alt="Interino" />
+        <img :src="shopSettings.brandLogo" alt="Interino" />
       </NuxtLink>
 
       <nav class="desktop-nav" aria-label="Primary">
@@ -179,7 +180,7 @@ function openMobileCategory(groupKey: string, childIndex?: number) {
     </div>
 
     <footer class="footer">
-      <p>123 Ceiling Ave, Yerevan · +374 10 234 567</p>
+      <p>{{ shopSettings.footerText }}</p>
       <nav class="social-links" aria-label="Social links">
         <template v-for="(link, index) in socialLinks" :key="link.label">
           <a v-if="link.external" :href="link.href" target="_blank" rel="noopener noreferrer">{{ link.label }}</a>

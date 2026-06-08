@@ -1,7 +1,7 @@
 ﻿import { computed, ref, watch } from 'vue'
 
-type ProductKind = 'black' | 'silver' | 'wood'
-type LanguageCode = 'hy' | 'en' | 'ru'
+type ProductKind = string
+type LanguageCode = string
 
 interface Product {
   id: number
@@ -15,6 +15,28 @@ interface Product {
 interface CartItem {
   productId: number
   quantity: number
+}
+
+interface ShopFrontendSettings {
+  brandLogo: string
+  footerText: string
+  contactPhone: string
+  contactEmail: string
+  contactAddress: string
+  contactMapUrl: string
+  socialLinks: Array<{ label: string, href: string, external: boolean }>
+}
+
+interface ShopFrontendConfig {
+  languages: Array<{ code: LanguageCode, label: string, icon: string }>
+  menuGroups: Array<{
+    key: string
+    title: Record<LanguageCode, string>
+    children: Record<LanguageCode, string[]>
+  }>
+  translations: Record<LanguageCode, Record<string, string>>
+  products: Product[]
+  settings: ShopFrontendSettings
 }
 
 const menuGroups = [
@@ -77,6 +99,19 @@ const languages = [
   { code: 'en', label: 'English', icon: '/assets/icons/flag-en.svg' },
   { code: 'ru', label: 'Русский', icon: '/assets/icons/flag-ru.svg' }
 ] satisfies Array<{ code: LanguageCode, label: string, icon: string }>
+
+const defaultSettings: ShopFrontendSettings = {
+  brandLogo: '/assets/brand/logo.png',
+  footerText: '123 Ceiling Ave, Yerevan · +374 10 234 567',
+  contactPhone: '+374 10 234 567',
+  contactEmail: 'info@interino.am',
+  contactAddress: '123 Ceiling Ave, Yerevan',
+  contactMapUrl: 'https://maps.google.com/?q=Yerevan',
+  socialLinks: [
+    { label: 'Instagram', href: 'https://www.instagram.com/', external: true },
+    { label: 'Facebook', href: 'https://www.facebook.com/', external: true }
+  ]
+}
 
 const translations = {
   hy: {
@@ -428,17 +463,20 @@ const products: Product[] = [
   }
 ]
 
-const secondaryProducts = products.slice(0, 5).map((product) => ({
-  ...product,
-  id: product.id + 20
-}))
-
 const recentlyAddedProductId = ref<number | null>(null)
 let addToCartFeedbackTimer: ReturnType<typeof setTimeout> | null = null
 
 export function useCatalog() {
   const route = useRoute()
   const router = useRouter()
+  const runtimeConfig = useRuntimeConfig()
+  const frontApiBase = String(runtimeConfig.public.frontApiBase || '').replace(/\/$/, '')
+  const frontApiUrl = (path: string) => `${frontApiBase}${path}`
+  const { data: remoteCatalog } = useFetch<any>(frontApiUrl('/api/front/shop'), {
+    key: 'front-shop-config',
+    transform: (response: any) => response?.data ?? null,
+    default: () => null
+  })
   const currentLanguageCode = useCookie<LanguageCode>('interino-locale', {
     default: () => 'hy',
     sameSite: 'lax'
@@ -451,15 +489,29 @@ export function useCatalog() {
   const searchTerm = useState<string>('search-term', () => '')
   const selectedProductImage = useState<string | null>('selected-product-image', () => null)
 
-  const currentLanguage = computed(() => languages.find((language) => language.code === currentLanguageCode.value) ?? languages[0])
-  const copy = computed(() => translations[currentLanguageCode.value])
+  const catalogConfig = computed<ShopFrontendConfig>(() => ({
+    languages: remoteCatalog.value?.languages?.length ? remoteCatalog.value.languages : languages,
+    menuGroups: remoteCatalog.value?.menuGroups?.length ? remoteCatalog.value.menuGroups : menuGroups,
+    translations: remoteCatalog.value?.translations || translations,
+    products: remoteCatalog.value?.products?.length ? remoteCatalog.value.products : products,
+    settings: { ...defaultSettings, ...(remoteCatalog.value?.settings || {}) }
+  }))
+  const availableLanguages = computed(() => catalogConfig.value.languages)
+  const menuGroupList = computed(() => catalogConfig.value.menuGroups)
+  const primaryProducts = computed(() => catalogConfig.value.products)
+  const secondaryProductList = computed(() => primaryProducts.value.slice(0, 5).map((product) => ({
+    ...product,
+    id: product.id + 20
+  })))
+  const shopSettings = computed(() => catalogConfig.value.settings)
+  const currentLanguage = computed(() => availableLanguages.value.find((language) => language.code === currentLanguageCode.value) ?? availableLanguages.value[0])
+  const copy = computed(() => catalogConfig.value.translations[currentLanguageCode.value] ?? translations[currentLanguageCode.value])
   const socialLinks = computed(() => [
-    { label: 'Instagram', href: 'https://www.instagram.com/', external: true },
-    { label: 'Facebook', href: 'https://www.facebook.com/', external: true },
+    ...(shopSettings.value.socialLinks || []),
     { label: copy.value.privacyPolicy, href: '/privacy-policy', external: false }
   ])
-  const categories = computed(() => menuGroups.map((group) => group.title[currentLanguageCode.value]))
-  const allProducts = computed(() => [...products, ...secondaryProducts])
+  const categories = computed(() => menuGroupList.value.map((group) => group.title[currentLanguageCode.value]))
+  const allProducts = computed(() => [...primaryProducts.value, ...secondaryProductList.value])
   const isCartPage = computed(() => withoutLanguagePrefix(route.path) === '/cart')
   const isContactPage = computed(() => withoutLanguagePrefix(route.path) === '/contact')
   const isSearchPage = computed(() => withoutLanguagePrefix(route.path) === '/search')
@@ -482,12 +534,12 @@ export function useCatalog() {
 
     return [
       currentProduct.value.image,
-      ...products
+      ...primaryProducts.value
         .filter((product) => product.id !== currentProduct.value?.id)
         .map((product) => product.image)
     ].slice(0, 4)
   })
-  const relatedProducts = computed(() => products.filter((product) => product.id !== currentProduct.value?.id))
+  const relatedProducts = computed(() => primaryProducts.value.filter((product) => product.id !== currentProduct.value?.id))
   const similarProducts = computed(() => allProducts.value.filter((product) => product.id !== currentProduct.value?.id))
   const searchResults = computed(() => {
     const query = searchQuery.value.toLowerCase()
@@ -502,7 +554,7 @@ export function useCatalog() {
       return searchable.includes(query)
     })
   })
-  const searchRecommendations = computed(() => products.slice(0, 8))
+  const searchRecommendations = computed(() => primaryProducts.value.slice(0, 8))
   const cartCount = computed(() => cartItems.value.reduce((total, item) => total + item.quantity, 0))
   const cartProducts = computed(() => {
     return cartItems.value
@@ -530,7 +582,7 @@ export function useCatalog() {
     }
   })
   const currentCategoryGroup = computed(() => {
-    return menuGroups.find((group) => group.key === currentCategoryRoute.value?.groupKey) ?? null
+    return menuGroupList.value.find((group) => group.key === currentCategoryRoute.value?.groupKey) ?? null
   })
   const currentCategoryChild = computed(() => {
     const routeValue = currentCategoryRoute.value
@@ -544,7 +596,7 @@ export function useCatalog() {
   const isCategoryPage = computed(() => Boolean(currentCategoryGroup.value))
 
   function isLanguageCode(value: string | undefined): value is LanguageCode {
-    return value === 'hy' || value === 'en' || value === 'ru'
+    return Boolean(value && availableLanguages.value.some((language) => language.code === value))
   }
 
   function getRouteLanguage(path: string): LanguageCode | null {
@@ -630,6 +682,24 @@ export function useCatalog() {
 
   function selectProductImage(image: string) {
     selectedProductImage.value = image
+  }
+
+  async function submitOrder(customer: Record<string, string>) {
+    await $fetch(frontApiUrl('/api/front/orders'), {
+      method: 'POST',
+      body: {
+        customer,
+        items: cartProducts.value.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          product: item.product
+        })),
+        total: cartTotal.value,
+        language: currentLanguageCode.value
+      }
+    })
+
+    clearCart()
   }
 
   function scrollProductSlider(id: string, direction: 'previous' | 'next') {
@@ -729,28 +799,29 @@ export function useCatalog() {
     isCategoryPage,
     isContactPage,
     isSearchPage,
-    languages,
+    languages: availableLanguages,
     localizedPath,
-    menuGroups,
+    menuGroups: menuGroupList,
     openCategory,
     openProduct,
-    products,
+    products: primaryProducts,
     recentlyAddedProductId,
     relatedProducts,
     removeFromCart,
     searchRecommendations,
     searchResults,
     searchTerm,
-    secondaryProducts,
+    secondaryProducts: secondaryProductList,
     selectLanguage,
     selectProductImage,
     similarProducts,
+    shopSettings,
     socialLinks,
     submitSearch,
+    submitOrder,
     toggleMenuGroup,
     updateCartQuantity,
     addToCart,
     scrollProductSlider
   }
 }
-

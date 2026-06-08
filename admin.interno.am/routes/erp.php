@@ -25,6 +25,7 @@ use App\Http\Controllers\API\ERP\RecommendationController;
 use App\Http\Controllers\API\ERP\SmsBazaController;
 use App\Http\Controllers\API\ERP\SmsHistoryController;
 use App\Http\Controllers\API\ERP\SmsShablonController;
+use App\Http\Controllers\API\ERP\ShopFrontendController;
 use App\Http\Controllers\API\ERP\SubscribeController;
 use App\Http\Controllers\API\ERP\TrashController;
 use App\Http\Controllers\API\ERP\UserController;
@@ -69,6 +70,12 @@ Route::group(['prefix' => 'erp'], function () {
                 Route::put('update', [LanguageController::class, 'update'])->middleware('check.permission:languages,can_edit');
 
                 Route::delete('delete/{id}', [LanguageController::class, 'delete'])->middleware('check.permission:languages,can_delete');
+            });
+
+            Route::group(['prefix' => 'shop-frontend'], function () {
+                Route::get('fetch', [ShopFrontendController::class, 'fetch'])->middleware('check.permission:languages,can_view');
+                Route::put('update', [ShopFrontendController::class, 'update'])->middleware('check.permission:languages,can_edit');
+                Route::get('orders', [ShopFrontendController::class, 'orders'])->middleware('check.permission:languages,can_view');
             });
 
             Route::group(['prefix' => 'vcountries'], function () {
