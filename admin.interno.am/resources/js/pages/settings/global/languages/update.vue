@@ -41,7 +41,6 @@ const fetchByField = async () => {
         base: res.data.base,
         status: res.data.status,
         draft: res.data.draft,
-        email: res.data.email,
         errors: {}
     };
     paramsReady.value = true;

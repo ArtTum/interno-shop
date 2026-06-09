@@ -52,12 +52,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (!Schema::hasTable('user_group_permissions')) {
-            return;
-        }
-
-        DB::table('user_group_permissions')
-            ->whereIn('name', array_column($this->permissions, 'name'))
-            ->delete();
+        //
     }
 };
