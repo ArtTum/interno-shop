@@ -8,6 +8,12 @@ export const routes = [
                 route: '/shop-frontend',
             },
             {
+                icon: ['far', 'folder-tree'],
+                label: 'Shop Categories',
+                name: 'shop_categories',
+                route: '/shop-categories',
+            },
+            {
                 icon: ['far', 'screwdriver-wrench'],
                 label: 'Settings',
                 name: 'settings_menu_link',

@@ -55,6 +55,9 @@ const options = [
 ];
 
 const auth = computed(() => store.getters['auth/getUser']);
+const permission = computed(() => auth.value?.user_group?.permissions_by_name?.languages?.[0] || {});
+const canAdd = computed(() => auth.value?.superadmin || permission.value.can_add);
+const canDelete = computed(() => auth.value?.superadmin || permission.value.can_delete);
 </script>
 
 <template>
@@ -63,7 +66,7 @@ const auth = computed(() => store.getters['auth/getUser']);
             {path: '/', title: 'Dashboard'},
         ]"/>
         <TableActions
-            :createRoute="auth.user_group.permissions_by_name.languages[0].can_add ? '/settings/languages/create' : ''"
+            :createRoute="canAdd ? '/settings/languages/create' : ''"
             :showFilter="true"
             @applyFilters="doPageFetching"
         >
@@ -166,7 +169,7 @@ const auth = computed(() => store.getters['auth/getUser']);
                                 </button>
                             </RouterLink>
 
-                            <template v-if="auth.user_group.permissions_by_name.languages[0].can_delete">
+                            <template v-if="canDelete">
                                 <button
                                     @click="store.commit('language/SET_DELETE_MODAL_VALUE', {
                                         value: true,

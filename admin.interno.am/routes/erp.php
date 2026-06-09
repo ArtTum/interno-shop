@@ -26,6 +26,7 @@ use App\Http\Controllers\API\ERP\SmsBazaController;
 use App\Http\Controllers\API\ERP\SmsHistoryController;
 use App\Http\Controllers\API\ERP\SmsShablonController;
 use App\Http\Controllers\API\ERP\ShopFrontendController;
+use App\Http\Controllers\API\ERP\ShopCategoryController;
 use App\Http\Controllers\API\ERP\SubscribeController;
 use App\Http\Controllers\API\ERP\TrashController;
 use App\Http\Controllers\API\ERP\UserController;
@@ -75,6 +76,15 @@ Route::group(['prefix' => 'erp'], function () {
                 Route::get('fetch', [ShopFrontendController::class, 'fetch'])->middleware('check.permission:languages,can_view');
                 Route::put('update', [ShopFrontendController::class, 'update'])->middleware('check.permission:languages,can_edit');
                 Route::get('orders', [ShopFrontendController::class, 'orders'])->middleware('check.permission:languages,can_view');
+            });
+
+            Route::group(['prefix' => 'shop-categories'], function () {
+                Route::get('fetch', [ShopCategoryController::class, 'fetch'])->middleware('check.permission:shop_categories,can_view');
+                Route::get('fetch-params', [ShopCategoryController::class, 'fetchParams'])->middleware('check.permission:shop_categories,can_view');
+                Route::get('fetch-by-field', [ShopCategoryController::class, 'fetchByField'])->middleware('check.permission:shop_categories,can_view');
+                Route::post('insert', [ShopCategoryController::class, 'insert'])->middleware('check.permission:shop_categories,can_add');
+                Route::put('update', [ShopCategoryController::class, 'update'])->middleware('check.permission:shop_categories,can_edit');
+                Route::delete('delete/{id}', [ShopCategoryController::class, 'delete'])->middleware('check.permission:shop_categories,can_delete');
             });
 
             Route::group(['prefix' => 'vcountries'], function () {

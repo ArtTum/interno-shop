@@ -41,6 +41,9 @@ watch(form.value, (newVal) => {
 });
 
 const auth = computed(() => store.getters['auth/getUser']);
+const permission = computed(() => auth.value?.user_group?.permissions_by_name?.languages?.[0] || {});
+const canEdit = computed(() => auth.value?.superadmin || props.emitAction !== 'update' || permission.value.can_edit);
+const canDelete = computed(() => auth.value?.superadmin || permission.value.can_delete);
 </script>
 
 <template>
@@ -54,7 +57,7 @@ const auth = computed(() => store.getters['auth/getUser']);
         <div class="grid grid-cols-3 gap-6 py-6 px-4">
             <div class="px-4">
                 <CustomInput
-                    :disabled="emitAction === 'update' && !auth.user_group.permissions_by_name.languages[0].can_edit"
+                    :disabled="!canEdit"
                     v-model="form.name"
                     name="name"
                     label="Name *"
@@ -66,7 +69,7 @@ const auth = computed(() => store.getters['auth/getUser']);
             </div>
             <div class="px-4">
                 <CustomInput
-                    :disabled="emitAction === 'update' && !auth.user_group.permissions_by_name.languages[0].can_edit"
+                    :disabled="!canEdit"
                     v-model="form.code"
                     name="code"
                     label="Code *"
@@ -90,7 +93,7 @@ const auth = computed(() => store.getters['auth/getUser']);
             </div>
             <div class="px-4">
                 <CustomInput
-                    :disabled="emitAction === 'update' && !auth.user_group.permissions_by_name.languages[0].can_edit"
+                    :disabled="!canEdit"
                     v-model="form.hreflang"
                     name="hreflang"
                     label="Hreflang *"
@@ -103,7 +106,7 @@ const auth = computed(() => store.getters['auth/getUser']);
             </div>
             <div class="px-4">
                 <CustomInput
-                    :disabled="emitAction === 'update' && !auth.user_group.permissions_by_name.languages[0].can_edit"
+                    :disabled="!canEdit"
                     v-model="form.local_for_trustpilot"
                     name="local_for_trustpilot"
                     label="Local for trustpilot *"
@@ -127,7 +130,7 @@ const auth = computed(() => store.getters['auth/getUser']);
                         @change="(value) => {
                            form.status = value;
                         }"
-                        :disabled="emitAction === 'update' && !auth.user_group.permissions_by_name.languages[0].can_edit"
+                        :disabled="!canEdit"
                         :value="form.status"
                         id="status"
                         label="Status"
@@ -136,7 +139,7 @@ const auth = computed(() => store.getters['auth/getUser']);
                         @change="(value) => {
                            form.draft = value;
                         }"
-                        :disabled="emitAction === 'update' && !auth.user_group.permissions_by_name.languages[0].can_edit"
+                        :disabled="!canEdit"
                         :value="form.draft"
                         id="draft"
                         label="Is draft"
@@ -145,7 +148,7 @@ const auth = computed(() => store.getters['auth/getUser']);
                         @change="(value) => {
                            form.base = value;
                         }"
-                        :disabled="emitAction === 'update' && !auth.user_group.permissions_by_name.languages[0].can_edit"
+                        :disabled="!canEdit"
                         :value="form.base"
                         id="base"
                         label="Base"
@@ -154,7 +157,7 @@ const auth = computed(() => store.getters['auth/getUser']);
                         @change="(value) => {
                            form.default_hreflang = value;
                         }"
-                        :disabled="emitAction === 'update' && !auth.user_group.permissions_by_name.languages[0].can_edit"
+                        :disabled="!canEdit"
                         :value="form.default_hreflang"
                         id="default_hreflang"
                         label="Default hreflang"
@@ -163,7 +166,7 @@ const auth = computed(() => store.getters['auth/getUser']);
                         @change="(value) => {
                            form.is_rtl = value;
                         }"
-                        :disabled="emitAction === 'update' && !auth.user_group.permissions_by_name.languages[0].can_edit"
+                        :disabled="!canEdit"
                         :value="form.is_rtl"
                         id="is_rtl"
                         label="Is RTL Direction"
@@ -172,7 +175,7 @@ const auth = computed(() => store.getters['auth/getUser']);
             </div>
             <div class="p-6 save-button-fixed">
                 <div class="flex ml-auto gap-5">
-                    <template v-if="auth.user_group.permissions_by_name.languages[0].can_delete">
+                    <template v-if="canDelete">
                         <CustomButton
                             v-if="emitAction === 'update'"
                             @click="store.commit('language/SET_DELETE_MODAL_VALUE', {
@@ -188,7 +191,7 @@ const auth = computed(() => store.getters['auth/getUser']);
                     </template>
 
                     <template
-                        v-if="emitAction !== 'update' || auth.user_group.permissions_by_name.languages[0].can_edit">
+                        v-if="canEdit">
                         <CustomButton
                             class="flex items-center gap-2 rounded bg-primary py-2 px-4.5 font-medium text-white hover:bg-opacity-80"
                             type="submit"

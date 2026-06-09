@@ -37,4 +37,9 @@ class ShopCategory extends Model
     {
         return $this->hasMany(ShopCategoryTranslation::class);
     }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(ShopProduct::class);
+    }
 }

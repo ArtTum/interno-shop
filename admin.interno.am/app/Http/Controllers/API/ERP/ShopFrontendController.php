@@ -301,11 +301,22 @@ class ShopFrontendController extends Controller
             return [
                 'key' => $category->slug,
                 'title' => $this->mapTranslationsByLanguage($category, $languageCodes),
+                'meta' => $this->mapCategoryMetaByLanguage($category, $languageCodes),
                 'children' => $languageCodes
                     ->mapWithKeys(function (string $code) use ($category) {
                         return [
                             $code => $category->children
                                 ->map(fn (ShopCategory $child) => $this->categoryTitleForLanguage($child, $code))
+                                ->values()
+                                ->all(),
+                        ];
+                      })
+                      ->all(),
+                'childMeta' => $languageCodes
+                    ->mapWithKeys(function (string $code) use ($category) {
+                        return [
+                            $code => $category->children
+                                ->map(fn (ShopCategory $child) => $this->categoryMetaForLanguage($child, $code))
                                 ->values()
                                 ->all(),
                         ];
@@ -417,6 +428,13 @@ class ShopFrontendController extends Controller
             ->all();
     }
 
+    private function mapCategoryMetaByLanguage(ShopCategory $category, $languageCodes): array
+    {
+        return $languageCodes
+            ->mapWithKeys(fn (string $code) => [$code => $this->categoryMetaForLanguage($category, $code)])
+            ->all();
+    }
+
     private function categoryTitleForLanguage(ShopCategory $category, string $code): string
     {
         $translation = $category->translations->first(fn ($translation) => $translation->language?->code === $code);
@@ -426,6 +444,20 @@ class ShopFrontendController extends Controller
         }
 
         return $category->translations->first()?->title ?? '';
+    }
+
+    private function categoryMetaForLanguage(ShopCategory $category, string $code): array
+    {
+        $translation = $category->translations->first(fn ($translation) => $translation->language?->code === $code)
+            ?: $category->translations->first();
+        $title = $translation?->title ?? '';
+
+        return [
+            'title' => $title,
+            'metaTitle' => $translation?->meta_title ?: $title,
+            'metaDescription' => $translation?->meta_description ?? '',
+            'metaKeywords' => $translation?->meta_keywords ?? '',
+        ];
     }
 
     private function normalizeSlug(?string $value, string $fallback): string

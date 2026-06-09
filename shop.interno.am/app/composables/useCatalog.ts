@@ -45,7 +45,9 @@ interface ShopFrontendConfig {
   menuGroups: Array<{
     key: string
     title: Record<LanguageCode, string>
+    meta?: Record<LanguageCode, SeoEntry>
     children: Record<LanguageCode, string[]>
+    childMeta?: Record<LanguageCode, SeoEntry[]>
   }>
   translations: Record<LanguageCode, Record<string, string>>
   products: Product[]
@@ -654,6 +656,9 @@ export function useCatalog() {
     return 'home'
   })
   const currentSeo = computed(() => {
+    const categorySeo = currentCategoryRoute.value?.childIndex === null
+      ? currentCategoryGroup.value?.meta?.[currentLanguageCode.value]
+      : currentCategoryGroup.value?.childMeta?.[currentLanguageCode.value]?.[currentCategoryRoute.value?.childIndex ?? -1]
     const seo = catalogConfig.value.seo[currentSeoPageKey.value]?.[currentLanguageCode.value]
       ?? catalogConfig.value.seo[currentSeoPageKey.value]?.hy
       ?? defaultSeo[currentSeoPageKey.value]?.[currentLanguageCode.value]
@@ -665,10 +670,10 @@ export function useCatalog() {
       || seo.title
 
     return {
-      title: seo.title || dynamicTitle,
-      metaTitle: seo.metaTitle || dynamicTitle,
-      metaDescription: seo.metaDescription || '',
-      metaKeywords: seo.metaKeywords || ''
+      title: categorySeo?.title || seo.title || dynamicTitle,
+      metaTitle: categorySeo?.metaTitle || seo.metaTitle || dynamicTitle,
+      metaDescription: categorySeo?.metaDescription || seo.metaDescription || '',
+      metaKeywords: categorySeo?.metaKeywords || seo.metaKeywords || ''
     }
   })
   const categoryProducts = computed(() => {

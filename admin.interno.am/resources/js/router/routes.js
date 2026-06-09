@@ -19,6 +19,39 @@ const routes = [
         ],
     },
     {
+        path: '/shop-categories',
+        meta: { requiresAuth: true },
+        children: [
+            {
+                path: '',
+                component: () => import('@pages/shopCategories/index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_categories',
+                    permission_type: 'can_view',
+                },
+            },
+            {
+                path: 'create',
+                component: () => import('@pages/shopCategories/create.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_categories',
+                    permission_type: 'can_add',
+                },
+            },
+            {
+                path: 'update/:id/:languageId?',
+                component: () => import('@pages/shopCategories/update.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_categories',
+                    permission_type: 'can_view',
+                },
+            },
+        ],
+    },
+    {
         path: '/settings',
         redirect: '/settings/languages',
         meta: {

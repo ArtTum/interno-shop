@@ -14,6 +14,10 @@ class ShopCategoryTranslation extends Model
         'shop_category_id',
         'language_id',
         'title',
+        'slug',
+        'meta_title',
+        'meta_description',
+        'meta_keywords',
     ];
 
     public function category(): BelongsTo
