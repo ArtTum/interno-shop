@@ -1,7 +1,11 @@
 <script setup>
 import DefaultLayoutComponent from "@layouts/DefaultLayoutComponent.vue";
 import BreadcrumbDefault from "@components/global/BreadcrumbDefault.vue";
+import CustomTable from "@components/global/CustomTable.vue";
 import DeleteModal from "@components/global/DeleteModal.vue";
+import CustomSelect from "@components/global/CustomSelect.vue";
+import TableActions from "@components/global/TableActions.vue";
+
 import {computed, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import {useStore} from "vuex";
@@ -16,28 +20,51 @@ const params = ref({
     search: route.query.search || '',
     language_id: Number(route.query.language_id) || 0,
     parent_id: route.query.parent_id ?? '',
-    status: route.query.status ?? '',
+    status: route.query.status === undefined ? -1 : Number(route.query.status),
+    ordering_field: route.query.ordering_field || 'sort_order',
+    ordering_direction: route.query.ordering_direction || 'asc',
 });
+
+const statusOptions = [
+    {value: -1, label: 'All'},
+    {value: 1, label: 'Active'},
+    {value: 0, label: 'Inactive'},
+];
+
+const pageData = computed(() => store.getters['shopCategory/getPageData']);
+const parentOptions = computed(() => [
+    {value: '', label: 'All parents'},
+    {value: 'root', label: 'Root only'},
+    ...(pageData.value.parents || []).filter((parent) => parent.value),
+]);
 
 const auth = computed(() => store.getters['auth/getUser']);
 const permission = computed(() => auth.value?.user_group?.permissions_by_name?.shop_categories?.[0] || {});
 const canAdd = computed(() => auth.value?.superadmin || permission.value.can_add);
 const canDelete = computed(() => auth.value?.superadmin || permission.value.can_delete);
-const pageData = computed(() => store.getters['shopCategory/getPageData']);
 
 const updateQueryParams = async () => {
-    await router.push({query: {...params.value}});
+    await router.push({
+        query: {
+            ...route.query,
+            ...params.value,
+        },
+    });
 };
 
 const fetchPageData = async () => {
     const data = await store.dispatch('shopCategory/fetchPageData', params.value);
+
     if (!params.value.language_id && data.base_language_id) {
         params.value.language_id = data.base_language_id;
     }
 };
 
-const doFetch = async () => {
-    params.value.page = 1;
+const doPageFetching = async (isPagination = false) => {
+    if (!isPagination) {
+        params.value.page = 1;
+    }
+
     await updateQueryParams();
     await fetchPageData();
 };
@@ -47,70 +74,132 @@ fetchPageData();
 
 <template>
     <DefaultLayoutComponent>
-        <BreadcrumbDefault pageTitle="Shop Categories" :breadcrumb="[{path: '/', title: 'Dashboard'}]" />
+        <BreadcrumbDefault pageTitle="Shop Categories" :breadcrumb="[
+            {path: '/', title: 'Dashboard'},
+        ]"/>
 
-        <div class="mb-4 rounded-sm border border-stroke bg-white p-4 shadow-default">
-            <div class="grid grid-cols-5 gap-3 max-xl:grid-cols-2 max-sm:grid-cols-1">
-                <input v-model="params.search" class="rounded border border-stroke px-3 py-2 text-black" placeholder="Search name, slug, meta title" @keyup.enter="doFetch" />
-                <select v-model.number="params.language_id" class="rounded border border-stroke px-3 py-2 text-black" @change="doFetch">
-                    <option v-for="language in pageData.languages" :key="language.value" :value="language.value">{{ language.label }}</option>
-                </select>
-                <select v-model="params.parent_id" class="rounded border border-stroke px-3 py-2 text-black" @change="doFetch">
-                    <option value="">All parents</option>
-                    <option value="root">Root only</option>
-                    <option v-for="parent in pageData.parents" :key="parent.value ?? 'none'" :value="parent.value" v-show="parent.value">{{ parent.label }}</option>
-                </select>
-                <select v-model="params.status" class="rounded border border-stroke px-3 py-2 text-black" @change="doFetch">
-                    <option value="">All statuses</option>
-                    <option value="1">Active</option>
-                    <option value="0">Inactive</option>
-                </select>
-                <div class="flex gap-2">
-                    <button type="button" class="rounded bg-black px-4 py-2 font-medium text-white" @click="doFetch">Filter</button>
-                    <RouterLink v-if="canAdd" to="/shop-categories/create" class="rounded bg-primary px-4 py-2 font-medium text-white">Create</RouterLink>
+        <TableActions
+            :createRoute="canAdd ? '/shop-categories/create' : ''"
+            :showFilter="true"
+            @applyFilters="doPageFetching"
+        >
+            <div class="grid grid-cols-4 gap-6 p-6 max-xl:grid-cols-2 max-sm:grid-cols-1 max-md:gap-4 max-md:p-4 max-sm:p-1">
+                <div>
+                    <CustomSelect
+                        v-model="params.language_id"
+                        mode="single"
+                        label="Language"
+                        :options="pageData.languages"
+                        :searchable="true"
+                        :canClear="false"
+                    />
+                </div>
+                <div>
+                    <CustomSelect
+                        v-model="params.parent_id"
+                        mode="single"
+                        label="Parent"
+                        :options="parentOptions"
+                        :searchable="true"
+                        :canClear="false"
+                    />
+                </div>
+                <div>
+                    <CustomSelect
+                        v-model="params.status"
+                        mode="single"
+                        label="Status"
+                        :options="statusOptions"
+                        :searchable="false"
+                        :canClear="false"
+                    />
                 </div>
             </div>
-        </div>
+        </TableActions>
 
-        <div class="overflow-x-auto rounded-sm border border-stroke bg-white shadow-default">
-            <table class="w-full min-w-220 text-left">
-                <thead class="bg-gray-50 text-black">
-                    <tr>
-                        <th class="px-4 py-3">ID</th>
-                        <th class="px-4 py-3">Name</th>
-                        <th class="px-4 py-3">Slug</th>
-                        <th class="px-4 py-3">Parent</th>
-                        <th class="px-4 py-3">Meta title</th>
-                        <th class="px-4 py-3">Children</th>
-                        <th class="px-4 py-3">Products</th>
-                        <th class="px-4 py-3">Status</th>
-                        <th class="px-4 py-3">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="item in pageData.data" :key="item.id" class="border-t border-stroke">
-                        <td class="px-4 py-3 font-medium text-black">#{{ item.id }}</td>
-                        <td class="px-4 py-3 text-black">{{ item.name || '-' }}</td>
-                        <td class="px-4 py-3 text-black">{{ item.slug || item.global_slug }}</td>
-                        <td class="px-4 py-3 text-black">{{ item.parent_name || '-' }}</td>
-                        <td class="px-4 py-3 text-black">{{ item.meta_title || '-' }}</td>
-                        <td class="px-4 py-3 text-black">{{ item.children_count }}</td>
-                        <td class="px-4 py-3 text-black">{{ item.products_count }}</td>
-                        <td class="px-4 py-3">
-                            <span class="rounded px-2 py-1 text-xs font-medium" :class="item.status ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'">
-                                {{ item.status ? 'Active' : 'Inactive' }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3">
-                            <div class="flex gap-3">
-                                <RouterLink :to="`/shop-categories/update/${item.id}/${params.language_id}`" class="text-primary">Edit</RouterLink>
-                                <button v-if="canDelete" type="button" class="text-meta-1" @click="store.commit('shopCategory/SET_DELETE_MODAL_VALUE', {value: true, id: item.id})">Delete</button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <CustomTable
+            :main-search="{
+                visibility: true,
+                placeholder: 'Search ...',
+                tooltip: {
+                    button: {showingType: 'info'},
+                    text: 'Name, slug, meta title'
+                }
+            }"
+            @do-page-fetching="doPageFetching"
+            v-model="params"
+            :pagination="pageData.pagination"
+            :columns="[
+                {title: 'ID', key: 'shop_categories.id'},
+                {title: 'Name'},
+                {title: 'Slug'},
+                {title: 'Parent'},
+                {title: 'Meta title'},
+                {title: 'Children'},
+                {title: 'Products'},
+                {title: 'Status', key: 'status'},
+                {title: 'Action'},
+            ]"
+        >
+            <template v-for="(item, index) in pageData.data" :key="index">
+                <tr :draggable="false">
+                    <td class="py-5 px-4 pl-9 xl:pl-11">
+                        <h5 class="font-medium text-black">#{{ item.id }}</h5>
+                    </td>
+                    <td class="py-5 px-4 pl-9 xl:pl-11">
+                        <span class="font-medium text-black">{{ item.name || '-' }}</span>
+                    </td>
+                    <td class="py-5 px-4 pl-9 xl:pl-11">
+                        <span class="font-medium text-black">{{ item.slug || item.global_slug }}</span>
+                    </td>
+                    <td class="py-5 px-4 pl-9 xl:pl-11">
+                        <span class="font-medium text-black">{{ item.parent_name || '-' }}</span>
+                    </td>
+                    <td class="py-5 px-4 pl-9 xl:pl-11">
+                        <span class="font-medium text-black">{{ item.meta_title || '-' }}</span>
+                    </td>
+                    <td class="py-5 px-4 pl-9 xl:pl-11">
+                        <span class="font-medium text-black">{{ item.children_count }}</span>
+                    </td>
+                    <td class="py-5 px-4 pl-9 xl:pl-11">
+                        <span class="font-medium text-black">{{ item.products_count }}</span>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p
+                            class="inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium"
+                            :class="{
+                                'bg-danger text-danger': !item.status,
+                                'bg-success text-success': item.status
+                            }"
+                        >
+                            {{ item.status ? 'Active' : 'Inactive' }}
+                        </p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center space-x-3.5">
+                            <RouterLink :to="`/shop-categories/update/${item.id}/${params.language_id}`">
+                                <button class="hover:text-primary" title="Edit">
+                                    <font-awesome-icon :icon="['far', 'pen-to-square']"/>
+                                </button>
+                            </RouterLink>
+
+                            <template v-if="canDelete">
+                                <button
+                                    @click="store.commit('shopCategory/SET_DELETE_MODAL_VALUE', {
+                                        value: true,
+                                        id: item.id
+                                    });"
+                                    class="hover:text-primary"
+                                    title="Delete"
+                                >
+                                    <font-awesome-icon :icon="['fas', 'trash-can']"/>
+                                </button>
+                            </template>
+                        </div>
+                    </td>
+                </tr>
+            </template>
+        </CustomTable>
 
         <DeleteModal
             @fetch="fetchPageData()"
@@ -120,3 +209,19 @@ fetchPageData();
         />
     </DefaultLayoutComponent>
 </template>
+
+<style lang="scss">
+@import '@assets/scss/tables';
+
+.thead > th:first-child,
+.data-table-common .datatable-table > tbody > tr > td:first-child,
+.data-table-common .datatable-table > thead > tr > th:first-child {
+    padding-left: 15px !important;
+}
+</style>
+
+<style lang="scss" scoped>
+.index tr td:last-child {
+    min-width: 70px;
+}
+</style>

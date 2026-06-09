@@ -3,6 +3,7 @@ import DefaultLayoutComponent from "@layouts/DefaultLayoutComponent.vue";
 import BreadcrumbDefault from "@components/global/BreadcrumbDefault.vue";
 import DeleteModal from "@components/global/DeleteModal.vue";
 import CustomForm from "@components/shopCategory/CustomForm.vue";
+import CustomCopyButton from "@components/global/CustomCopyButton.vue";
 import {computed, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import {useStore} from "vuex";
@@ -68,7 +69,7 @@ fetchCategory();
 
         <div v-if="form" class="rounded-sm border border-stroke bg-white shadow-default">
             <div class="border-b border-stroke px-6 py-4">
-                <h3 class="font-medium text-black">#{{ form.id }}</h3>
+                <h3 class="font-medium text-black">#{{ form.id }} <CustomCopyButton :text="form.id"/></h3>
             </div>
             <CustomForm
                 v-model="form"

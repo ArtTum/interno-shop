@@ -20,7 +20,20 @@ class ShopCategoryController extends Controller
         $languageId = $this->resolveLanguageId((int) $request->query('language_id', 0));
         $search = trim((string) $request->query('search', ''));
         $parentId = $request->query('parent_id', '');
-        $status = $request->query('status', '');
+        $status = (int) $request->query('status', -1);
+        $orderingField = (string) $request->query('ordering_field', 'sort_order');
+        $orderingDirection = $request->query('ordering_direction') === 'desc' ? 'desc' : 'asc';
+        $orderingColumns = [
+            'id' => 'shop_categories.id',
+            'shop_categories.id' => 'shop_categories.id',
+            'sort_order' => 'shop_categories.sort_order',
+            'shop_categories.sort_order' => 'shop_categories.sort_order',
+            'slug' => 'shop_categories.slug',
+            'shop_categories.slug' => 'shop_categories.slug',
+            'status' => 'shop_categories.status',
+            'shop_categories.status' => 'shop_categories.status',
+        ];
+        $orderingColumn = $orderingColumns[$orderingField] ?? 'shop_categories.sort_order';
 
         $query = ShopCategory::query()
             ->with([
@@ -31,7 +44,7 @@ class ShopCategoryController extends Controller
             ->when($parentId !== '', fn ($query) => $parentId === 'root'
                 ? $query->whereNull('parent_id')
                 : $query->where('parent_id', (int) $parentId))
-            ->when($status !== '', fn ($query) => $query->where('status', (bool) $status))
+            ->when($status >= 0, fn ($query) => $query->where('status', (bool) $status))
             ->when($search !== '', function ($query) use ($search, $languageId) {
                 $query->where(function ($query) use ($search, $languageId) {
                     $query->where('slug', 'like', "%{$search}%")
@@ -45,8 +58,8 @@ class ShopCategoryController extends Controller
                         });
                 });
             })
+            ->orderBy($orderingColumn, $orderingDirection)
             ->orderBy('parent_id')
-            ->orderBy('sort_order')
             ->orderBy('id');
 
         $perPage = max(1, (int) $request->query('per_page', 25));
