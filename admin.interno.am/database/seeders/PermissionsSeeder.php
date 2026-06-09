@@ -9,6 +9,8 @@ use Illuminate\Database\Seeder;
 class PermissionsSeeder extends Seeder
 {
     const PERMISSIONS = [
+        ['title' => 'Settings menu', 'name' => 'settings_menu_link'],
+        ['title' => 'Languages', 'name' => 'languages'],
         ['title' => 'Recommendations', 'name' => 'recommendations'],
         ['title' => 'Hospitals base', 'name' => 'hospitals_bases'],
         ['title' => 'Incomings', 'name' => 'incomings'],

@@ -19,6 +19,7 @@ class LanguageInsertRequest extends FormRequest
             'code' => 'required|string|max:3|unique:languages,code',
             'name' => 'required|string|max:15',
             'status' => 'required|boolean',
+            'draft' => 'required|boolean',
             'currency_id' => 'nullable|integer',
             'base' => 'required|boolean',
             'hreflang' => 'required|string|max:10',

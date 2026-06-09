@@ -6,13 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ERP\Language\LanguageFetchByFieldRequest;
 use App\Http\Requests\ERP\Language\LanguageFetchRequest;
 use App\Http\Requests\ERP\Language\LanguageInsertRequest;
-use App\Http\Requests\ERP\Language\LanguageOutlookRequest;
-use App\Http\Requests\ERP\Language\LanguageOutlookUpdateRequest;
 use App\Http\Requests\ERP\Language\LanguageUpdateRequest;
 use App\Services\ERP\Settings\Language\LanguageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class LanguageController extends Controller
 {
@@ -80,36 +77,6 @@ class LanguageController extends Controller
                 'message' => 'Failed!',
                 'error' => $exception->getMessage()
             ], ($exception->getCode() ?: 400));
-        }
-    }
-
-    public function outlook(LanguageOutlookRequest $request): JsonResponse
-    {
-        try {
-            return $this->service->outlook($request->validated());
-        } catch (\Exception $exception) {
-            Log::channel('languages-errors')->error('Failed', ['error' => $exception]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed!',
-                'error' => $exception->getMessage()
-            ], ($exception->getCode() ?: 400));
-        }
-    }
-
-    public function callback($id, $vendor, LanguageOutlookUpdateRequest $request): JsonResponse|RedirectResponse
-    {
-        try {
-            return $this->service->updateOutlook($id, $vendor, $request->validated());
-        } catch (\Exception $exception) {
-            Log::channel('languages-errors')->error('Failed', ['error' => $exception]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed!',
-                'error' => $exception->getMessage()
-            ], 500);
         }
     }
 

@@ -23,13 +23,13 @@ class LanguageService implements LanguageServiceInterface
     public function fetch(array $data): JsonResponse
     {
         try {
-            $select = "languages.id, languages.code, currencies.code as currency_code, languages.name, status, languages.base, IF(status = 1, 'Active', 'Inactive') as status_text";
+            $select = "languages.id, languages.code, languages.draft, currencies.code as currency_code, languages.name, status, languages.base, IF(status = 1, 'Active', 'Inactive') as status_text, IF(draft = 0, 'Active', 'Draft') as draft_text";
             $pagination = prepare_pagination_array($data['page'], $data['per_page']);
             $ordering = [
                 'field' => $data['ordering_field'],
                 'direction' => $data['ordering_direction']
             ];
-            $searchFields = ['code', 'name'];
+            $searchFields = ['languages.code', 'languages.name'];
 
             return response()->json([
                 'success' => true,
@@ -47,7 +47,7 @@ class LanguageService implements LanguageServiceInterface
 
     public function fetchByField(array $data): JsonResponse
     {
-        $select = "id, code, name, status, base, default_hreflang, hreflang, local_for_trustpilot, email, currency_id, is_rtl";
+        $select = "id, code, name, draft, status, base, default_hreflang, hreflang, local_for_trustpilot, email, currency_id, is_rtl";
         $code = $data['code'];
 
         $orderingCurrency = [
@@ -98,21 +98,6 @@ class LanguageService implements LanguageServiceInterface
         $this->repository->update('code', $code, $data);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Successfully updated!'
-        ]);
-    }
-
-    public function updateOutlook(int $id, string $vendor, array $data)
-    {
-
-
-    }
-
-    public function outlook(array $data): JsonResponse
-    {
-        return response()->json([
-            'url' => '',
             'success' => true,
             'message' => 'Successfully updated!'
         ]);

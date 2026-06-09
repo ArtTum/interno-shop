@@ -32,6 +32,9 @@ class LanguageRepository extends BaseRepository implements LanguageRepositoryInt
         return parent::fetch($select, $pagination, $ordering, $params, $searchFields, $joins)
             ->when((isset($params['status']) && $params['status'] >= 0), function ($statusQuery) use ($params) {
                 $statusQuery->where('status', $params['status']);
+            })
+            ->when((isset($params['draft']) && $params['draft'] >= 0), function ($statusQuery) use ($params) {
+                $statusQuery->where('draft', $params['draft']);
             });
     }
 
@@ -131,6 +134,7 @@ class LanguageRepository extends BaseRepository implements LanguageRepositoryInt
     {
         return $this->model->select('code')
             ->where('status', true)
+            ->where('draft', false)
             ->orderByRaw("FIELD(base, true) DESC, code ASC")
             ->pluck('code')
             ->toArray();
@@ -140,6 +144,7 @@ class LanguageRepository extends BaseRepository implements LanguageRepositoryInt
     {
         return $this->model->select('name', 'code')
             ->where('status', true)
+            ->where('draft', false)
             ->pluck('name', 'code');
     }
 
@@ -147,6 +152,7 @@ class LanguageRepository extends BaseRepository implements LanguageRepositoryInt
     {
         return $this->model->select('id', 'name', 'code')
             ->where('status', true)
+            ->where('draft', false)
             ->get();
     }
 
@@ -154,6 +160,8 @@ class LanguageRepository extends BaseRepository implements LanguageRepositoryInt
     {
         return $this->model->select('id as language_id', 'currency_id')
             ->where('languages.code', $locale)
+            ->where('languages.status', true)
+            ->where('languages.draft', false)
             ->first();
     }
 

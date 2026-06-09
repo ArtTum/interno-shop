@@ -12,11 +12,12 @@ class Language extends Model
 
     protected $fillable = [
         'currency_id', 'code', 'name', 'status', 'base', 'local_for_trustpilot', 'hreflang', 'default_hreflang', 'email', 'microsoft_access_token', 'microsoft_refresh_token',
-        'microsoft_token_expires_at', 'oauth_state', 'is_rtl'
+        'microsoft_token_expires_at', 'oauth_state', 'is_rtl', 'draft'
     ];
 
     protected $casts = [
         'status' => 'boolean',
+        'draft' => 'boolean',
         'base' => 'boolean',
         'default_hreflang' => 'boolean',
         'is_rtl' => 'boolean'

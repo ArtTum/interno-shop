@@ -21,9 +21,6 @@ const props = defineProps({
     },
     emitAction: {
         type: String
-    },
-    emitOutlook: {
-        type: String
     }
 });
 
@@ -32,7 +29,6 @@ const form = ref(modelValue.value);
 
 const emits = defineEmits([
     'update:modelValue',
-    'outlook',
     'submit'
 ]);
 
@@ -93,19 +89,6 @@ const auth = computed(() => store.getters['auth/getUser']);
 
             </div>
             <div class="px-4">
-
-                <CustomInput
-                    :disabled="true"
-                    v-model="form.email"
-                    name="email"
-                    label="Email *"
-                    type="text"
-                    placeholder="Enter email"
-                    @keyup="form.errors = validate(form)"
-                    :error="form.errors['email']"
-                />
-            </div>
-            <div class="px-4">
                 <CustomInput
                     :disabled="emitAction === 'update' && !auth.user_group.permissions_by_name.languages[0].can_edit"
                     v-model="form.hreflang"
@@ -151,6 +134,15 @@ const auth = computed(() => store.getters['auth/getUser']);
                     />
                     <Switch
                         @change="(value) => {
+                           form.draft = value;
+                        }"
+                        :disabled="emitAction === 'update' && !auth.user_group.permissions_by_name.languages[0].can_edit"
+                        :value="form.draft"
+                        id="draft"
+                        label="Is draft"
+                    />
+                    <Switch
+                        @change="(value) => {
                            form.base = value;
                         }"
                         :disabled="emitAction === 'update' && !auth.user_group.permissions_by_name.languages[0].can_edit"
@@ -180,17 +172,6 @@ const auth = computed(() => store.getters['auth/getUser']);
             </div>
             <div class="p-6 save-button-fixed">
                 <div class="flex ml-auto gap-5">
-                    <template v-if="auth.user_group.permissions_by_name.languages[0].can_delete">
-                        <CustomButton
-                            v-if="emitAction === 'update'"
-                            @click="emits('outlook')"
-                            class="flex items-center gap-2 rounded border-meta-1 bg-meta-10 py-2 px-4.5 font-medium text-white hover:bg-opacity-80"
-                            type="button"
-                        >
-                            <img src="@assets/images/outlook-icon.svg" alt="Logo" width="35px"/>
-                            Connect outlook email
-                        </CustomButton>
-                    </template>
                     <template v-if="auth.user_group.permissions_by_name.languages[0].can_delete">
                         <CustomButton
                             v-if="emitAction === 'update'"
