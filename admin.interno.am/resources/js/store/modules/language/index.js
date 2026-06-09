@@ -40,10 +40,6 @@ const actions = {
     async update({}, params) {
         return await baseHttp.put(`languages/update`, params);
     },
-    async outlook ({}, params) {
-        const res =  await baseHttp.post(`languages/outlook`, params);
-        return res.data;
-    },
 };
 
 const mutations = {
@@ -72,4 +68,3 @@ const language = {
 };
 
 export default language;
-

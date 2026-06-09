@@ -19,6 +19,50 @@ const routes = [
         ],
     },
     {
+        path: '/settings',
+        redirect: '/settings/languages',
+        meta: {
+            requiresAuth: true,
+        },
+        children: [
+            {
+                path: 'languages',
+                meta: {
+                    requiresAuth: true,
+                },
+                children: [
+                    {
+                        path: '',
+                        component: () => import('@pages/settings/global/languages/index.vue'),
+                        meta: {
+                            requiresAuth: true,
+                            permission_name: 'languages',
+                            permission_type: 'can_view',
+                        },
+                    },
+                    {
+                        path: 'create',
+                        component: () => import('@pages/settings/global/languages/create.vue'),
+                        meta: {
+                            requiresAuth: true,
+                            permission_name: 'languages',
+                            permission_type: 'can_add',
+                        },
+                    },
+                    {
+                        path: 'update/:code',
+                        component: () => import('@pages/settings/global/languages/update.vue'),
+                        meta: {
+                            requiresAuth: true,
+                            permission_name: 'languages',
+                            permission_type: 'can_view',
+                        },
+                    },
+                ],
+            },
+        ],
+    },
+    {
         path: '/notes',
         meta: { requiresAuth: true },
         children: [

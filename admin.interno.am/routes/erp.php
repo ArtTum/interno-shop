@@ -65,7 +65,6 @@ Route::group(['prefix' => 'erp'], function () {
                 Route::get('fetch-by-field', [LanguageController::class, 'fetchByField'])->middleware('check.permission:languages,can_view');
                 // post requests
                 Route::post('insert', [LanguageController::class, 'insert'])->middleware('check.permission:languages,can_add');
-                Route::post('outlook', [LanguageController::class, 'outlook'])->middleware('check.permission:languages,can_add');
 
                 Route::put('update', [LanguageController::class, 'update'])->middleware('check.permission:languages,can_edit');
 

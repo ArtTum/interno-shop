@@ -8,6 +8,15 @@ export const routes = [
                 route: '/shop-frontend',
             },
             {
+                icon: ['far', 'screwdriver-wrench'],
+                label: 'Settings',
+                name: 'settings_menu_link',
+                route: '/settings/languages',
+                children: [
+                    {label: '- Languages', route: '/settings/languages', name: 'languages'},
+                ]
+            },
+            {
                 icon: ['far', 'calendar-check'],
                 label: 'Հերթագրումներ',
                 name: 'recommendations',
