@@ -17,9 +17,20 @@ class ShopProduct extends Model
         'slug',
         'price',
         'kind',
+        'media_id',
         'image',
         'gallery',
+        'gallery_media_ids',
         'options',
+        'option_code',
+        'option_size',
+        'option_quantity',
+        'option_type_id',
+        'option_unit',
+        'option_piece',
+        'option_height',
+        'option_material',
+        'option_color_id',
         'is_new',
         'status',
         'sort_order',
@@ -27,6 +38,7 @@ class ShopProduct extends Model
 
     protected $casts = [
         'gallery' => 'array',
+        'gallery_media_ids' => 'array',
         'options' => 'array',
         'is_new' => 'boolean',
         'status' => 'boolean',
@@ -37,6 +49,21 @@ class ShopProduct extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(ShopCategory::class, 'shop_category_id');
+    }
+
+    public function media(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'media_id');
+    }
+
+    public function optionType(): BelongsTo
+    {
+        return $this->belongsTo(ShopProductOptionType::class, 'option_type_id');
+    }
+
+    public function optionColor(): BelongsTo
+    {
+        return $this->belongsTo(ShopProductColor::class, 'option_color_id');
     }
 
     public function translations(): HasMany

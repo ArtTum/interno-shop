@@ -52,6 +52,105 @@ const routes = [
         ],
     },
     {
+        path: '/shop-products',
+        meta: { requiresAuth: true },
+        children: [
+            {
+                path: '',
+                component: () => import('@pages/shopProducts/index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_products',
+                    permission_type: 'can_view',
+                },
+            },
+            {
+                path: 'create',
+                component: () => import('@pages/shopProducts/create.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_products',
+                    permission_type: 'can_add',
+                },
+            },
+            {
+                path: 'update/:id/:languageId?',
+                component: () => import('@pages/shopProducts/update.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_products',
+                    permission_type: 'can_view',
+                },
+            },
+        ],
+    },
+    {
+        path: '/shop-product-option-types',
+        meta: { requiresAuth: true },
+        children: [
+            {
+                path: '',
+                component: () => import('@pages/shopProductOptionTypes/index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_product_option_types',
+                    permission_type: 'can_view',
+                },
+            },
+            {
+                path: 'create',
+                component: () => import('@pages/shopProductOptionTypes/create.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_product_option_types',
+                    permission_type: 'can_add',
+                },
+            },
+            {
+                path: 'update/:id',
+                component: () => import('@pages/shopProductOptionTypes/update.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_product_option_types',
+                    permission_type: 'can_view',
+                },
+            },
+        ],
+    },
+    {
+        path: '/shop-product-colors',
+        meta: { requiresAuth: true },
+        children: [
+            {
+                path: '',
+                component: () => import('@pages/shopProductColors/index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_product_colors',
+                    permission_type: 'can_view',
+                },
+            },
+            {
+                path: 'create',
+                component: () => import('@pages/shopProductColors/create.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_product_colors',
+                    permission_type: 'can_add',
+                },
+            },
+            {
+                path: 'update/:id',
+                component: () => import('@pages/shopProductColors/update.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_product_colors',
+                    permission_type: 'can_view',
+                },
+            },
+        ],
+    },
+    {
         path: '/settings',
         redirect: '/settings/languages',
         meta: {

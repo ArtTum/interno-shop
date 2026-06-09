@@ -1,0 +1,85 @@
+<script setup>
+import DefaultLayoutComponent from "@layouts/DefaultLayoutComponent.vue";
+import BreadcrumbDefault from "@components/global/BreadcrumbDefault.vue";
+import TableActions from "@components/global/TableActions.vue";
+import CustomTable from "@components/global/CustomTable.vue";
+import DeleteModal from "@components/global/DeleteModal.vue";
+import CustomSelect from "@components/global/CustomSelect.vue";
+import {computed, ref} from "vue";
+import {useRoute, useRouter} from "vue-router";
+import {useStore} from "vuex";
+
+const store = useStore();
+const route = useRoute();
+const router = useRouter();
+const params = ref({
+    page: Number(route.query.page) || 1,
+    per_page: Number(route.query.per_page) || 25,
+    search: route.query.search || '',
+    status: route.query.status === undefined ? -1 : Number(route.query.status),
+    ordering_field: route.query.ordering_field || 'sort_order',
+    ordering_direction: route.query.ordering_direction || 'asc',
+});
+const statusOptions = [{value: -1, label: 'All'}, {value: 1, label: 'Active'}, {value: 0, label: 'Inactive'}];
+const pageData = computed(() => store.getters['shopProductColor/getPageData']);
+const auth = computed(() => store.getters['auth/getUser']);
+const permission = computed(() => auth.value?.user_group?.permissions_by_name?.shop_product_colors?.[0] || {});
+const canAdd = computed(() => auth.value?.superadmin || permission.value.can_add);
+const canDelete = computed(() => auth.value?.superadmin || permission.value.can_delete);
+const updateQueryParams = async () => router.push({query: {...route.query, ...params.value}});
+const fetchPageData = async () => store.dispatch('shopProductColor/fetchPageData', params.value);
+const doPageFetching = async (isPagination = false) => {
+    if (!isPagination) params.value.page = 1;
+    await updateQueryParams();
+    await fetchPageData();
+};
+fetchPageData();
+</script>
+
+<template>
+    <DefaultLayoutComponent>
+        <BreadcrumbDefault pageTitle="Product Colors" :breadcrumb="[{path: '/', title: 'Dashboard'}]"/>
+        <TableActions :createRoute="canAdd ? '/shop-product-colors/create' : ''" :showFilter="true" @applyFilters="doPageFetching">
+            <div class="grid grid-cols-4 gap-6 p-6 max-xl:grid-cols-2 max-sm:grid-cols-1 max-md:gap-4 max-md:p-4 max-sm:p-1">
+                <CustomSelect v-model="params.status" mode="single" label="Status" :options="statusOptions" :searchable="false" :canClear="false"/>
+            </div>
+        </TableActions>
+        <CustomTable
+            :main-search="{visibility: true, placeholder: 'Search ...', tooltip: {button: {showingType: 'info'}, text: 'Name, value'}}"
+            @do-page-fetching="doPageFetching"
+            v-model="params"
+            :pagination="pageData.pagination"
+            :columns="[
+                {title: 'ID', key: 'id'},
+                {title: 'Color'},
+                {title: 'Name', key: 'name'},
+                {title: 'Value', key: 'value'},
+                {title: 'Sort order', key: 'sort_order'},
+                {title: 'Status', key: 'status'},
+                {title: 'Action'},
+            ]"
+        >
+            <template v-for="item in pageData.data" :key="item.id">
+                <tr>
+                    <td class="py-5 px-4 pl-9 xl:pl-11"><h5 class="font-medium text-black">#{{ item.id }}</h5></td>
+                    <td class="py-5 px-4 pl-9 xl:pl-11"><span class="block h-6 w-6 rounded border border-stroke" :style="{backgroundColor: item.value || 'transparent'}"></span></td>
+                    <td class="py-5 px-4 pl-9 xl:pl-11"><span class="font-medium text-black">{{ item.name }}</span></td>
+                    <td class="py-5 px-4 pl-9 xl:pl-11"><span class="font-medium text-black">{{ item.value || '-' }}</span></td>
+                    <td class="py-5 px-4 pl-9 xl:pl-11"><span class="font-medium text-black">{{ item.sort_order }}</span></td>
+                    <td class="py-5 px-4"><p class="inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium" :class="{'bg-danger text-danger': !item.status, 'bg-success text-success': item.status}">{{ item.status ? 'Active' : 'Inactive' }}</p></td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center space-x-3.5">
+                            <RouterLink :to="`/shop-product-colors/update/${item.id}`"><button class="hover:text-primary" title="Edit"><font-awesome-icon :icon="['far', 'pen-to-square']"/></button></RouterLink>
+                            <button v-if="canDelete" @click="store.commit('shopProductColor/SET_DELETE_MODAL_VALUE', {value: true, id: item.id})" class="hover:text-primary" title="Delete"><font-awesome-icon :icon="['fas', 'trash-can']"/></button>
+                        </div>
+                    </td>
+                </tr>
+            </template>
+        </CustomTable>
+        <DeleteModal @fetch="fetchPageData()" action-variable="shopProductColor/delete" getter-variable="shopProductColor/getDeleteModelValue" mutation-variable="shopProductColor/SET_DELETE_MODAL_VALUE"/>
+    </DefaultLayoutComponent>
+</template>
+
+<style lang="scss">
+@import '@assets/scss/tables';
+</style>

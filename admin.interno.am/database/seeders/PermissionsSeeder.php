@@ -11,7 +11,11 @@ class PermissionsSeeder extends Seeder
     const PERMISSIONS = [
         ['title' => 'Settings menu', 'name' => 'settings_menu_link'],
         ['title' => 'Languages', 'name' => 'languages'],
+        ['title' => 'Medias', 'name' => 'medias'],
         ['title' => 'Shop categories', 'name' => 'shop_categories'],
+        ['title' => 'Shop products', 'name' => 'shop_products'],
+        ['title' => 'Shop product types', 'name' => 'shop_product_option_types'],
+        ['title' => 'Shop product colors', 'name' => 'shop_product_colors'],
         ['title' => 'Recommendations', 'name' => 'recommendations'],
         ['title' => 'Hospitals base', 'name' => 'hospitals_bases'],
         ['title' => 'Incomings', 'name' => 'incomings'],

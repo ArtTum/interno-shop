@@ -149,6 +149,12 @@ const handleSearchChange = (query) => {
                             class="w-[70px] mr-2"
                         />
                     </template>
+                    <template v-else-if="option.color">
+                        <span
+                            class="mr-2 inline-block h-5 w-5 rounded border border-stroke"
+                            :style="{backgroundColor: option.color}"
+                        ></span>
+                    </template>
                     <span>{{ option.label }}</span>
                     <font-awesome-icon
                         v-if="option.fulled"

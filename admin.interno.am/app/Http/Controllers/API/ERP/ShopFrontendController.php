@@ -488,6 +488,7 @@ class ShopFrontendController extends Controller
             ->with([
                 'translations.language:id,code',
                 'category.parent',
+                'media',
             ])
             ->orderBy('sort_order')
             ->orderBy('id')
@@ -505,9 +506,10 @@ class ShopFrontendController extends Controller
                 'id' => $product->id,
                 'slug' => $product->slug,
                 'title' => $this->mapProductTranslationsByLanguage($product, $languageCodes),
+                'meta' => $this->mapProductMetaByLanguage($product, $languageCodes),
                 'price' => $this->formatPrice($product->price),
                 'kind' => $product->kind ?? '',
-                'image' => $product->image ?? '',
+                'image' => $product->media?->original_path ?: ($product->image ?? ''),
                 'gallery' => $product->gallery ?: array_values(array_filter([$product->image])),
                 'options' => $product->options ?: [],
                 'isNew' => $product->is_new,
@@ -635,6 +637,13 @@ class ShopFrontendController extends Controller
             ->all();
     }
 
+    private function mapProductMetaByLanguage(ShopProduct $product, $languageCodes): array
+    {
+        return $languageCodes
+            ->mapWithKeys(fn (string $code) => [$code => $this->productMetaForLanguage($product, $code)])
+            ->all();
+    }
+
     private function productTitleForLanguage(ShopProduct $product, string $code): string
     {
         $translation = $product->translations->first(fn ($translation) => $translation->language?->code === $code);
@@ -644,6 +653,20 @@ class ShopFrontendController extends Controller
         }
 
         return $product->translations->first()?->title ?? '';
+    }
+
+    private function productMetaForLanguage(ShopProduct $product, string $code): array
+    {
+        $translation = $product->translations->first(fn ($translation) => $translation->language?->code === $code)
+            ?: $product->translations->first();
+        $title = $translation?->title ?? '';
+
+        return [
+            'title' => $translation?->meta_title ?: $title,
+            'metaTitle' => $translation?->meta_title ?: $title,
+            'metaDescription' => $translation?->meta_description ?? '',
+            'metaKeywords' => $translation?->meta_keywords ?? '',
+        ];
     }
 
     private function formatPrice($price): string

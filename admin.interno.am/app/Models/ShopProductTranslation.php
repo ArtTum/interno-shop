@@ -14,8 +14,12 @@ class ShopProductTranslation extends Model
         'shop_product_id',
         'language_id',
         'title',
+        'slug',
         'short_description',
         'description',
+        'meta_title',
+        'meta_description',
+        'meta_keywords',
     ];
 
     public function product(): BelongsTo

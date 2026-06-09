@@ -10,6 +10,7 @@ const modalOpen = computed(() => store.getters[props.getterVariable]);
 const media = computed(() => store.getters['media/getEditData']);
 const mode = computed(() => store.getters['media/getMediaMode']);
 const auth = computed(() => store.getters['auth/getUser']);
+const mediaPermission = computed(() => auth.value?.user_group?.permissions_by_name?.medias?.[0] || {});
 
 const getAdminBaseUrl = computed(() => store.getters['general/getAdminBaseUrl']);
 
@@ -363,7 +364,7 @@ const searchNotUploaded = async (value) => {
                         </customButton>
                     </CustomInput>
                     <div class="grid-cols-1 flex gap-5">
-                        <template v-if="auth.user_group.permissions_by_name.medias[0].can_delete">
+                        <template v-if="auth?.superadmin || mediaPermission.can_delete">
                             <CustomButton
                                 @click="store.commit('media/SET_DELETE_MODAL_VALUE', {
                                     value: true,
@@ -376,7 +377,7 @@ const searchNotUploaded = async (value) => {
                                 Delete
                             </CustomButton>
                         </template>
-                        <template v-if="auth.user_group.permissions_by_name.medias[0].can_edit">
+                        <template v-if="auth?.superadmin || mediaPermission.can_edit">
                             <CustomButton
                                 type="button"
                                 @click.prevent="submit"

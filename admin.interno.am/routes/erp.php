@@ -16,6 +16,7 @@ use App\Http\Controllers\API\ERP\HospitalsBaseController;
 use App\Http\Controllers\API\ERP\IncomingController;
 use App\Http\Controllers\API\ERP\LanguageController;
 use App\Http\Controllers\API\ERP\MemberGroupController;
+use App\Http\Controllers\API\ERP\MediaController;
 use App\Http\Controllers\API\ERP\NoteController;
 use App\Http\Controllers\API\ERP\OutgoingController;
 use App\Http\Controllers\API\ERP\PermalinkController;
@@ -27,6 +28,9 @@ use App\Http\Controllers\API\ERP\SmsHistoryController;
 use App\Http\Controllers\API\ERP\SmsShablonController;
 use App\Http\Controllers\API\ERP\ShopFrontendController;
 use App\Http\Controllers\API\ERP\ShopCategoryController;
+use App\Http\Controllers\API\ERP\ShopProductColorController;
+use App\Http\Controllers\API\ERP\ShopProductController;
+use App\Http\Controllers\API\ERP\ShopProductOptionTypeController;
 use App\Http\Controllers\API\ERP\SubscribeController;
 use App\Http\Controllers\API\ERP\TrashController;
 use App\Http\Controllers\API\ERP\UserController;
@@ -85,6 +89,44 @@ Route::group(['prefix' => 'erp'], function () {
                 Route::post('insert', [ShopCategoryController::class, 'insert'])->middleware('check.permission:shop_categories,can_add');
                 Route::put('update', [ShopCategoryController::class, 'update'])->middleware('check.permission:shop_categories,can_edit');
                 Route::delete('delete/{id}', [ShopCategoryController::class, 'delete'])->middleware('check.permission:shop_categories,can_delete');
+            });
+
+            Route::group(['prefix' => 'shop-products'], function () {
+                Route::get('fetch', [ShopProductController::class, 'fetch'])->middleware('check.permission:shop_products,can_view');
+                Route::get('fetch-params', [ShopProductController::class, 'fetchParams'])->middleware('check.permission:shop_products,can_view');
+                Route::get('fetch-by-field', [ShopProductController::class, 'fetchByField'])->middleware('check.permission:shop_products,can_view');
+                Route::post('insert', [ShopProductController::class, 'insert'])->middleware('check.permission:shop_products,can_add');
+                Route::put('update', [ShopProductController::class, 'update'])->middleware('check.permission:shop_products,can_edit');
+                Route::delete('delete/{id}', [ShopProductController::class, 'delete'])->middleware('check.permission:shop_products,can_delete');
+            });
+
+            Route::group(['prefix' => 'shop-product-option-types'], function () {
+                Route::get('fetch', [ShopProductOptionTypeController::class, 'fetch'])->middleware('check.permission:shop_product_option_types,can_view');
+                Route::get('fetch-by-field', [ShopProductOptionTypeController::class, 'fetchByField'])->middleware('check.permission:shop_product_option_types,can_view');
+                Route::post('insert', [ShopProductOptionTypeController::class, 'insert'])->middleware('check.permission:shop_product_option_types,can_add');
+                Route::put('update', [ShopProductOptionTypeController::class, 'update'])->middleware('check.permission:shop_product_option_types,can_edit');
+                Route::delete('delete/{id}', [ShopProductOptionTypeController::class, 'delete'])->middleware('check.permission:shop_product_option_types,can_delete');
+            });
+
+            Route::group(['prefix' => 'shop-product-colors'], function () {
+                Route::get('fetch', [ShopProductColorController::class, 'fetch'])->middleware('check.permission:shop_product_colors,can_view');
+                Route::get('fetch-by-field', [ShopProductColorController::class, 'fetchByField'])->middleware('check.permission:shop_product_colors,can_view');
+                Route::post('insert', [ShopProductColorController::class, 'insert'])->middleware('check.permission:shop_product_colors,can_add');
+                Route::put('update', [ShopProductColorController::class, 'update'])->middleware('check.permission:shop_product_colors,can_edit');
+                Route::delete('delete/{id}', [ShopProductColorController::class, 'delete'])->middleware('check.permission:shop_product_colors,can_delete');
+            });
+
+            Route::group(['prefix' => 'media'], function () {
+                Route::get('fetch', [MediaController::class, 'fetch'])->middleware('check.permission:medias,can_view');
+                Route::get('fetch-params', [MediaController::class, 'fetchParams'])->middleware('check.permission:medias,can_view');
+                Route::get('fetch-by-field', [MediaController::class, 'fetchByField'])->middleware('check.permission:medias,can_view');
+                Route::post('upload', [MediaController::class, 'upload'])->middleware('check.permission:medias,can_add');
+                Route::post('upload-file', [MediaController::class, 'uploadFile'])->middleware('check.permission:medias,can_add');
+                Route::post('replace-image', [MediaController::class, 'replaceImage'])->middleware('check.permission:medias,can_edit');
+                Route::post('translate-ai', [MediaController::class, 'translateAI'])->middleware('check.permission:medias,can_edit');
+                Route::put('update', [MediaController::class, 'update'])->middleware('check.permission:medias,can_edit');
+                Route::delete('delete/{ids}', [MediaController::class, 'delete'])->middleware('check.permission:medias,can_delete');
+                Route::get('export', [MediaController::class, 'export'])->middleware('check.permission:medias,can_export');
             });
 
             Route::group(['prefix' => 'vcountries'], function () {

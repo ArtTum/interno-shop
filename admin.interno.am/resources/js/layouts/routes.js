@@ -14,6 +14,24 @@ export const routes = [
                 route: '/shop-categories',
             },
             {
+                icon: ['far', 'box-open'],
+                label: 'Shop Products',
+                name: 'shop_products',
+                route: '/shop-products',
+            },
+            {
+                icon: ['far', 'list-tree'],
+                label: 'Product Types',
+                name: 'shop_product_option_types',
+                route: '/shop-product-option-types',
+            },
+            {
+                icon: ['far', 'palette'],
+                label: 'Product Colors',
+                name: 'shop_product_colors',
+                route: '/shop-product-colors',
+            },
+            {
                 icon: ['far', 'screwdriver-wrench'],
                 label: 'Settings',
                 name: 'settings_menu_link',

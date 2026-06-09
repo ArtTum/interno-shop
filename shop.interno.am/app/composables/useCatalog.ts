@@ -3,10 +3,18 @@
 type ProductKind = string
 type LanguageCode = string
 
+interface SeoEntry {
+  title: string
+  metaTitle: string
+  metaDescription: string
+  metaKeywords: string
+}
+
 interface Product {
   id: number
   slug?: string
   title: Record<LanguageCode, string>
+  meta?: Record<LanguageCode, SeoEntry>
   price: string
   kind: ProductKind
   image: string
@@ -31,13 +39,6 @@ interface ShopFrontendSettings {
   contactAddress: string
   contactMapUrl: string
   socialLinks: Array<{ label: string, href: string, external: boolean }>
-}
-
-interface SeoEntry {
-  title: string
-  metaTitle: string
-  metaDescription: string
-  metaKeywords: string
 }
 
 interface ShopFrontendConfig {
@@ -656,6 +657,8 @@ export function useCatalog() {
     return 'home'
   })
   const currentSeo = computed(() => {
+    const productSeo = currentProduct.value?.meta?.[currentLanguageCode.value]
+      ?? currentProduct.value?.meta?.hy
     const categorySeo = currentCategoryRoute.value?.childIndex === null
       ? currentCategoryGroup.value?.meta?.[currentLanguageCode.value]
       : currentCategoryGroup.value?.childMeta?.[currentLanguageCode.value]?.[currentCategoryRoute.value?.childIndex ?? -1]
@@ -670,10 +673,10 @@ export function useCatalog() {
       || seo.title
 
     return {
-      title: categorySeo?.title || seo.title || dynamicTitle,
-      metaTitle: categorySeo?.metaTitle || seo.metaTitle || dynamicTitle,
-      metaDescription: categorySeo?.metaDescription || seo.metaDescription || '',
-      metaKeywords: categorySeo?.metaKeywords || seo.metaKeywords || ''
+      title: productSeo?.title || categorySeo?.title || seo.title || dynamicTitle,
+      metaTitle: productSeo?.metaTitle || categorySeo?.metaTitle || seo.metaTitle || dynamicTitle,
+      metaDescription: productSeo?.metaDescription || categorySeo?.metaDescription || seo.metaDescription || '',
+      metaKeywords: productSeo?.metaKeywords || categorySeo?.metaKeywords || seo.metaKeywords || ''
     }
   })
   const categoryProducts = computed(() => {

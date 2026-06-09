@@ -85,6 +85,9 @@ import trash from "@store/modules/trash/index.js";
 import note from "@store/modules/note/index.js";
 import shopFrontend from "@store/modules/shopFrontend/index.js";
 import shopCategory from "@store/modules/shopCategory/index.js";
+import shopProduct from "@store/modules/shopProduct/index.js";
+import shopProductOptionType from "@store/modules/shopProductOptionType/index.js";
+import shopProductColor from "@store/modules/shopProductColor/index.js";
 
 const store = createStore({
     modules: {
@@ -173,6 +176,9 @@ const store = createStore({
         note,
         shopFrontend,
         shopCategory,
+        shopProduct,
+        shopProductOptionType,
+        shopProductColor,
     }
 });
 export default store;

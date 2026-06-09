@@ -38,6 +38,7 @@ const props = defineProps({
 const modalOpen = computed(() => store.getters[props.getterVariable]);
 const media = computed(() => store.getters['media/getEditData']);
 const auth = computed(() => store.getters['auth/getUser']);
+const mediaPermission = computed(() => auth.value?.user_group?.permissions_by_name?.medias?.[0] || {});
 
 const getAdminBaseUrl = computed(() => store.getters['general/getAdminBaseUrl']);
 
@@ -320,12 +321,12 @@ const generateAITranslations = async (isAll = false) => {
                             type="button"
                             @click="toggleAiTranslate()"
                             class="flex items-center gap-2 rounded bg-primary p-2 font-medium text-white hover:bg-opacity-80"
-                            v-if="auth.user_group.permissions_by_name.medias[0].can_edit && form.id && form.alt"
+                            v-if="(auth?.superadmin || mediaPermission.can_edit) && form.id && form.alt"
                         >
                             <font-awesome-icon :icon="['fas', 'robot']"/>
                         </CustomButton>
                     </CustomInput>
-                    <div v-if="auth.user_group.permissions_by_name.medias[0].can_edit && form.id && form.alt && isAiTranslateExpanded">
+                    <div v-if="(auth?.superadmin || mediaPermission.can_edit) && form.id && form.alt && isAiTranslateExpanded">
                         <h2 class="text-black mt-2 font-bold">You can generate AI translations from this language to the
                             missing ones.</h2>
                         <div class="mt-2">
@@ -389,7 +390,7 @@ const generateAITranslations = async (isAll = false) => {
             </div>
 
             <div class="grid-cols-1 flex gap-5">
-                <template v-if="auth.user_group.permissions_by_name.medias[0].can_delete">
+                <template v-if="auth?.superadmin || mediaPermission.can_delete">
                     <CustomButton
                         @click="store.commit('media/SET_DELETE_MODAL_VALUE', {
                                     value: true,
@@ -402,7 +403,7 @@ const generateAITranslations = async (isAll = false) => {
                         Delete
                     </CustomButton>
                 </template>
-                <template v-if="auth.user_group.permissions_by_name.medias[0].can_edit">
+                <template v-if="auth?.superadmin || mediaPermission.can_edit">
                     <CustomButton
                         @click.prevent="submit"
                         class="items-center gap-2 rounded bg-meta-3 py-2 px-4.5 font-medium text-white hover:bg-opacity-80"
