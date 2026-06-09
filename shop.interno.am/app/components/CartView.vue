@@ -99,11 +99,11 @@ async function submitCheckout() {
           <div class="cart-item-info">
             <h2>{{ item.product.title[currentLanguageCode] }}</h2>
             <dl class="cart-item-options">
-              <div><dt>{{ copy.optionType }}</dt><dd>{{ copy.optionTypeName }}</dd></div>
-              <div><dt>{{ copy.optionUnit }}</dt><dd>111</dd></div>
-              <div><dt>{{ copy.optionCode }}</dt><dd>111</dd></div>
-              <div><dt>{{ copy.optionColor }}</dt><dd><span class="cart-color-dot" /></dd></div>
-              <div><dt>{{ copy.optionMaterial }}</dt><dd>{{ copy.materialName }}</dd></div>
+              <div><dt>{{ copy.optionType }}</dt><dd>{{ item.product.options?.type || copy.optionTypeName }}</dd></div>
+              <div><dt>{{ copy.optionUnit }}</dt><dd>{{ item.product.options?.unit || '111' }}</dd></div>
+              <div><dt>{{ copy.optionCode }}</dt><dd>{{ item.product.options?.code || '111' }}</dd></div>
+              <div><dt>{{ copy.optionColor }}</dt><dd><span class="cart-color-dot" :style="{ background: item.product.options?.color || undefined }" /></dd></div>
+              <div><dt>{{ copy.optionMaterial }}</dt><dd>{{ item.product.options?.material || copy.materialName }}</dd></div>
             </dl>
           </div>
 

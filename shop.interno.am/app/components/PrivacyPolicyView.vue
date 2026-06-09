@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 import { computed } from 'vue'
 
-const { copy, currentLanguageCode, localizedPath } = useCatalog()
+const { copy, currentLanguageCode, localizedPath, shopPrivacy } = useCatalog()
 
 const privacyContent = {
   hy: {
@@ -69,7 +69,12 @@ const privacyContent = {
   }
 }
 
-const privacyCopy = computed(() => privacyContent[currentLanguageCode.value] ?? privacyContent.hy)
+const privacyCopy = computed(() => {
+  return shopPrivacy.value?.content?.[currentLanguageCode.value]
+    ?? privacyContent[currentLanguageCode.value]
+    ?? privacyContent.hy
+})
+const privacyUpdatedAt = computed(() => shopPrivacy.value?.updatedAt || '03.06.2026')
 </script>
 
 <template>
@@ -98,7 +103,7 @@ const privacyCopy = computed(() => privacyContent[currentLanguageCode.value] ?? 
         </div>
         <div class="privacy-update">
           <span>{{ privacyCopy.updated }}</span>
-          <strong>03.06.2026</strong>
+          <strong>{{ privacyUpdatedAt }}</strong>
         </div>
       </aside>
 

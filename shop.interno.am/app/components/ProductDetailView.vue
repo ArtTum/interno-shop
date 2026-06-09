@@ -98,46 +98,46 @@ function addCurrentProductToCart() {
         <form class="product-options" @submit.prevent>
           <label class="option-field option-wide">
             <span>{{ copy.optionCode }}</span>
-            <input type="text" :value="copy.optionCode" />
+            <input type="text" :value="currentProduct.options?.code || copy.optionCode" />
           </label>
 
           <label class="option-field">
             <span>{{ copy.optionSize }}</span>
             <select>
-              <option>{{ copy.profile }}</option>
+              <option>{{ currentProduct.options?.size || copy.profile }}</option>
             </select>
           </label>
 
           <label class="option-field">
             <span>{{ copy.optionQuantity }}</span>
-            <input type="text" value="1" />
+            <input type="text" :value="currentProduct.options?.quantity || '1'" />
           </label>
 
           <label class="option-field">
             <span>{{ copy.optionType }}</span>
             <select>
-              <option>{{ copy.optionType }}</option>
+              <option>{{ currentProduct.options?.type || copy.optionType }}</option>
             </select>
           </label>
 
           <label class="option-field">
             <span>{{ copy.optionUnitLong }}</span>
-            <input type="text" :value="copy.optionUnit" />
+            <input type="text" :value="currentProduct.options?.unit || copy.optionUnit" />
           </label>
 
           <label class="option-field">
             <span>{{ copy.optionPiece }}</span>
-            <input type="text" value="44" />
+            <input type="text" :value="currentProduct.options?.piece || '44'" />
           </label>
 
           <label class="option-field">
             <span>{{ copy.optionHeight }}</span>
-            <input type="text" value="111" />
+            <input type="text" :value="currentProduct.options?.height || '111'" />
           </label>
 
           <div class="color-options" aria-label="Colors">
             <span>{{ copy.optionColor }}</span>
-            <button type="button" class="color-dot color-white" aria-label="White" />
+            <button type="button" class="color-dot" :style="{ background: currentProduct.options?.color || '#ffffff' }" aria-label="Selected color" />
             <button type="button" class="color-dot color-cream" aria-label="Cream" />
             <button type="button" class="color-dot color-gray" aria-label="Gray" />
             <button type="button" class="color-dot color-dark" aria-label="Dark" />

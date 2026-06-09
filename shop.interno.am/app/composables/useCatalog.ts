@@ -5,11 +5,17 @@ type LanguageCode = string
 
 interface Product {
   id: number
+  slug?: string
   title: Record<LanguageCode, string>
   price: string
   kind: ProductKind
   image: string
+  gallery?: string[]
+  options?: Record<string, string>
   isNew?: boolean
+  status?: boolean
+  categoryKey?: string | null
+  categoryChildIndex?: number | null
 }
 
 interface CartItem {
@@ -27,6 +33,13 @@ interface ShopFrontendSettings {
   socialLinks: Array<{ label: string, href: string, external: boolean }>
 }
 
+interface SeoEntry {
+  title: string
+  metaTitle: string
+  metaDescription: string
+  metaKeywords: string
+}
+
 interface ShopFrontendConfig {
   languages: Array<{ code: LanguageCode, label: string, icon: string }>
   menuGroups: Array<{
@@ -37,6 +50,11 @@ interface ShopFrontendConfig {
   translations: Record<LanguageCode, Record<string, string>>
   products: Product[]
   settings: ShopFrontendSettings
+  seo: Record<string, Record<LanguageCode, SeoEntry>>
+  privacy?: {
+    updatedAt?: string
+    content?: Record<LanguageCode, any>
+  }
 }
 
 const menuGroups = [
@@ -99,6 +117,30 @@ const languages = [
   { code: 'en', label: 'English', icon: '/assets/icons/flag-en.svg' },
   { code: 'ru', label: 'Русский', icon: '/assets/icons/flag-ru.svg' }
 ] satisfies Array<{ code: LanguageCode, label: string, icon: string }>
+
+const seoPages = [
+  { key: 'home', title: 'Interino' },
+  { key: 'contact', title: 'Contact' },
+  { key: 'cart', title: 'Cart' },
+  { key: 'checkout-success', title: 'Checkout success' },
+  { key: 'search', title: 'Search' },
+  { key: 'privacy-policy', title: 'Privacy Policy' },
+  { key: 'category', title: 'Category' },
+  { key: 'product', title: 'Product' }
+]
+
+const defaultSeo = Object.fromEntries(seoPages.map((page) => [
+  page.key,
+  Object.fromEntries(languages.map((language) => [
+    language.code,
+    {
+      title: page.title,
+      metaTitle: page.title,
+      metaDescription: '',
+      metaKeywords: ''
+    }
+  ]))
+])) as Record<string, Record<LanguageCode, SeoEntry>>
 
 const defaultSettings: ShopFrontendSettings = {
   brandLogo: '/assets/brand/logo.png',
@@ -494,7 +536,9 @@ export function useCatalog() {
     menuGroups: remoteCatalog.value?.menuGroups?.length ? remoteCatalog.value.menuGroups : menuGroups,
     translations: remoteCatalog.value?.translations || translations,
     products: remoteCatalog.value?.products?.length ? remoteCatalog.value.products : products,
-    settings: { ...defaultSettings, ...(remoteCatalog.value?.settings || {}) }
+    settings: { ...defaultSettings, ...(remoteCatalog.value?.settings || {}) },
+    seo: { ...defaultSeo, ...(remoteCatalog.value?.seo || {}) },
+    privacy: remoteCatalog.value?.privacy
   }))
   const availableLanguages = computed(() => catalogConfig.value.languages)
   const menuGroupList = computed(() => catalogConfig.value.menuGroups)
@@ -504,6 +548,7 @@ export function useCatalog() {
     id: product.id + 20
   })))
   const shopSettings = computed(() => catalogConfig.value.settings)
+  const shopPrivacy = computed(() => catalogConfig.value.privacy)
   const currentLanguage = computed(() => availableLanguages.value.find((language) => language.code === currentLanguageCode.value) ?? availableLanguages.value[0])
   const copy = computed(() => catalogConfig.value.translations[currentLanguageCode.value] ?? translations[currentLanguageCode.value])
   const socialLinks = computed(() => [
@@ -533,7 +578,7 @@ export function useCatalog() {
     }
 
     return [
-      currentProduct.value.image,
+      ...(currentProduct.value.gallery?.length ? currentProduct.value.gallery : [currentProduct.value.image]),
       ...primaryProducts.value
         .filter((product) => product.id !== currentProduct.value?.id)
         .map((product) => product.image)
@@ -594,6 +639,55 @@ export function useCatalog() {
     return currentCategoryGroup.value.children[currentLanguageCode.value][routeValue.childIndex] ?? null
   })
   const isCategoryPage = computed(() => Boolean(currentCategoryGroup.value))
+  const currentSeoPageKey = computed(() => {
+    const path = withoutLanguagePrefix(route.path)
+
+    if (path === '/') return 'home'
+    if (path === '/contact') return 'contact'
+    if (path === '/cart') return 'cart'
+    if (path === '/checkout-success') return 'checkout-success'
+    if (path === '/search') return 'search'
+    if (path === '/privacy-policy') return 'privacy-policy'
+    if (path.startsWith('/categories/')) return 'category'
+    if (path.startsWith('/products/')) return 'product'
+
+    return 'home'
+  })
+  const currentSeo = computed(() => {
+    const seo = catalogConfig.value.seo[currentSeoPageKey.value]?.[currentLanguageCode.value]
+      ?? catalogConfig.value.seo[currentSeoPageKey.value]?.hy
+      ?? defaultSeo[currentSeoPageKey.value]?.[currentLanguageCode.value]
+      ?? defaultSeo.home[currentLanguageCode.value]
+      ?? defaultSeo.home.hy
+    const dynamicTitle = currentProduct.value?.title?.[currentLanguageCode.value]
+      || currentCategoryChild.value
+      || currentCategoryGroup.value?.title?.[currentLanguageCode.value]
+      || seo.title
+
+    return {
+      title: seo.title || dynamicTitle,
+      metaTitle: seo.metaTitle || dynamicTitle,
+      metaDescription: seo.metaDescription || '',
+      metaKeywords: seo.metaKeywords || ''
+    }
+  })
+  const categoryProducts = computed(() => {
+    const routeValue = currentCategoryRoute.value
+
+    if (!routeValue) {
+      return primaryProducts.value
+    }
+
+    const filtered = primaryProducts.value.filter((product) => {
+      if (product.categoryKey !== routeValue.groupKey) {
+        return false
+      }
+
+      return routeValue.childIndex === null || product.categoryChildIndex === routeValue.childIndex
+    })
+
+    return primaryProducts.value.some((product) => product.categoryKey) ? filtered : primaryProducts.value
+  })
 
   function isLanguageCode(value: string | undefined): value is LanguageCode {
     return Boolean(value && availableLanguages.value.some((language) => language.code === value))
@@ -774,7 +868,22 @@ export function useCatalog() {
     { immediate: true }
   )
 
-  useHead(() => ({ htmlAttrs: { lang: currentLanguageCode.value } }))
+  useHead(() => {
+    const seo = currentSeo.value
+    const title = seo.metaTitle || seo.title
+    const meta = [
+      seo.metaDescription ? { name: 'description', content: seo.metaDescription } : null,
+      seo.metaKeywords ? { name: 'keywords', content: seo.metaKeywords } : null,
+      { property: 'og:title', content: title },
+      seo.metaDescription ? { property: 'og:description', content: seo.metaDescription } : null
+    ].filter(Boolean)
+
+    return {
+      title,
+      htmlAttrs: { lang: currentLanguageCode.value },
+      meta
+    }
+  })
 
   return {
     activeMenuKey,
@@ -783,6 +892,7 @@ export function useCatalog() {
     cartProducts,
     cartRecommendations,
     cartTotal,
+    categoryProducts,
     categories,
     categoryPath,
     clearCart,
@@ -794,6 +904,7 @@ export function useCatalog() {
     currentLanguageCode,
     currentProduct,
     currentProductImage,
+    currentSeo,
     detailThumbnails,
     isCartPage,
     isCategoryPage,
@@ -816,6 +927,7 @@ export function useCatalog() {
     selectProductImage,
     similarProducts,
     shopSettings,
+    shopPrivacy,
     socialLinks,
     submitSearch,
     submitOrder,

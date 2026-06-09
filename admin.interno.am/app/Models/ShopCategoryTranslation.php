@@ -6,17 +6,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class SocialTranslation extends Model
+class ShopCategoryTranslation extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'social_id', 'language_id', 'url'
+        'shop_category_id',
+        'language_id',
+        'title',
     ];
 
-    public function social(): BelongsTo
+    public function category(): BelongsTo
     {
-        return $this->belongsTo(Social::class);
+        return $this->belongsTo(ShopCategory::class, 'shop_category_id');
     }
 
     public function language(): BelongsTo

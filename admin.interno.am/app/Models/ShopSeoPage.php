@@ -6,18 +6,23 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class SocialTranslation extends Model
+class ShopSeoPage extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'social_id', 'language_id', 'url'
+        'page_key',
+        'language_id',
+        'title',
+        'meta_title',
+        'meta_description',
+        'meta_keywords',
+        'status',
     ];
 
-    public function social(): BelongsTo
-    {
-        return $this->belongsTo(Social::class);
-    }
+    protected $casts = [
+        'status' => 'boolean',
+    ];
 
     public function language(): BelongsTo
     {

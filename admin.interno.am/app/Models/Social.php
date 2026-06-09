@@ -12,7 +12,12 @@ class Social extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'url', 'icon', 'color'
+        'name', 'url', 'icon', 'color', 'status', 'show_in_frontend', 'sort_order'
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
+        'show_in_frontend' => 'boolean',
     ];
 
     public function social_translation(): HasOne
