@@ -1,22 +1,7 @@
 const routes = [
     {
         path: '/',
-        redirect: '/shop-frontend',
-    },
-    {
-        path: '/shop-frontend',
-        meta: { requiresAuth: true },
-        children: [
-            {
-                path: '',
-                component: () => import('@pages/shopFrontend/index.vue'),
-                meta: {
-                    requiresAuth: true,
-                    permission_name: 'languages',
-                    permission_type: 'can_view',
-                },
-            },
-        ],
+        redirect: '/shop-contact',
     },
     {
         path: '/shop-contact',

@@ -2,12 +2,6 @@ export const routes = [
     {
         menuItems: [
             {
-                icon: ['far', 'store'],
-                label: 'Shop Frontend',
-                name: 'languages',
-                route: '/shop-frontend',
-            },
-            {
                 icon: ['far', 'address-book'],
                 label: 'Contact Page',
                 name: 'languages',
