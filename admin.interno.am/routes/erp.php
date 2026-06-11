@@ -2,37 +2,22 @@
 
 use App\Http\Controllers\API\ERP\AllCountryController;
 use App\Http\Controllers\API\ERP\AuthController;
-use App\Http\Controllers\API\ERP\ClinicController;
 use App\Http\Controllers\API\ERP\CookieSettingController;
 use App\Http\Controllers\API\ERP\CustomerGroupController;
 use App\Http\Controllers\API\ERP\DashboardController;
-use App\Http\Controllers\API\ERP\DiseaseController;
-use App\Http\Controllers\API\ERP\DoctorsFinalController;
-use App\Http\Controllers\API\ERP\ExtendedPriceController;
 use App\Http\Controllers\API\ERP\GeneralController;
 use App\Http\Controllers\API\ERP\GeneralSettingController;
-use App\Http\Controllers\API\ERP\HospitalController;
-use App\Http\Controllers\API\ERP\HospitalsBaseController;
-use App\Http\Controllers\API\ERP\IncomingController;
 use App\Http\Controllers\API\ERP\LanguageController;
 use App\Http\Controllers\API\ERP\MemberGroupController;
 use App\Http\Controllers\API\ERP\MediaController;
-use App\Http\Controllers\API\ERP\NoteController;
-use App\Http\Controllers\API\ERP\OutgoingController;
 use App\Http\Controllers\API\ERP\PermalinkController;
 use App\Http\Controllers\API\ERP\PermissionController;
 use App\Http\Controllers\API\ERP\ProgramController;
-use App\Http\Controllers\API\ERP\RecommendationController;
-use App\Http\Controllers\API\ERP\SmsBazaController;
-use App\Http\Controllers\API\ERP\SmsHistoryController;
-use App\Http\Controllers\API\ERP\SmsShablonController;
 use App\Http\Controllers\API\ERP\ShopFrontendController;
 use App\Http\Controllers\API\ERP\ShopCategoryController;
 use App\Http\Controllers\API\ERP\ShopProductColorController;
 use App\Http\Controllers\API\ERP\ShopProductController;
 use App\Http\Controllers\API\ERP\ShopProductOptionTypeController;
-use App\Http\Controllers\API\ERP\SubscribeController;
-use App\Http\Controllers\API\ERP\TrashController;
 use App\Http\Controllers\API\ERP\UserController;
 use App\Http\Controllers\API\ERP\UserGroupController;
 use App\Http\Controllers\API\ERP\VendorController;
@@ -195,176 +180,6 @@ Route::group(['prefix' => 'erp'], function () {
                 Route::put('update', [UserGroupController::class, 'update'])->middleware('check.permission:users_groups,can_edit');
                 Route::delete('delete/{id}', [UserGroupController::class, 'delete'])->middleware('check.permission:users_groups,can_delete');
             });
-            Route::group(['prefix' => 'hospitals'], function () {
-                // get requests
-                Route::get('fetch', [HospitalController::class, 'fetch'])->middleware('check.permission:hospitals,can_view');
-                Route::get('fetch-by-field', [HospitalController::class, 'fetchByField'])->middleware('check.permission:hospitals,can_view');
-
-                // post requests
-                Route::post('insert', [HospitalController::class, 'insert'])->middleware('check.permission:hospitals,can_add');
-                Route::put('update', [HospitalController::class, 'update'])->middleware('check.permission:hospitals,can_edit');
-                Route::delete('delete/{id}', [HospitalController::class, 'delete'])->middleware('check.permission:hospitals,can_delete');
-            });
-            Route::group(['prefix' => 'notes'], function () {
-                // get requests
-                Route::get('fetch', [NoteController::class, 'fetch'])->middleware('check.permission:notes,can_view');
-                Route::get('fetch-by-field', [NoteController::class, 'fetchByField'])->middleware('check.permission:notes,can_view');
-
-                // post requests
-                Route::post('insert', [NoteController::class, 'insert'])->middleware('check.permission:notes,can_add');
-                Route::put('update', [NoteController::class, 'update'])->middleware('check.permission:notes,can_edit');
-                Route::delete('delete/{id}', [NoteController::class, 'delete'])->middleware('check.permission:notes,can_delete');
-            });
-            Route::group(['prefix' => 'sms-shablons'], function () {
-                // get requests
-                Route::get('fetch', [SmsShablonController::class, 'fetch'])->middleware('check.permission:sms_shablons,can_view');
-                Route::get('fetch-by-field', [SmsShablonController::class, 'fetchByField'])->middleware('check.permission:sms_shablons,can_view');
-
-                // post requests
-                Route::post('insert', [SmsShablonController::class, 'insert'])->middleware('check.permission:sms_shablons,can_add');
-                Route::put('update', [SmsShablonController::class, 'update'])->middleware('check.permission:sms_shablons,can_edit');
-                Route::delete('delete/{id}', [SmsShablonController::class, 'delete'])->middleware('check.permission:sms_shablons,can_delete');
-            });
-            Route::group(['prefix' => 'sms-histories'], function () {
-                // get requests
-                Route::get('fetch', [SmsHistoryController::class, 'fetch'])->middleware('check.permission:sms_histories,can_view');
-                Route::get('fetch-index-params', [SmsHistoryController::class, 'fetchIndexParams'])->middleware('check.permission:sms_histories,can_view');
-                Route::post('send', [SmsHistoryController::class, 'send'])->middleware('check.permission:sms_histories,can_add');
-//                Route::get('fetch-by-field', [HospitalController::class, 'fetchByField'])->middleware('check.permission:hospitals,can_view');
-//
-//                // post requests
-//                Route::post('insert', [HospitalController::class, 'insert'])->middleware('check.permission:hospitals,can_add');
-//                Route::put('update', [HospitalController::class, 'update'])->middleware('check.permission:hospitals,can_edit');
-//                Route::delete('delete/{id}', [HospitalController::class, 'delete'])->middleware('check.permission:hospitals,can_delete');
-            });
-
-            Route::group(['prefix' => 'diseases'], function () {
-                // get requests
-                Route::get('fetch', [DiseaseController::class, 'fetch'])->middleware('check.permission:diseases,can_view');
-                Route::get('fetch-by-field', [DiseaseController::class, 'fetchByField'])->middleware('check.permission:diseases,can_view');
-
-                // post requests
-                Route::post('insert', [DiseaseController::class, 'insert'])->middleware('check.permission:diseases,can_add');
-                Route::put('update', [DiseaseController::class, 'update'])->middleware('check.permission:diseases,can_edit');
-                Route::delete('delete/{id}', [DiseaseController::class, 'delete'])->middleware('check.permission:diseases,can_delete');
-            });
-
-            Route::group(['prefix' => 'doctors-final'], function () {
-                // get requests
-                Route::get('fetch', [DoctorsFinalController::class, 'fetch'])->middleware('check.permission:doctors_finals,can_view');
-                Route::get('fetch-by-field', [DoctorsFinalController::class, 'fetchByField'])->middleware('check.permission:doctors_finals,can_view');
-
-                // post requests
-                Route::post('insert', [DoctorsFinalController::class, 'insert'])->middleware('check.permission:doctors_finals,can_add');
-                Route::put('update', [DoctorsFinalController::class, 'update'])->middleware('check.permission:doctors_finals,can_edit');
-                Route::delete('delete/{id}', [DoctorsFinalController::class, 'delete'])->middleware('check.permission:doctors_finals,can_delete');
-            });
-
-            Route::group(['prefix' => 'extended-prices'], function () {
-                // get requests
-                Route::get('fetch', [ExtendedPriceController::class, 'fetch'])->middleware('check.permission:extended_prices,can_view');
-                Route::get('fetch-by-field', [ExtendedPriceController::class, 'fetchByField'])->middleware('check.permission:extended_prices,can_view');
-
-                // post requests
-                Route::post('insert', [ExtendedPriceController::class, 'insert'])->middleware('check.permission:extended_prices,can_add');
-                Route::put('update', [ExtendedPriceController::class, 'update'])->middleware('check.permission:extended_prices,can_edit');
-                Route::delete('delete/{id}', [ExtendedPriceController::class, 'delete'])->middleware('check.permission:extended_prices,can_delete');
-            });
-
-            Route::group(['prefix' => 'clinics'], function () {
-                // get requests
-                Route::get('fetch', [ClinicController::class, 'fetch'])->middleware('check.permission:clinics,can_view');
-                Route::get('fetch-by-field', [ClinicController::class, 'fetchByField'])->middleware('check.permission:clinics,can_view');
-
-                // post requests
-                Route::post('insert', [ClinicController::class, 'insert'])->middleware('check.permission:clinics,can_add');
-                Route::put('update', [ClinicController::class, 'update'])->middleware('check.permission:clinics,can_edit');
-                Route::delete('delete/{id}', [ClinicController::class, 'delete'])->middleware('check.permission:clinics,can_delete');
-            });
-
-            Route::group(['prefix' => 'sms-bazas'], function () {
-                // get requests
-                Route::get('fetch', [SmsBazaController::class, 'fetch'])->middleware('check.permission:sms_bazas,can_view');
-                Route::get('fetch-index-params', [SmsBazaController::class, 'fetchIndexParams'])->middleware('check.permission:sms_bazas,can_view');
-                Route::get('fetch-by-field', [SmsBazaController::class, 'fetchByField'])->middleware('check.permission:sms_bazas,can_view');
-
-                // post requests
-                Route::post('insert', [SmsBazaController::class, 'insert'])->middleware('check.permission:sms_bazas,can_add');
-                Route::put('update', [SmsBazaController::class, 'update'])->middleware('check.permission:sms_bazas,can_edit');
-                Route::delete('delete/{id}', [SmsBazaController::class, 'delete'])->middleware('check.permission:sms_bazas,can_delete');
-            });
-            Route::group(['prefix' => 'outgoings'], function () {
-                // get requests
-                Route::get('fetch', [OutgoingController::class, 'fetch'])->middleware('check.permission:outgoings,can_view');
-                Route::get('fetch-by-field', [OutgoingController::class, 'fetchByField'])->middleware('check.permission:outgoings,can_view');
-                Route::get('fetch-params', [OutgoingController::class, 'fetchParams'])->middleware('check.permission:outgoings,can_view');
-                Route::get('fetch-index-params', [OutgoingController::class, 'fetchIndexParams'])->middleware('check.permission:outgoings,can_view');
-
-                // post requests
-                Route::post('insert', [OutgoingController::class, 'insert'])->middleware('check.permission:outgoings,can_add');
-                Route::put('update', [OutgoingController::class, 'update'])->middleware('check.permission:outgoings,can_edit');
-                Route::delete('delete/{id}', [OutgoingController::class, 'delete'])->middleware('check.permission:outgoings,can_delete');
-            });
-            Route::group(['prefix' => 'subscribes'], function () {
-                // get requests
-                Route::get('fetch-index-params', [SubscribeController::class, 'fetchIndexParams'])->middleware('check.permission:subscribes,can_view');
-                Route::get('fetch', [SubscribeController::class, 'fetch'])->middleware('check.permission:subscribes,can_view');
-                Route::get('fetch-by-field', [SubscribeController::class, 'fetchByField'])->middleware('check.permission:subscribes,can_view');
-                Route::get('fetch-count', [SubscribeController::class, 'fetchCount'])->middleware('check.permission:subscribes,can_view');
-
-                // post requests
-                Route::post('insert', [SubscribeController::class, 'insert'])->middleware('check.permission:subscribes,can_add');
-                Route::put('update', [SubscribeController::class, 'update'])->middleware('check.permission:subscribes,can_edit');
-                Route::delete('delete/{id}', [SubscribeController::class, 'delete'])->middleware('check.permission:subscribes,can_delete');
-            });
-            Route::group(['prefix' => 'incomings'], function () {
-                // get requests
-                Route::get('fetch-index-params', [IncomingController::class, 'fetchIndexParams'])->middleware('check.permission:incomings,can_view');
-                Route::get('fetch-params', [IncomingController::class, 'fetchParams'])->middleware('check.permission:incomings,can_view');
-                Route::get('fetch', [IncomingController::class, 'fetch'])->middleware('check.permission:incomings,can_view');
-                Route::get('export', [IncomingController::class, 'export'])->middleware('check.permission:incomings,can_view');
-                Route::get('fetch-stats', [IncomingController::class, 'fetchStats'])->middleware('check.permission:incomings,can_view');
-                Route::get('fetch-by-field', [IncomingController::class, 'fetchByField'])->middleware('check.permission:incomings,can_view');
-
-                // post requests
-                Route::post('insert', [IncomingController::class, 'insert'])->middleware('check.permission:incomings,can_add');
-                Route::put('update', [IncomingController::class, 'update'])->middleware('check.permission:incomings,can_edit');
-                Route::delete('delete/{id}', [IncomingController::class, 'delete'])->middleware('check.permission:incomings,can_delete');
-            });
-
-            Route::group(['prefix' => 'trash'], function () {
-                Route::get('fetch', [TrashController::class, 'fetch'])->middleware('check.permission:trash,can_view');
-                Route::post('restore/{id}', [TrashController::class, 'restore'])->middleware('check.permission:trash,can_delete');
-                Route::delete('force-delete/{id}', [TrashController::class, 'forceDelete'])->middleware('check.permission:trash,can_delete');
-            });
-
-            Route::group(['prefix' => 'hospitals-bases'], function () {
-                // get requests
-                Route::get('fetch-index-params', [HospitalsBaseController::class, 'fetchIndexParams'])->middleware('check.permission:hospitals_bases,can_view');
-                Route::get('fetch-params', [HospitalsBaseController::class, 'fetchParams'])->middleware('check.permission:hospitals_bases,can_view');
-                Route::get('fetch', [HospitalsBaseController::class, 'fetch'])->middleware('check.permission:hospitals_bases,can_view');
-                Route::get('fetch-by-field', [HospitalsBaseController::class, 'fetchByField'])->middleware('check.permission:hospitals_bases,can_view');
-
-                // post requests
-                Route::post('insert', [HospitalsBaseController::class, 'insert'])->middleware('check.permission:hospitals_bases,can_add');
-                Route::put('update', [HospitalsBaseController::class, 'update'])->middleware('check.permission:hospitals_bases,can_edit');
-                Route::delete('delete/{id}', [HospitalsBaseController::class, 'delete'])->middleware('check.permission:hospitals_bases,can_delete');
-            });
-
-            Route::group(['prefix' => 'recommendations'], function () {
-                // get requests
-                Route::get('fetch-index-params', [RecommendationController::class, 'fetchIndexParams'])->middleware('check.permission:recommendations,can_view');
-                Route::get('fetch-params', [RecommendationController::class, 'fetchParams'])->middleware('check.permission:recommendations,can_view');
-                Route::get('fetch', [RecommendationController::class, 'fetch'])->middleware('check.permission:recommendations,can_view');
-                Route::get('fetch-by-field', [RecommendationController::class, 'fetchByField'])->middleware('check.permission:recommendations,can_view');
-                Route::get('export', [RecommendationController::class, 'export'])->middleware('check.permission:recommendations,can_view');
-
-                // post requests
-                Route::post('insert', [RecommendationController::class, 'insert'])->middleware('check.permission:recommendations,can_add');
-                Route::put('update', [RecommendationController::class, 'update'])->middleware('check.permission:recommendations,can_edit');
-                Route::delete('delete/{id}', [RecommendationController::class, 'delete'])->middleware('check.permission:recommendations,can_delete');
-            });
-
             Route::group(['prefix' => 'member-groups'], function () {
                 // get requests
                 Route::get('fetch', [MemberGroupController::class, 'fetch'])->middleware('check.permission:affiliate_member_groups,can_view');

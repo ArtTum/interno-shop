@@ -1,5 +1,11 @@
 ﻿<script setup lang="ts">
 const { copy, shopSettings } = useCatalog()
+
+const contactPhone = computed(() => String(shopSettings.value.contactPhone || ''))
+const contactEmail = computed(() => String(shopSettings.value.contactEmail || ''))
+const contactAddress = computed(() => String(shopSettings.value.contactAddress || ''))
+const contactMapUrl = computed(() => String(shopSettings.value.contactMapUrl || '#'))
+const contactPhoneHref = computed(() => contactPhone.value.replace(/\s/g, ''))
 </script>
 
 <template>
@@ -14,9 +20,9 @@ const { copy, shopSettings } = useCatalog()
       <section class="contact-card contact-info-card" :aria-label="copy.contactInfoTitle">
         <h2>{{ copy.contactInfoTitle }}</h2>
         <div class="contact-info-list">
-          <a :href="`tel:${shopSettings.contactPhone.replace(/\\s/g, '')}`"><span>{{ copy.contactPhone }}</span><strong>{{ shopSettings.contactPhone }}</strong></a>
-          <a :href="`mailto:${shopSettings.contactEmail}`"><span>{{ copy.contactEmail }}</span><strong>{{ shopSettings.contactEmail }}</strong></a>
-          <a :href="shopSettings.contactMapUrl" target="_blank" rel="noopener noreferrer"><span>{{ copy.contactAddress }}</span><strong>{{ shopSettings.contactAddress }}</strong></a>
+          <a :href="`tel:${contactPhoneHref}`"><span>{{ copy.contactPhone }}</span><strong>{{ contactPhone }}</strong></a>
+          <a :href="`mailto:${contactEmail}`"><span>{{ copy.contactEmail }}</span><strong>{{ contactEmail }}</strong></a>
+          <a :href="contactMapUrl" target="_blank" rel="noopener noreferrer"><span>{{ copy.contactAddress }}</span><strong>{{ contactAddress }}</strong></a>
         </div>
 
         <div class="contact-hours">

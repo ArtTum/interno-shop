@@ -49,22 +49,26 @@ const seoPages = [
     {key: 'cart', label: 'Cart'},
     {key: 'checkout-success', label: 'Checkout success'},
     {key: 'search', label: 'Search'},
-    {key: 'privacy-policy', label: 'Privacy policy'},
     {key: 'category', label: 'Category pages'},
     {key: 'product', label: 'Product pages'},
 ];
-const privacyTextFields = [
-    'kicker',
-    'title',
-    'intro',
-    'badgeTitle',
-    'badgeText',
-    'summaryLabel',
-    'summaryTitle',
-    'summaryText',
-    'updated',
-    'summaryAria',
-    'checklistAria',
+const contactTranslationFields = [
+    {key: 'contactHeroKicker', label: 'Hero kicker', type: 'input'},
+    {key: 'contactHeroTitle', label: 'Hero title', type: 'input'},
+    {key: 'contactHeroText', label: 'Hero text', type: 'textarea'},
+    {key: 'contactInfoTitle', label: 'Info block title', type: 'input'},
+    {key: 'contactPhone', label: 'Phone label', type: 'input'},
+    {key: 'contactEmail', label: 'Email label', type: 'input'},
+    {key: 'contactAddress', label: 'Address label', type: 'input'},
+    {key: 'contactHours', label: 'Hours label', type: 'input'},
+    {key: 'contactHoursValue', label: 'Hours value', type: 'input'},
+    {key: 'contactFormTitle', label: 'Form title', type: 'input'},
+    {key: 'firstName', label: 'Name field label', type: 'input'},
+    {key: 'contactNamePlaceholder', label: 'Name placeholder', type: 'input'},
+    {key: 'contactPhonePlaceholder', label: 'Phone placeholder', type: 'input'},
+    {key: 'contactMessage', label: 'Message field label', type: 'input'},
+    {key: 'contactMessagePlaceholder', label: 'Message placeholder', type: 'textarea'},
+    {key: 'contactSend', label: 'Send button', type: 'input'},
 ];
 
 const ensureLanguageSlots = (code) => {
@@ -99,6 +103,7 @@ const fetchConfig = async () => {
     normalizeSettings();
     normalizeSeo();
     normalizePrivacy();
+    normalizeContactTranslations();
     activeLanguage.value = form.value.languages?.[0]?.code || 'hy';
     form.value.languages.forEach((language) => ensureLanguageSlots(language.code));
     form.value.products.forEach((product) => normalizeProduct(product));
@@ -106,6 +111,12 @@ const fetchConfig = async () => {
 
 const normalizeSettings = () => {
     form.value.settings = form.value.settings || {};
+    form.value.settings.brandLogo = form.value.settings.brandLogo || '/assets/brand/logo.png';
+    form.value.settings.footerText = form.value.settings.footerText || '';
+    form.value.settings.contactPhone = form.value.settings.contactPhone || '';
+    form.value.settings.contactEmail = form.value.settings.contactEmail || '';
+    form.value.settings.contactAddress = form.value.settings.contactAddress || '';
+    form.value.settings.contactMapUrl = form.value.settings.contactMapUrl || '';
     form.value.settings.socialLinks = Array.isArray(form.value.settings.socialLinks) && form.value.settings.socialLinks.length
         ? form.value.settings.socialLinks
         : clone(defaultSocialLinks);
@@ -114,6 +125,18 @@ const normalizeSettings = () => {
         link.label = link.label || '';
         link.href = link.href || '';
         link.external = link.external ?? true;
+    });
+};
+
+const normalizeContactTranslations = () => {
+    form.value.translations = form.value.translations || {};
+
+    languages.value.forEach((language) => {
+        form.value.translations[language.code] = form.value.translations[language.code] || {};
+
+        contactTranslationFields.forEach((field) => {
+            form.value.translations[language.code][field.key] = form.value.translations[language.code][field.key] || '';
+        });
     });
 };
 
@@ -182,30 +205,6 @@ const normalizePrivacy = () => {
             ? form.value.privacy.content[language.code].sections
             : [];
     });
-};
-
-const activePrivacy = computed(() => form.value?.privacy?.content?.[activeLanguage.value] || emptyPrivacyContent());
-
-const addPrivacyChecklistItem = () => {
-    activePrivacy.value.checklist.push('');
-};
-
-const removePrivacyChecklistItem = (index) => {
-    activePrivacy.value.checklist.splice(index, 1);
-};
-
-const addPrivacySection = () => {
-    const nextIndex = String(activePrivacy.value.sections.length + 1).padStart(2, '0');
-    activePrivacy.value.sections.push({
-        index: nextIndex,
-        icon: '?',
-        title: '',
-        text: '',
-    });
-};
-
-const removePrivacySection = (index) => {
-    activePrivacy.value.sections.splice(index, 1);
 };
 
 const addLanguage = () => {
@@ -307,22 +306,6 @@ const moveArrayItem = (list, index, direction) => {
 
     const [item] = list.splice(index, 1);
     list.splice(targetIndex, 0, item);
-};
-
-const addSocialLink = () => {
-    form.value.settings.socialLinks.push({
-        label: 'Social',
-        href: 'https://',
-        external: true,
-    });
-};
-
-const removeSocialLink = (index) => {
-    form.value.settings.socialLinks.splice(index, 1);
-};
-
-const moveSocialLink = (index, direction) => {
-    moveArrayItem(form.value.settings.socialLinks, index, direction);
 };
 
 const addProduct = () => {
@@ -477,39 +460,12 @@ fetchConfig();
             <div class="rounded-sm border border-stroke bg-white p-5 shadow-default">
                 <div class="mb-4 flex items-center justify-between gap-3">
                     <h3 class="text-lg font-semibold text-black">Site Settings</h3>
-                    <button type="button" class="rounded bg-black px-4 py-2 font-medium text-white" @click="addSocialLink">Add social</button>
                 </div>
                 <div class="grid grid-cols-2 gap-4 max-md:grid-cols-1">
                     <label class="block"><span class="mb-2 block font-medium text-black">Brand logo</span><input v-model="form.settings.brandLogo" class="w-full rounded border border-stroke px-3 py-2 text-black" /></label>
                     <label class="block"><span class="mb-2 block font-medium text-black">Footer text</span><input v-model="form.settings.footerText" class="w-full rounded border border-stroke px-3 py-2 text-black" /></label>
-                    <label class="block"><span class="mb-2 block font-medium text-black">Phone</span><input v-model="form.settings.contactPhone" class="w-full rounded border border-stroke px-3 py-2 text-black" /></label>
-                    <label class="block"><span class="mb-2 block font-medium text-black">Email</span><input v-model="form.settings.contactEmail" class="w-full rounded border border-stroke px-3 py-2 text-black" /></label>
-                    <label class="block"><span class="mb-2 block font-medium text-black">Address</span><input v-model="form.settings.contactAddress" class="w-full rounded border border-stroke px-3 py-2 text-black" /></label>
-                    <label class="block"><span class="mb-2 block font-medium text-black">Map URL</span><input v-model="form.settings.contactMapUrl" class="w-full rounded border border-stroke px-3 py-2 text-black" /></label>
                 </div>
 
-                <div class="mt-5 space-y-3">
-                    <h4 class="font-semibold text-black">Social links</h4>
-                    <div v-for="(link, index) in form.settings.socialLinks" :key="`${link.label}-${index}`" class="grid grid-cols-12 gap-3 rounded border border-stroke p-3 max-lg:grid-cols-1">
-                        <label class="col-span-3 block">
-                            <span class="mb-2 block font-medium text-black">Label</span>
-                            <input v-model="link.label" class="w-full rounded border border-stroke px-3 py-2 text-black" placeholder="Instagram" />
-                        </label>
-                        <label class="col-span-5 block">
-                            <span class="mb-2 block font-medium text-black">URL</span>
-                            <input v-model="link.href" class="w-full rounded border border-stroke px-3 py-2 text-black" placeholder="https://www.instagram.com/..." />
-                        </label>
-                        <label class="col-span-1 flex items-center gap-2 pt-8 text-black">
-                            <input v-model="link.external" type="checkbox" />
-                            External
-                        </label>
-                        <div class="col-span-3 flex flex-wrap items-end gap-2">
-                            <button type="button" class="rounded border border-stroke px-3 py-2 text-black disabled:opacity-40" :disabled="index === 0" @click="moveSocialLink(index, -1)">Up</button>
-                            <button type="button" class="rounded border border-stroke px-3 py-2 text-black disabled:opacity-40" :disabled="index === form.settings.socialLinks.length - 1" @click="moveSocialLink(index, 1)">Down</button>
-                            <button type="button" class="rounded border border-meta-1 px-3 py-2 text-meta-1" @click="removeSocialLink(index)">Remove</button>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div class="rounded-sm border border-stroke bg-white p-5 shadow-default">
@@ -619,63 +575,6 @@ fetchConfig();
                                 <span class="mb-2 block font-medium text-black">Meta keywords</span>
                                 <textarea v-model="form.seo[page.key][activeLanguage].metaKeywords" rows="2" class="w-full rounded border border-stroke px-3 py-2 text-black" placeholder="keyword 1, keyword 2"></textarea>
                             </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="rounded-sm border border-stroke bg-white p-5 shadow-default">
-                <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <h3 class="text-lg font-semibold text-black">Privacy Policy for {{ activeLanguageLabel }}</h3>
-                        <p class="text-sm text-gray-500">Controls the frontend privacy policy page content.</p>
-                    </div>
-                    <label class="block">
-                        <span class="mb-2 block font-medium text-black">Visible updated date</span>
-                        <input v-model="form.privacy.updatedAt" class="w-full rounded border border-stroke px-3 py-2 text-black" placeholder="03.06.2026" />
-                    </label>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3 max-md:grid-cols-1">
-                    <label v-for="field in privacyTextFields" :key="field" class="block">
-                        <span class="mb-2 block font-medium text-black">{{ field }}</span>
-                        <textarea
-                            v-if="['intro', 'summaryText', 'badgeText'].includes(field)"
-                            v-model="activePrivacy[field]"
-                            rows="2"
-                            class="w-full rounded border border-stroke px-3 py-2 text-black"
-                        ></textarea>
-                        <input v-else v-model="activePrivacy[field]" class="w-full rounded border border-stroke px-3 py-2 text-black" />
-                    </label>
-                </div>
-
-                <div class="mt-5">
-                    <div class="mb-3 flex items-center justify-between gap-3">
-                        <h4 class="font-semibold text-black">Checklist</h4>
-                        <button type="button" class="rounded bg-black px-4 py-2 font-medium text-white" @click="addPrivacyChecklistItem">Add item</button>
-                    </div>
-                    <div class="space-y-2">
-                        <div v-for="(item, index) in activePrivacy.checklist" :key="index" class="grid grid-cols-12 gap-2">
-                            <input v-model="activePrivacy.checklist[index]" class="col-span-11 rounded border border-stroke px-3 py-2 text-black" />
-                            <button type="button" class="col-span-1 text-meta-1" @click="removePrivacyChecklistItem(index)">x</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-5">
-                    <div class="mb-3 flex items-center justify-between gap-3">
-                        <h4 class="font-semibold text-black">Sections</h4>
-                        <button type="button" class="rounded bg-black px-4 py-2 font-medium text-white" @click="addPrivacySection">Add section</button>
-                    </div>
-                    <div class="space-y-3">
-                        <div v-for="(section, index) in activePrivacy.sections" :key="index" class="rounded border border-stroke p-3">
-                            <div class="grid grid-cols-12 gap-3 max-lg:grid-cols-1">
-                                <label class="col-span-1 block"><span class="mb-2 block font-medium text-black">Index</span><input v-model="section.index" class="w-full rounded border border-stroke px-3 py-2 text-black" /></label>
-                                <label class="col-span-1 block"><span class="mb-2 block font-medium text-black">Icon</span><input v-model="section.icon" class="w-full rounded border border-stroke px-3 py-2 text-black" /></label>
-                                <label class="col-span-4 block"><span class="mb-2 block font-medium text-black">Title</span><input v-model="section.title" class="w-full rounded border border-stroke px-3 py-2 text-black" /></label>
-                                <label class="col-span-5 block"><span class="mb-2 block font-medium text-black">Text</span><textarea v-model="section.text" rows="2" class="w-full rounded border border-stroke px-3 py-2 text-black"></textarea></label>
-                                <div class="col-span-1 flex items-end"><button type="button" class="text-meta-1" @click="removePrivacySection(index)">Remove</button></div>
-                            </div>
                         </div>
                     </div>
                 </div>

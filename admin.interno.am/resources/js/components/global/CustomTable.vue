@@ -266,6 +266,22 @@ const exportFile = async (isAll, justTemplate, byPageFilter) => {
 };
 
 const auth = computed(() => store.getters['auth/getUser']);
+const tablePagination = computed(() => {
+    if (!props.pagination || typeof props.pagination !== 'object') {
+        return null;
+    }
+
+    const showing = props.pagination.showing || {};
+
+    return {
+        ...props.pagination,
+        showing: {
+            from: Number(showing.from ?? props.pagination.from ?? 0),
+            to: Number(showing.to ?? props.pagination.to ?? 0),
+        },
+        total_items: Number(props.pagination.total_items ?? props.pagination.total ?? 0),
+    };
+});
 const paginateCustom = () => {
     setTimeout(() => {
         emits('do-page-fetching', true);
@@ -552,7 +568,7 @@ const generateAITranslations = async () => {
                         </div>
 
                         <div class="datatable-dropdown ml-auto">
-                            <label v-if="pagination">
+                            <label v-if="tablePagination">
                                 <select
                                     class="datatable-selector "
                                     v-model="params.per_page"
@@ -641,17 +657,17 @@ const generateAITranslations = async () => {
 
                     </div>
                     <div
-                        v-if="pagination"
+                        v-if="tablePagination"
                         class="datatable-bottom"
                     >
                         <div class="datatable-info">
-                            Ցուցադրվում է {{ pagination.showing.from }} -ից {{ pagination.showing.to }} գրառումները
-                            {{ pagination.total_items }} -ից
+                            Ցուցադրվում է {{ tablePagination.showing.from }} -ից {{ tablePagination.showing.to }} գրառումները
+                            {{ tablePagination.total_items }} -ից
                         </div>
 
                         <vue-awesome-paginate
-                            v-if="params.per_page < pagination.total_items"
-                            :total-items="pagination.total_items"
+                            v-if="params.per_page < tablePagination.total_items"
+                            :total-items="tablePagination.total_items"
                             :items-per-page="params.per_page"
                             :max-pages-shown="3"
                             v-model="params.page"

@@ -33,10 +33,10 @@ class ShopFrontendController extends Controller
 
     public function publicConfig(): JsonResponse
     {
-        return response()->json([
+        return $this->withCors(response()->json([
             'success' => true,
             'data' => $this->readConfig(),
-        ]);
+        ]));
     }
 
     public function fetch(): JsonResponse
@@ -71,16 +71,16 @@ class ShopFrontendController extends Controller
         $this->syncPrivacyToDatabase($payload['privacy'] ?? []);
         $this->writeJson($this->configPath, $payload);
 
-        return response()->json([
+        return $this->withCors(response()->json([
             'success' => true,
             'message' => 'Shop frontend settings saved.',
             'data' => $payload,
-        ]);
+        ]));
     }
 
     public function storeOrder(Request $request): JsonResponse
     {
-        $payload = $request->all();
+        $payload = $this->decodePayload($request);
 
         $validator = Validator::make($payload, [
             'customer.firstName' => ['required', 'string', 'max:120'],
@@ -116,19 +116,40 @@ class ShopFrontendController extends Controller
         array_unshift($orders, $order);
         $this->writeJson($this->ordersPath, $orders);
 
-        return response()->json([
+        return $this->withCors(response()->json([
             'success' => true,
             'message' => 'Order created.',
             'data' => $order,
-        ], 201);
+        ], 201));
     }
 
     public function orders(): JsonResponse
     {
-        return response()->json([
+        return $this->withCors(response()->json([
             'success' => true,
             'data' => $this->readOrders(),
-        ]);
+        ]));
+    }
+
+    private function withCors(JsonResponse $response): JsonResponse
+    {
+        return $response
+            ->header('Access-Control-Allow-Origin', '*')
+            ->header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            ->header('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Requested-With');
+    }
+
+    private function decodePayload(Request $request): array
+    {
+        $payload = $request->input('payload');
+
+        if (is_string($payload)) {
+            $decoded = json_decode($payload, true);
+
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        return $request->all();
     }
 
     private function readConfig(): array
@@ -871,7 +892,14 @@ class ShopFrontendController extends Controller
             }
 
             $code = $translation->language->code;
+            $contentHtml = $translation->content_html ?? '';
+
+            if (!$contentHtml && is_string($translation->intro) && str_starts_with($translation->intro, '<!--privacy-content-html-->')) {
+                $contentHtml = substr($translation->intro, strlen('<!--privacy-content-html-->'));
+            }
+
             $content[$code] = [
+                'contentHtml' => $contentHtml,
                 'kicker' => $translation->kicker ?? '',
                 'title' => $translation->title ?? '',
                 'intro' => $translation->intro ?? '',
@@ -930,7 +958,9 @@ class ShopFrontendController extends Controller
             return;
         }
 
-        DB::transaction(function () use ($privacy, $content, $languages) {
+        $hasContentHtml = Schema::hasColumn('shop_privacy_policy_translations', 'content_html');
+
+        DB::transaction(function () use ($privacy, $content, $languages, $hasContentHtml) {
             $policy = ShopPrivacyPolicy::query()->updateOrCreate(
                 ['slug' => 'privacy-policy'],
                 [
@@ -946,21 +976,29 @@ class ShopFrontendController extends Controller
 
                 $payload = $content[$language->code];
 
+                $translationPayload = [
+                    'kicker' => $payload['kicker'] ?? null,
+                    'title' => $payload['title'] ?? null,
+                    'intro' => $payload['intro'] ?? null,
+                    'badge_title' => $payload['badgeTitle'] ?? null,
+                    'badge_text' => $payload['badgeText'] ?? null,
+                    'summary_label' => $payload['summaryLabel'] ?? null,
+                    'summary_title' => $payload['summaryTitle'] ?? null,
+                    'summary_text' => $payload['summaryText'] ?? null,
+                    'updated_label' => $payload['updated'] ?? null,
+                    'summary_aria' => $payload['summaryAria'] ?? null,
+                    'checklist_aria' => $payload['checklistAria'] ?? null,
+                ];
+
+                if ($hasContentHtml) {
+                    $translationPayload['content_html'] = $payload['contentHtml'] ?? null;
+                } elseif (!empty($payload['contentHtml'])) {
+                    $translationPayload['intro'] = '<!--privacy-content-html-->' . $payload['contentHtml'];
+                }
+
                 $policy->translations()->updateOrCreate(
                     ['language_id' => $language->id],
-                    [
-                        'kicker' => $payload['kicker'] ?? null,
-                        'title' => $payload['title'] ?? null,
-                        'intro' => $payload['intro'] ?? null,
-                        'badge_title' => $payload['badgeTitle'] ?? null,
-                        'badge_text' => $payload['badgeText'] ?? null,
-                        'summary_label' => $payload['summaryLabel'] ?? null,
-                        'summary_title' => $payload['summaryTitle'] ?? null,
-                        'summary_text' => $payload['summaryText'] ?? null,
-                        'updated_label' => $payload['updated'] ?? null,
-                        'summary_aria' => $payload['summaryAria'] ?? null,
-                        'checklist_aria' => $payload['checklistAria'] ?? null,
-                    ]
+                    $translationPayload
                 );
             }
 

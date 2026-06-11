@@ -1,7 +1,7 @@
 const state = () => ({
-    isHovered: false,
+    isHovered: true,
     isSidebarOpen: false,
-    isSidebarMenuOpen: false,
+    isSidebarMenuOpen: true,
     selected: localStorage.getItem('selected') || 'Dashboard',
     page: localStorage.getItem('page') || 'Dashboard',
     navTimestamp: 0,
@@ -36,15 +36,11 @@ const actions = {
 
 const mutations = {
     TOGGLE_SIDEBAR_MENU(state) {
-        state.isSidebarMenuOpen = !state.isSidebarMenuOpen
-        if (state.isSidebarMenuOpen) {
-            state.isHovered = true;
-        } else {
-            state.isHovered = false;
-        }
+        state.isSidebarMenuOpen = true;
+        state.isHovered = true;
     },
     SET_SIDEBAR_STATE(state, value) {
-        state.isHovered = value;
+        state.isHovered = true;
     },
     TOGGLE_SIDEBAR(state) {
         state.isSidebarOpen = !state.isSidebarOpen

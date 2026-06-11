@@ -8,6 +8,30 @@ export const routes = [
                 route: '/shop-frontend',
             },
             {
+                icon: ['far', 'address-book'],
+                label: 'Contact Page',
+                name: 'languages',
+                route: '/shop-contact',
+            },
+            {
+                icon: ['far', 'file-lines'],
+                label: 'Privacy Policy',
+                name: 'languages',
+                route: '/shop-privacy',
+            },
+            {
+                icon: ['far', 'share-nodes'],
+                label: 'Social Links',
+                name: 'languages',
+                route: '/shop-social',
+            },
+            {
+                icon: ['far', 'receipt'],
+                label: 'Shop Orders',
+                name: 'languages',
+                route: '/shop-orders',
+            },
+            {
                 icon: ['far', 'folder-tree'],
                 label: 'Shop Categories',
                 name: 'shop_categories',
@@ -41,72 +65,6 @@ export const routes = [
                 ]
             },
             {
-                icon: ['far', 'calendar-check'],
-                label: 'Հերթագրումներ',
-                name: 'recommendations',
-                route: '/recommendations',
-            },
-            {
-                icon: ['far', 'users'],
-                label: 'Հիվանդների բազա',
-                name: 'hospitals_bases',
-                route: '/hospitals-bases',
-            },
-            {
-                icon: ['far', 'money-bill-trend-up'],
-                label: 'Եկամուտներ',
-                name: 'incomings',
-                route: '/incomings',
-            },
-            {
-                icon: ['far', 'comment-sms'],
-                label: 'SMS Բազա',
-                name: 'sms_bazas',
-                route: '/sms-bazas',
-            },
-            {
-                icon: ['far', 'hospital'],
-                label: 'Կապ հիվանդանոցների',
-                name: 'clinics',
-                route: '/clinics',
-            },
-            {
-                icon: ['far', 'tags'],
-                label: 'Տարածված գներ',
-                name: 'extended_prices',
-                route: '/extended-prices',
-            },
-            {
-                icon: ['far', 'user-doctor'],
-                label: 'Բժիշկներ վերջնական',
-                name: 'doctors_finals',
-                route: '/doctors-finals',
-            },
-            {
-                icon: ['far', 'file-lines'],
-                label: 'SMS շաբլոններ',
-                name: 'sms_shablons',
-                route: '/sms-shablons',
-            },
-            {
-                icon: ['far', 'paper-plane'],
-                label: 'Ուղարկված SMS-ներ',
-                name: 'sms_histories',
-                route: '/sms-histories',
-            },
-            {
-                icon: ['far', 'disease'],
-                label: 'Հիվանդություններ',
-                name: 'diseases',
-                route: '/diseases',
-            },
-            {
-                icon: ['far', 'house-medical'],
-                label: 'Հիվանդանոցներ',
-                name: 'hospitals',
-                route: '/hospitals',
-            },
-            {
                 icon: ['far', 'user-tie'],
                 label: 'Օգտատերեր',
                 name: 'users_menu_link',
@@ -116,30 +74,6 @@ export const routes = [
                     {label: '- Groups', route: '/users/user-groups', name: 'users_groups'},
                     {label: '- Permissions', route: '/users/permissions', name: 'permissions'},
                 ]
-            },
-            // {
-            //     icon: ['fab', 'telegram'],
-            //     label: 'subscribes',
-            //     name: 'subscribes',
-            //     route: '/subscribes',
-            // },
-            {
-                icon: ['far', 'money-bill-wave'],
-                label: 'Ծախսեր',
-                name: 'outgoings',
-                route: '/outgoings',
-            },
-            {
-                icon: ['far', 'note-sticky'],
-                label: 'Նոթեր',
-                name: 'notes',
-                route: '/notes',
-            },
-            {
-                icon: ['far', 'trash-can'],
-                label: 'Ջնջվածներ',
-                name: 'trash',
-                route: '/trash',
             },
     ]
 

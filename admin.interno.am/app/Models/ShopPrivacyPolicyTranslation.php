@@ -24,6 +24,7 @@ class ShopPrivacyPolicyTranslation extends Model
         'updated_label',
         'summary_aria',
         'checklist_aria',
+        'content_html',
     ];
 
     public function policy(): BelongsTo

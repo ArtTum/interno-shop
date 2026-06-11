@@ -515,7 +515,10 @@ export function useCatalog() {
   const route = useRoute()
   const router = useRouter()
   const runtimeConfig = useRuntimeConfig()
-  const frontApiBase = String(runtimeConfig.public.frontApiBase || '').replace(/\/$/, '')
+  const configuredFrontApiBase = String(runtimeConfig.public.frontApiBase || 'http://127.0.0.1:8001').replace(/\/$/, '')
+  const frontApiBase = configuredFrontApiBase.includes('admin.interno.am')
+    ? 'http://127.0.0.1:8001'
+    : configuredFrontApiBase
   const frontApiUrl = (path: string) => `${frontApiBase}${path}`
   const { data: remoteCatalog } = useFetch<any>(frontApiUrl('/api/front/shop'), {
     key: 'front-shop-config',
@@ -787,18 +790,22 @@ export function useCatalog() {
   }
 
   async function submitOrder(customer: Record<string, string>) {
+    const payload = {
+      customer,
+      items: cartProducts.value.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        product: item.product
+      })),
+      total: cartTotal.value,
+      language: currentLanguageCode.value
+    }
+
     await $fetch(frontApiUrl('/api/front/orders'), {
       method: 'POST',
-      body: {
-        customer,
-        items: cartProducts.value.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          product: item.product
-        })),
-        total: cartTotal.value,
-        language: currentLanguageCode.value
-      }
+      body: new URLSearchParams({
+        payload: JSON.stringify(payload)
+      })
     })
 
     clearCart()

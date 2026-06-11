@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 import { computed } from 'vue'
 
-const { copy, currentLanguageCode, localizedPath, shopPrivacy } = useCatalog()
+const { copy, currentLanguageCode, currentSeo, localizedPath, shopPrivacy } = useCatalog()
 
 const privacyContent = {
   hy: {
@@ -74,11 +74,19 @@ const privacyCopy = computed(() => {
     ?? privacyContent[currentLanguageCode.value]
     ?? privacyContent.hy
 })
+const privacyHtml = computed(() => privacyCopy.value.contentHtml?.trim() || '')
+const privacyTitle = computed(() => currentSeo.value.title || privacyCopy.value.title || copy.value.privacyPolicy)
 const privacyUpdatedAt = computed(() => shopPrivacy.value?.updatedAt || '03.06.2026')
 </script>
 
 <template>
   <section class="privacy-page" aria-labelledby="privacy-title">
+    <div v-if="privacyHtml" class="privacy-editor-page">
+      <h1 id="privacy-title">{{ privacyTitle }}</h1>
+      <div class="privacy-editor-content" v-html="privacyHtml"></div>
+    </div>
+
+    <template v-else>
     <div class="privacy-hero">
       <div>
         <p>{{ privacyCopy.kicker }}</p>
@@ -124,5 +132,73 @@ const privacyUpdatedAt = computed(() => shopPrivacy.value?.updatedAt || '03.06.2
         </article>
       </div>
     </div>
+    </template>
   </section>
 </template>
+
+<style scoped>
+.privacy-editor-page {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 34px 18px 54px;
+}
+
+.privacy-editor-page h1 {
+  margin: 0 0 24px;
+  color: #142948;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(28px, 4vw, 46px);
+  font-weight: 680;
+  line-height: 1.08;
+}
+
+.privacy-editor-content {
+  color: #24344d;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.privacy-editor-content :deep(h1),
+.privacy-editor-content :deep(h2),
+.privacy-editor-content :deep(h3),
+.privacy-editor-content :deep(h4) {
+  margin: 28px 0 12px;
+  color: #142948;
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.2;
+}
+
+.privacy-editor-content :deep(p),
+.privacy-editor-content :deep(ul),
+.privacy-editor-content :deep(ol),
+.privacy-editor-content :deep(table),
+.privacy-editor-content :deep(figure) {
+  margin: 0 0 16px;
+}
+
+.privacy-editor-content :deep(ul),
+.privacy-editor-content :deep(ol) {
+  padding-left: 22px;
+}
+
+.privacy-editor-content :deep(a) {
+  color: #0b66d8;
+  font-weight: 620;
+}
+
+.privacy-editor-content :deep(img) {
+  max-width: 100%;
+  height: auto;
+}
+
+.privacy-editor-content :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.privacy-editor-content :deep(td),
+.privacy-editor-content :deep(th) {
+  border: 1px solid #d8dee8;
+  padding: 10px;
+}
+</style>

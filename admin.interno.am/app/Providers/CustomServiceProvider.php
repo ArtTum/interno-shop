@@ -176,13 +176,8 @@ use App\Services\ERP\B2B\CustomerGroup\CustomerGroupService;
 use App\Services\ERP\Catalog\Attribute\AttributeService;
 use App\Services\ERP\Catalog\AttributeType\AttributeTypeService;
 use App\Services\ERP\Catalog\Category\CategoryService;
-use App\Services\ERP\Clinic\ClinicService;
 use App\Services\ERP\Dashboard\DashboardService;
 use App\Services\ERP\Dashboard\Revenue\RevenueService;
-use App\Services\ERP\Disease\DiseaseService;
-use App\Services\ERP\DoctorsFinal\DoctorsFinalService;
-use App\Services\ERP\ExtendedPrice\ExtendedPriceService;
-use App\Services\ERP\Hospital\HospitalService;
 use App\Services\ERP\Marketing\MyOffer\MyOfferService;
 use App\Services\ERP\Marketing\LoyaltyProgram\LoyaltyProgramService;
 use App\Services\ERP\Marketing\MySharedCart\MySharedCartService;
@@ -193,16 +188,11 @@ use App\Services\ERP\Marketplaces\MarketplaceSetting\MarketplaceSettingService;
 use App\Services\ERP\Newsletter\BlacklistService;
 use App\Services\ERP\Newsletter\Campaign\CampaignService;
 use App\Services\ERP\Newsletter\EmailAds\EmailAdsService;
-use App\Services\ERP\Outgoing\OutgoingService;
-use App\Services\ERP\Recommendation\RecommendationService;
 use App\Services\ERP\Report\Controlling\ControllingService;
 use App\Services\ERP\Report\Customers\CustomersService;
 use App\Services\ERP\Settings\ShippingCountries\ShippingCountryService;
 use App\Services\ERP\Settings\SpeditionSetting\SpeditionSettingService;
 use App\Services\ERP\Settings\TntConsignmentNoteNumber\TntConsignmentNoteNumberService;
-use App\Services\ERP\SmsBaza\SmsBazaService;
-use App\Services\ERP\SmsShablon\SmsShablonService;
-use App\Services\ERP\Subscribe\SubscribeService;
 use App\Services\ERP\Users\Segment\CustomerSegmentService;
 use App\Services\Front\Category\CategoryService as CategoryServiceFront;
 use App\Services\ERP\Catalog\Product\ProductService;
@@ -923,61 +913,6 @@ class CustomServiceProvider extends ServiceProvider
             );
         });
 
-        ////
-        $this->app->bind(HospitalService::class, function ($app) {
-            return new HospitalService(
-                $app->make(HospitalRepository::class),
-            );
-        });
-
-        $this->app->bind(DiseaseService::class, function ($app) {
-            return new DiseaseService(
-                $app->make(DiseaseRepository::class),
-            );
-        });
-        $this->app->bind(SmsShablonService::class, function ($app) {
-            return new SmsShablonService(
-                $app->make(SmsShablonRepository::class),
-            );
-        });
-        $this->app->bind(DoctorsFinalService::class, function ($app) {
-            return new DoctorsFinalService(
-                $app->make(DoctorsFinalRepository::class),
-            );
-        });
-        $this->app->bind(ExtendedPriceService::class, function ($app) {
-            return new ExtendedPriceService(
-                $app->make(ExtendedPriceRepository::class),
-            );
-        });
-        $this->app->bind(ClinicService::class, function ($app) {
-            return new ClinicService(
-                $app->make(ClinicRepository::class),
-            );
-        });
-        $this->app->bind(SmsBazaService::class, function ($app) {
-            return new SmsBazaService(
-                $app->make(SmsBazaRepository::class),
-            );
-        });
-        $this->app->bind(OutgoingService::class, function ($app) {
-            return new OutgoingService(
-                $app->make(OutgoingRepository::class),
-            );
-        });
-        $this->app->bind(SubscribeService::class, function ($app) {
-            return new SubscribeService(
-                $app->make(SubscribeRepository::class),
-            );
-        });
-        $this->app->bind(RecommendationService::class, function ($app) {
-            return new RecommendationService(
-                $app->make(ServiceRepository::class),
-                $app->make(HospitalRepository::class),
-                $app->make(DiseaseRepository::class),
-                $app->make(UserRepository::class),
-            );
-        });
     }
 
     /**

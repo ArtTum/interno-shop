@@ -2,8 +2,6 @@ import { createStore } from 'vuex';
 import auth from "@store/modules/auth/index";
 import user from "@store/modules/user/index";
 import userGroup from "@store/modules/userGroup/index";
-import hospital from "@store/modules/hospital/index";
-import disease from "@store/modules/disease/index";
 
 import review from "@store/modules/review/index";
 import home from "@store/modules/home/index";
@@ -70,19 +68,6 @@ import program from "@store/modules/program/index.js";
 import databaseRestore from "@store/modules/databaseRestore/index";
 import newsletterReport from "@store/modules/newsletterReport/index";
 import shippingCostsUploader from "@store/modules/shippingCostsUploader/index";
-import smsHistory from "@store/modules/smsHistory/index";
-import smsShablon from "@store/modules/smsShablon/index";
-import doctorsFinal from "@store/modules/doctorsFinal/index.js";
-import extendedPrice from "@store/modules/extendedPrice/index.js";
-import clinic from "@store/modules/clinic/index.js";
-import smsBaza from "@store/modules/smsBaza/index.js";
-import outgoing from "@store/modules/outgoing/index.js";
-import subscribe from "@store/modules/subscribe/index.js";
-import recommendation from "@store/modules/recommendation/index.js";
-import incoming from "@store/modules/incoming/index.js";
-import hospitalsBase from "@store/modules/hospitalsBase/index.js";
-import trash from "@store/modules/trash/index.js";
-import note from "@store/modules/note/index.js";
 import shopFrontend from "@store/modules/shopFrontend/index.js";
 import shopCategory from "@store/modules/shopCategory/index.js";
 import shopProduct from "@store/modules/shopProduct/index.js";
@@ -93,8 +78,6 @@ const store = createStore({
     modules: {
         auth,
         userGroup,
-        hospital,
-        disease,
 
         sideBar,
         language,
@@ -161,19 +144,6 @@ const store = createStore({
         provider,
         databaseRestore,
         shippingCostsUploader,
-        smsHistory,
-        smsShablon,
-        doctorsFinal,
-        extendedPrice,
-        clinic,
-        smsBaza,
-        outgoing,
-        subscribe,
-        recommendation,
-        incoming,
-        hospitalsBase,
-        trash,
-        note,
         shopFrontend,
         shopCategory,
         shopProduct,

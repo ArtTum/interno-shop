@@ -16,28 +16,10 @@ class PermissionsSeeder extends Seeder
         ['title' => 'Shop products', 'name' => 'shop_products'],
         ['title' => 'Shop product types', 'name' => 'shop_product_option_types'],
         ['title' => 'Shop product colors', 'name' => 'shop_product_colors'],
-        ['title' => 'Recommendations', 'name' => 'recommendations'],
-        ['title' => 'Hospitals base', 'name' => 'hospitals_bases'],
-        ['title' => 'Incomings', 'name' => 'incomings'],
-        ['title' => 'Notes', 'name' => 'notes'],
-        ['title' => 'SMS base', 'name' => 'sms_bazas'],
-        ['title' => 'Clinics', 'name' => 'clinics'],
-        ['title' => 'Extended prices', 'name' => 'extended_prices'],
-        ['title' => 'Doctors final', 'name' => 'doctors_finals'],
-        ['title' => 'SMS templates', 'name' => 'sms_shablons'],
-        ['title' => 'Sent SMS history', 'name' => 'sms_histories'],
-        ['title' => 'Diseases', 'name' => 'diseases'],
-        ['title' => 'Hospitals', 'name' => 'hospitals'],
-
         ['title' => 'Users menu', 'name' => 'users_menu_link'],
         ['title' => 'Users', 'name' => 'users'],
         ['title' => 'User groups', 'name' => 'users_groups'],
-        ['title' => 'Permissions', 'name' => 'permissions'],
-
-        ['title' => 'Outgoings', 'name' => 'outgoings'],
-        ['title' => 'Subscribes', 'name' => 'subscribes'],
-        ['title' => 'Trash', 'name' => 'trash'],
-    ];
+        ['title' => 'Permissions', 'name' => 'permissions'],    ];
 
 
     public function run(): void
