@@ -40,6 +40,13 @@ const tabsRoutes = [
     {key: 'media', title: 'Media', icon: ['far', 'image']},
 ];
 
+const attributePriceGroups = [
+    {key: 'height', title: 'Length'},
+    {key: 'unit', title: 'Measurement unit'},
+    {key: 'size', title: 'Size'},
+    {key: 'power', title: 'Power'},
+];
+
 const auth = computed(() => store.getters['auth/getUser']);
 const permission = computed(() => auth.value?.user_group?.permissions_by_name?.shop_products?.[0] || {});
 const canEdit = computed(() => auth.value?.superadmin || props.emitAction !== 'update' || permission.value.can_edit);
@@ -107,8 +114,53 @@ const removeGalleryMedia = async () => {
     form.value.gallery_text = (form.value.gallery || []).map((media) => media.path).join('\n');
 };
 
+const ensureAttributePrices = () => {
+    if (!form.value.attribute_prices) {
+        form.value.attribute_prices = {};
+    }
+
+    attributePriceGroups.forEach((group) => {
+        if (!Array.isArray(form.value.attribute_prices[group.key])) {
+            form.value.attribute_prices[group.key] = [];
+        }
+    });
+};
+
+const attributeRows = (key) => {
+    ensureAttributePrices();
+
+    return form.value.attribute_prices[key];
+};
+
+const attributeOptions = (key, currentValue = null) => {
+    const selectedIds = attributeRows(key)
+        .map((row) => Number(row.attribute_value_id))
+        .filter((value) => value && value !== Number(currentValue));
+
+    return (props.params.attributeValues?.[key] || [])
+        .filter((option) => !selectedIds.includes(Number(option.value)));
+};
+
+const addAttributePrice = (key) => {
+    const options = attributeOptions(key);
+
+    if (!options.length) {
+        return;
+    }
+
+    attributeRows(key).push({
+        attribute_value_id: options[0].value,
+        price: 0,
+    });
+};
+
+const removeAttributePrice = (key, index) => {
+    attributeRows(key).splice(index, 1);
+};
+
 const submitForm = () => {
     syncGalleryIds();
+    ensureAttributePrices();
     emits('submit');
 };
 </script>
@@ -184,17 +236,6 @@ const submitForm = () => {
                             type="text"
                             placeholder="Enter or will generate automatically"
                             :error="form.errors?.global_slug"
-                        />
-                    </div>
-                    <div>
-                        <CustomInput
-                            :disabled="!canEdit"
-                            v-model="form.price"
-                            name="price"
-                            label="Price *"
-                            type="number"
-                            placeholder="Enter price"
-                            :error="form.errors?.price"
                         />
                     </div>
                     <div>
@@ -325,11 +366,80 @@ const submitForm = () => {
                     <div class="flex items-end pb-2">
                         <Switch
                             :disabled="!canEdit"
+                            @change="(value) => form.is_temporarily_unavailable = value"
+                            :value="form.is_temporarily_unavailable"
+                            id="shop_product_temporarily_unavailable"
+                            label="Temporarily unavailable"
+                        />
+                    </div>
+                    <div class="flex items-end pb-2">
+                        <Switch
+                            :disabled="!canEdit"
                             @change="(value) => form.status = value"
                             :value="form.status"
                             id="shop_product_status"
                             label="Active"
                         />
+                    </div>
+                </div>
+
+                <div class="mt-8 grid grid-cols-2 gap-6 max-xl:grid-cols-1">
+                    <div
+                        v-for="group in attributePriceGroups"
+                        :key="group.key"
+                        class="rounded-sm border border-stroke bg-white"
+                    >
+                        <div class="flex items-center justify-between gap-4 border-b border-stroke px-4 py-3">
+                            <h4 class="font-medium text-black">{{ group.title }} prices</h4>
+                            <button
+                                type="button"
+                                class="rounded bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-opacity-80 disabled:opacity-60"
+                                :disabled="!canEdit || !attributeOptions(group.key).length"
+                                @click="addAttributePrice(group.key)"
+                            >
+                                Add {{ group.title }} price
+                            </button>
+                        </div>
+
+                        <div class="space-y-4 p-4">
+                            <div
+                                v-for="(row, index) in attributeRows(group.key)"
+                                :key="`${group.key}-${index}`"
+                                class="grid grid-cols-[1fr_160px_36px] items-start gap-4 max-sm:grid-cols-1"
+                            >
+                                <CustomSelect
+                                    v-model="row.attribute_value_id"
+                                    mode="single"
+                                    :label="group.title"
+                                    placeholder="Select"
+                                    :disabled="!canEdit"
+                                    :options="attributeOptions(group.key, row.attribute_value_id)"
+                                    :searchable="true"
+                                    :canClear="false"
+                                    class="py-2 rounded-lg border-stroke bg-transparent"
+                                />
+                                <CustomInput
+                                    :disabled="!canEdit"
+                                    v-model="row.price"
+                                    :name="`${group.key}_price_${index}`"
+                                    label="Price"
+                                    type="number"
+                                    placeholder="Enter price"
+                                />
+                                <button
+                                    v-if="canEdit"
+                                    type="button"
+                                    class="mt-8 flex h-9 w-9 items-center justify-center rounded border border-danger text-danger hover:bg-danger hover:text-white"
+                                    title="Remove"
+                                    @click="removeAttributePrice(group.key, index)"
+                                >
+                                    <font-awesome-icon :icon="['fas', 'trash-can']"/>
+                                </button>
+                            </div>
+                            <p v-if="!attributeRows(group.key).length" class="text-sm text-gray-500">
+                                No {{ group.title }} price added.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

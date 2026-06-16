@@ -31,7 +31,7 @@ return new class extends Migration
         DB::table('languages')->insert([
             [
                 'code' => 'hy',
-                'name' => 'Հայերեն',
+                'name' => 'Armenian',
                 'status' => true,
                 'base' => true,
                 'hreflang' => 'hy',

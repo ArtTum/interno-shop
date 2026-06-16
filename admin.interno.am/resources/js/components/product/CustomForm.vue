@@ -2634,7 +2634,7 @@ const removeReel = (id, removeKey = 'removeReel') => {
                                             type="button"
                                         >
                                             <font-awesome-icon :icon="['far', 'magnifying-glass']"/>
-                                            Կիրառել որոնումը և ֆիլտրերը
+                                            Apply search and filters
                                         </CustomButton>
                                     </div>
 

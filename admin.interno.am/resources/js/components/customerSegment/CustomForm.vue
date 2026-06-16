@@ -233,14 +233,14 @@ const exportImportedCustomers = async () => {
                                     :tooltip="true"
                                     type="text"
                                     :disabled="emitAction === 'update' && !auth.user_group.permissions_by_name.customers_segments[0].can_edit"
-                                    placeholder="Example: Single։ 11101 OR Range: 11101-11115 OR Multiple: 11101;11156;55547"
+                                    placeholder="Example: Single: 11101 OR Range: 11101-11115 OR Multiple: 11101;11156;55547"
                                 />
                             </div>
                             <div class="mt-auto mb-auto">
                                 <TooltipOne
                                     tooltipClass="rounded-tr rounded-br bg-primary py-5.5 px-3.5"
                                     :button-params="{showingType: 'info'}"
-                                    tooltip-text="Example: Single։ 11101 <br> Range: 11101-11115 <br> Multiple: 11101;11156;55547"
+                                    tooltip-text="Example: Single: 11101 <br> Range: 11101-11115 <br> Multiple: 11101;11156;55547"
                                 />
                             </div>
                         </div>

@@ -47,39 +47,39 @@ return new class extends Migration
             $categories = [
                 [
                     'slug' => 'stretch',
-                    'title' => ['hy' => 'Ձգվող առաստաղներ', 'en' => 'Stretch ceilings', 'ru' => 'Натяжные потолки'],
+                    'title' => ['hy' => 'Stretch ceilings', 'en' => 'Stretch ceilings', 'ru' => 'Натяжные потолки'],
                     'children' => [
-                        ['hy' => 'Պրոֆիլ', 'en' => 'Profile', 'ru' => 'Профиль'],
-                        ['hy' => 'Ցանց', 'en' => 'Mesh', 'ru' => 'Сетка'],
-                        ['hy' => 'Փայտանյութ', 'en' => 'Wood material', 'ru' => 'Древесина'],
-                        ['hy' => 'Փող', 'en' => 'Tube', 'ru' => 'Труба'],
+                        ['hy' => 'Profile', 'en' => 'Profile', 'ru' => 'Профиль'],
+                        ['hy' => 'Mesh', 'en' => 'Mesh', 'ru' => 'Сетка'],
+                        ['hy' => 'Wood material', 'en' => 'Wood material', 'ru' => 'Древесина'],
+                        ['hy' => 'Tube', 'en' => 'Tube', 'ru' => 'Труба'],
                     ],
                 ],
                 [
                     'slug' => 'mdf',
-                    'title' => ['hy' => 'ՄԴՖ շրիշակ', 'en' => 'MDF skirting', 'ru' => 'МДФ плинтус'],
+                    'title' => ['hy' => 'MDF skirting', 'en' => 'MDF skirting', 'ru' => 'МДФ плинтус'],
                     'children' => [
-                        ['hy' => 'Սպիտակ', 'en' => 'White', 'ru' => 'Белый'],
-                        ['hy' => 'Սև', 'en' => 'Black', 'ru' => 'Черный'],
-                        ['hy' => 'Փայտային', 'en' => 'Wood look', 'ru' => 'Под дерево'],
+                        ['hy' => 'White', 'en' => 'White', 'ru' => 'Белый'],
+                        ['hy' => 'Black', 'en' => 'Black', 'ru' => 'Черный'],
+                        ['hy' => 'Wood look', 'en' => 'Wood look', 'ru' => 'Под дерево'],
                     ],
                 ],
                 [
                     'slug' => 'aluminum',
-                    'title' => ['hy' => 'Ալյումինե պրոֆիլ', 'en' => 'Aluminum profile', 'ru' => 'Алюминиевый профиль'],
+                    'title' => ['hy' => 'Aluminum profile', 'en' => 'Aluminum profile', 'ru' => 'Алюминиевый профиль'],
                     'children' => [
-                        ['hy' => 'Անկյունային', 'en' => 'Corner', 'ru' => 'Угловой'],
-                        ['hy' => 'Լուսային', 'en' => 'Light line', 'ru' => 'Световой'],
-                        ['hy' => 'Մոնտաժային', 'en' => 'Mounting', 'ru' => 'Монтажный'],
+                        ['hy' => 'Corner', 'en' => 'Corner', 'ru' => 'Угловой'],
+                        ['hy' => 'Light line', 'en' => 'Light line', 'ru' => 'Световой'],
+                        ['hy' => 'Mounting', 'en' => 'Mounting', 'ru' => 'Монтажный'],
                     ],
                 ],
                 [
                     'slug' => 'lighting',
-                    'title' => ['hy' => 'Լուսավորություն', 'en' => 'Lighting', 'ru' => 'Освещение'],
+                    'title' => ['hy' => 'Lighting', 'en' => 'Lighting', 'ru' => 'Освещение'],
                     'children' => [
-                        ['hy' => 'LED ժապավեն', 'en' => 'LED strip', 'ru' => 'LED лента'],
-                        ['hy' => 'Լամպեր', 'en' => 'Lamps', 'ru' => 'Лампы'],
-                        ['hy' => 'Աքսեսուարներ', 'en' => 'Accessories', 'ru' => 'Аксессуары'],
+                        ['hy' => 'LED strip', 'en' => 'LED strip', 'ru' => 'LED лента'],
+                        ['hy' => 'Lamps', 'en' => 'Lamps', 'ru' => 'Лампы'],
+                        ['hy' => 'Accessories', 'en' => 'Accessories', 'ru' => 'Аксессуары'],
                     ],
                 ],
             ];

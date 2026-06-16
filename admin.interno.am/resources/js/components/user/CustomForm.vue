@@ -133,7 +133,7 @@ const showInterests = async (interest) => {
                 <div class="flex flex-col px-6.5 py-0">
                     <div v-if="auth.superadmin">
                         <CustomSelect
-                            label="Օգտատերերի խումբ *"
+                            label="User group *"
                             v-model="form.user_group_id"
                             mode="single"
                             placeholder=""
@@ -158,10 +158,10 @@ const showInterests = async (interest) => {
                 <CustomInput
                     v-model="form.name"
                     name="name"
-                    label="Անուն *"
+                    label="First name *"
                     type="text"
                     :disabled="emitAction === 'update' && checkPermission(!auth.user_group.permissions_by_name[`${userType}s`][0].can_edit)"
-                    placeholder="Մուտքագրեք անունը"
+                    placeholder="Enter first name"
                     @keyup="form.errors = validate(form)"
                     :error="form.errors['name']"
                 />
@@ -170,10 +170,10 @@ const showInterests = async (interest) => {
                 <CustomInput
                     v-model="form.last_name"
                     name="last_name"
-                    label="Ազգանուն *"
+                    label="Last name *"
                     type="text"
                     :disabled="emitAction === 'update' && checkPermission(!auth.user_group.permissions_by_name[`${userType}s`][0].can_edit)"
-                    placeholder="Մուտքագրեք ազգանունը"
+                    placeholder="Enter last name"
                     @keyup="form.errors = validate(form)"
                     :error="form.errors['last_name']"
                 />
@@ -182,10 +182,10 @@ const showInterests = async (interest) => {
                 <CustomInput
                     v-model="form.email"
                     name="email"
-                    label="Էլ․ փոստ *"
+                    label="Email *"
                     type="email"
                     :disabled="emitAction === 'update' && checkPermission(!auth.user_group.permissions_by_name[`${userType}s`][0].can_edit)"
-                    placeholder="Մուտքագրեք էլ․ փոստը"
+                    placeholder="Enter email"
                     @keyup="form.errors = validate(form)"
                     :error="form.errors['email']"
                 />
@@ -197,9 +197,9 @@ const showInterests = async (interest) => {
                 <CustomInput
                     v-model="form.password"
                     name="password"
-                    :label="emitAction === 'update' ? 'Գաղտնաբառ' : 'Գաղտնաբառ *'"
+                    :label="emitAction === 'update' ? 'Password' : 'Password *'"
                     type="password"
-                    placeholder="Մուտքագրեք գաղտնաբառը"
+                    placeholder="Enter password"
                     :disabled="emitAction === 'update' && checkPermission(!auth.user_group.permissions_by_name[`${userType}s`][0].can_edit)"
                     @keyup="form.errors = validate(form)"
                     :error="form.errors['password']"
@@ -210,9 +210,9 @@ const showInterests = async (interest) => {
                     :disabled="emitAction === 'update' && checkPermission(!auth.user_group.permissions_by_name[`${userType}s`][0].can_edit)"
                     v-model="form.password_confirmation"
                     name="password_confirmation"
-                    :label="emitAction === 'update' ? 'Հաստատել գաղտնաբառը' : 'Հաստատել գաղտնաբառը *'"
+                    :label="emitAction === 'update' ? 'Apply password' : 'Apply password *'"
                     type="password"
-                    placeholder="Մուտքագրեք կրկնակի գաղտնաբառը"
+                    placeholder="Enter password confirmation"
                     @keyup="form.errors = validate(form)"
                     :error="form.errors['password_confirmation']"
                 />
@@ -226,7 +226,7 @@ const showInterests = async (interest) => {
                         :disabled="emitAction === 'update' && checkPermission(!auth.user_group.permissions_by_name[`${userType}s`][0].can_edit)"
                         :value="form.blocked"
                         id="blocked"
-                        label="Արգելված"
+                        label="Blocked"
                         :colorDanger="true"
                     />
                 </div>
@@ -244,7 +244,7 @@ const showInterests = async (interest) => {
 <!--                            type="button"-->
 <!--                        >-->
 <!--                            <font-awesome-icon :icon="['far', 'trash']"/>-->
-<!--                            Ջնջել-->
+<!--                            Delete-->
 <!--                        </CustomButton>-->
 <!--                    </template>-->
 
@@ -254,7 +254,7 @@ const showInterests = async (interest) => {
                             type="submit"
                         >
                             <font-awesome-icon :icon="['far', 'floppy-disk']"/>
-                            Պահպանել
+                            Save
                         </CustomButton>
 <!--                    </template>-->
                 </div>

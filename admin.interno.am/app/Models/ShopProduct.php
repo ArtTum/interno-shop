@@ -32,6 +32,7 @@ class ShopProduct extends Model
         'option_material',
         'option_color_id',
         'is_new',
+        'is_temporarily_unavailable',
         'status',
         'sort_order',
     ];
@@ -41,6 +42,7 @@ class ShopProduct extends Model
         'gallery_media_ids' => 'array',
         'options' => 'array',
         'is_new' => 'boolean',
+        'is_temporarily_unavailable' => 'boolean',
         'status' => 'boolean',
         'sort_order' => 'integer',
         'price' => 'decimal:2',
@@ -69,5 +71,10 @@ class ShopProduct extends Model
     public function translations(): HasMany
     {
         return $this->hasMany(ShopProductTranslation::class);
+    }
+
+    public function attributePrices(): HasMany
+    {
+        return $this->hasMany(ShopProductAttributePrice::class);
     }
 }

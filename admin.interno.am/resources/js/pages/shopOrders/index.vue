@@ -32,6 +32,19 @@ const customerName = (order) => {
     return [customer.firstName, customer.lastName].filter(Boolean).join(' ') || '-';
 };
 
+const craftsmanInfo = (order) => {
+    const craftsman = order.craftsman || {};
+    const customer = order.customer || {};
+    const code = craftsman.code || customer.masterCode || '';
+    const name = craftsman.name || '';
+
+    return {
+        code,
+        name,
+        label: [code, name].filter(Boolean).join(' - ') || '-',
+    };
+};
+
 const productTitle = (item, language = 'hy') => {
     const title = item.product?.title;
 
@@ -62,7 +75,7 @@ fetchOrders();
                 <div class="flex flex-wrap items-center justify-between gap-4">
                     <div>
                         <h3 class="text-lg font-semibold text-black">Shop Orders</h3>
-                        <p class="text-sm text-gray-500">Frontend-ից ուղարկված պատվերները և հաճախորդի տվյալները։</p>
+                        <p class="text-sm text-gray-500">Orders sent from the frontend and customer details.</p>
                     </div>
                     <button :disabled="isLoading" type="button" class="rounded bg-primary px-5 py-2 font-medium text-white disabled:opacity-70" @click="fetchOrders">
                         {{ isLoading ? 'Loading...' : 'Refresh' }}
@@ -96,6 +109,7 @@ fetchOrders();
                                 <th class="min-w-[150px] py-4 px-4 font-medium text-black">Phone</th>
                                 <th class="min-w-[210px] py-4 px-4 font-medium text-black">Email</th>
                                 <th class="min-w-[260px] py-4 px-4 font-medium text-black">Address</th>
+                                <th class="min-w-[220px] py-4 px-4 font-medium text-black">Craftsman</th>
                                 <th class="min-w-[110px] py-4 px-4 font-medium text-black">Items</th>
                                 <th class="min-w-[120px] py-4 px-4 font-medium text-black">Total</th>
                                 <th class="min-w-[120px] py-4 px-4 font-medium text-black">Status</th>
@@ -113,7 +127,9 @@ fetchOrders();
                                         <td class="py-5 px-4 text-black">{{ order.customer?.email || '-' }}</td>
                                         <td class="py-5 px-4 text-black">
                                             <span class="block max-w-[320px] whitespace-normal break-words">{{ order.customer?.address || '-' }}</span>
-                                            <span v-if="order.customer?.masterCode" class="mt-1 block text-xs text-gray-500">Master code: {{ order.customer.masterCode }}</span>
+                                        </td>
+                                        <td class="py-5 px-4 text-black">
+                                            <span class="block max-w-[240px] whitespace-normal break-words">{{ craftsmanInfo(order).label }}</span>
                                         </td>
                                         <td class="py-5 px-4 text-black">{{ order.items?.length || 0 }}</td>
                                         <td class="py-5 px-4 font-medium text-black">{{ formatPrice(order.total) }}</td>
@@ -127,7 +143,7 @@ fetchOrders();
                                         </td>
                                     </tr>
                                     <tr v-if="expandedOrderId === order.id" class="border-b border-stroke bg-gray-50">
-                                        <td colspan="10" class="p-4">
+                                        <td colspan="11" class="p-4">
                                             <div class="grid grid-cols-2 gap-4 max-lg:grid-cols-1">
                                                 <div v-for="item in order.items || []" :key="`${order.id}-${item.productId}`" class="rounded border border-stroke bg-white p-4">
                                                     <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
@@ -152,7 +168,7 @@ fetchOrders();
                                 </template>
                             </template>
                             <tr v-else>
-                                <td colspan="10" class="py-10 px-4 text-center text-black">
+                                <td colspan="11" class="py-10 px-4 text-center text-black">
                                     {{ isLoading ? 'Loading orders...' : 'No orders yet.' }}
                                 </td>
                             </tr>

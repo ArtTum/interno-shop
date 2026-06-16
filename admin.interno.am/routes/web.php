@@ -13,6 +13,7 @@ Route::prefix('api/front')->group(function () {
 
     Route::options('{any}', fn () => response('', 204, $corsHeaders))->where('any', '.*');
     Route::get('shop', [ShopFrontendController::class, 'publicConfig']);
+    Route::get('craftsmen', [ShopFrontendController::class, 'craftsmen']);
     Route::post('orders', [ShopFrontendController::class, 'storeOrder']);
 });
 

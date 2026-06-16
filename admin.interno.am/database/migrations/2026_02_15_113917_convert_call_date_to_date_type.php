@@ -9,24 +9,24 @@ return new class extends Migration
 {
     public function up(): void
     {
-//        // 1️⃣ Ավելացնում ենք նոր DATE column
+//        // 1️⃣ Add a new DATE column
 //        Schema::table('services', function (Blueprint $table) {
 //            $table->date('call_date_new')->nullable()->after('call_date');
 //        });
 //
-//        // 2️⃣ Convert ենք անում տվյալները d.m.Y → Y-m-d
+//        // 2️⃣ Convert data from d.m.Y to Y-m-d
 //        DB::statement("
 //            UPDATE services
 //            SET call_date_new = STR_TO_DATE(call_date, '%d.%m.%Y')
 //            WHERE call_date IS NOT NULL
 //        ");
 //
-//        // 3️⃣ Ջնջում ենք հինը
+//        // 3️⃣ Delete the old column
 //        Schema::table('services', function (Blueprint $table) {
 //            $table->dropColumn('call_date');
 //        });
 //
-//        // 4️⃣ Rename անում ենք նոր column-ը
+//        // 4️⃣ Rename the new column
 //        Schema::table('services', function (Blueprint $table) {
 //            $table->renameColumn('call_date_new', 'call_date');
 //        });

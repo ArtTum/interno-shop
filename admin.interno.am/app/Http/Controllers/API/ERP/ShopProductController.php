@@ -7,6 +7,8 @@ use App\Models\Language;
 use App\Models\Media;
 use App\Models\ShopCategory;
 use App\Models\ShopProduct;
+use App\Models\ShopProductAttributePrice;
+use App\Models\ShopProductAttributeValue;
 use App\Models\ShopProductColor;
 use App\Models\ShopProductOptionType;
 use Illuminate\Http\JsonResponse;
@@ -23,6 +25,7 @@ class ShopProductController extends Controller
         $search = trim((string) $request->query('search', ''));
         $categoryId = (int) $request->query('category_id', -1);
         $status = (int) $request->query('status', -1);
+        $availability = (int) $request->query('availability', -1);
         $isNew = (int) $request->query('is_new', -1);
         $kind = trim((string) $request->query('kind', ''));
         $optionTypeId = (int) $request->query('option_type_id', -1);
@@ -38,6 +41,8 @@ class ShopProductController extends Controller
             'shop_products.price' => 'shop_products.price',
             'status' => 'shop_products.status',
             'shop_products.status' => 'shop_products.status',
+            'availability' => 'shop_products.is_temporarily_unavailable',
+            'shop_products.is_temporarily_unavailable' => 'shop_products.is_temporarily_unavailable',
             'slug' => 'shop_products.slug',
             'shop_products.slug' => 'shop_products.slug',
         ];
@@ -50,9 +55,11 @@ class ShopProductController extends Controller
                 'media',
                 'optionType',
                 'optionColor',
+                'attributePrices.attributeValue',
             ])
             ->when($categoryId > 0, fn ($query) => $query->where('shop_category_id', $categoryId))
             ->when($status >= 0, fn ($query) => $query->where('status', (bool) $status))
+            ->when($availability >= 0, fn ($query) => $query->where('is_temporarily_unavailable', (bool) $availability))
             ->when($isNew >= 0, fn ($query) => $query->where('is_new', (bool) $isNew))
             ->when($kind !== '', fn ($query) => $query->where('kind', $kind))
             ->when($optionTypeId > 0, fn ($query) => $query->where('option_type_id', $optionTypeId))
@@ -88,6 +95,7 @@ class ShopProductController extends Controller
             'kinds' => $this->kindOptions(),
             'optionTypes' => $this->optionTypeOptions(),
             'optionColors' => $this->optionColorOptions(),
+            'attributeValues' => $this->attributeValueOptions(),
             'base_language_id' => $languageId,
             'pagination' => prepare_pagination($page, $perPage, $total),
         ]);
@@ -104,6 +112,7 @@ class ShopProductController extends Controller
             'kinds' => $this->kindOptions(),
             'optionTypes' => $this->optionTypeOptions(),
             'optionColors' => $this->optionColorOptions(),
+            'attributeValues' => $this->attributeValueOptions(),
             'base_language_id' => $languageId,
         ]);
     }
@@ -111,7 +120,7 @@ class ShopProductController extends Controller
     public function fetchByField(Request $request): JsonResponse
     {
         $product = ShopProduct::query()
-            ->with(['translations', 'category', 'media', 'optionType', 'optionColor'])
+            ->with(['translations', 'category', 'media', 'optionType', 'optionColor', 'attributePrices.attributeValue'])
             ->findOrFail((int) $request->query('id'));
         $languageId = $this->resolveLanguageId((int) $request->query('language_id', 0));
         $translation = $product->translations->firstWhere('language_id', $languageId);
@@ -131,6 +140,7 @@ class ShopProductController extends Controller
                 'gallery' => $this->formatMediaList($product->gallery_media_ids ?: []),
                 'gallery_text' => implode(PHP_EOL, $product->gallery ?: []),
                 'options_text' => json_encode($product->options ?: new \stdClass(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                'attribute_prices' => $this->formatAttributePrices($product),
                 'option_code' => $product->option_code ?? '',
                 'option_size' => $product->option_size ?? '',
                 'option_quantity' => $product->option_quantity ?? '',
@@ -141,6 +151,7 @@ class ShopProductController extends Controller
                 'option_material' => $product->option_material ?? '',
                 'option_color_id' => $product->option_color_id,
                 'is_new' => $product->is_new,
+                'is_temporarily_unavailable' => $product->is_temporarily_unavailable,
                 'status' => $product->status,
                 'sort_order' => $product->sort_order,
                 'language_id' => $languageId,
@@ -157,6 +168,7 @@ class ShopProductController extends Controller
             'kinds' => $this->kindOptions(),
             'optionTypes' => $this->optionTypeOptions(),
             'optionColors' => $this->optionColorOptions(),
+            'attributeValues' => $this->attributeValueOptions(),
             'base_language_id' => $languageId,
         ]);
     }
@@ -169,7 +181,7 @@ class ShopProductController extends Controller
             $product = ShopProduct::query()->create([
                 'shop_category_id' => $data['shop_category_id'] ?? null,
                 'slug' => $this->uniqueGlobalSlug(($data['global_slug'] ?? '') ?: ($data['slug'] ?? '') ?: $data['title']),
-                'price' => $data['price'],
+                'price' => $this->basePrice($data),
                 'kind' => $data['kind'] ?: null,
                 'media_id' => $data['media_id'] ?? null,
                 'image' => $this->mediaPathById($data['media_id'] ?? null) ?: (($data['image'] ?? '') ?: null),
@@ -186,10 +198,12 @@ class ShopProductController extends Controller
                 'option_material' => $data['option_material'] ?? null,
                 'option_color_id' => $data['option_color_id'] ?? null,
                 'is_new' => $data['is_new'],
+                'is_temporarily_unavailable' => $data['is_temporarily_unavailable'],
                 'status' => $data['status'],
                 'sort_order' => $data['sort_order'],
             ]);
 
+            $this->syncAttributePrices($product, $data);
             $this->saveTranslation($product, $data);
 
             return $product;
@@ -211,7 +225,7 @@ class ShopProductController extends Controller
             $product->update([
                 'shop_category_id' => $data['shop_category_id'] ?? null,
                 'slug' => $this->uniqueGlobalSlug(($data['global_slug'] ?? '') ?: ($data['slug'] ?? '') ?: $data['title'], $product->id),
-                'price' => $data['price'],
+                'price' => $this->basePrice($data),
                 'kind' => $data['kind'] ?: null,
                 'media_id' => $data['media_id'] ?? null,
                 'image' => $this->mediaPathById($data['media_id'] ?? null) ?: (($data['image'] ?? '') ?: null),
@@ -228,10 +242,12 @@ class ShopProductController extends Controller
                 'option_material' => $data['option_material'] ?? null,
                 'option_color_id' => $data['option_color_id'] ?? null,
                 'is_new' => $data['is_new'],
+                'is_temporarily_unavailable' => $data['is_temporarily_unavailable'],
                 'status' => $data['status'],
                 'sort_order' => $data['sort_order'],
             ]);
 
+            $this->syncAttributePrices($product, $data);
             $this->saveTranslation($product, $data);
         });
 
@@ -258,13 +274,17 @@ class ShopProductController extends Controller
             'language_id' => ['required', 'integer', Rule::exists('languages', 'id')],
             'shop_category_id' => ['nullable', 'integer', Rule::exists('shop_categories', 'id')],
             'global_slug' => ['nullable', 'string', 'max:160'],
-            'price' => ['required', 'numeric', 'min:0'],
+            'price' => ['nullable', 'numeric', 'min:0'],
             'kind' => ['nullable', 'string', 'max:80'],
             'media_id' => ['nullable', 'integer', Rule::exists('media', 'id')],
             'image' => ['nullable', 'string', 'max:500'],
             'gallery_media_ids' => ['nullable', 'array'],
             'gallery_media_ids.*' => ['integer', Rule::exists('media', 'id')],
             'gallery_text' => ['nullable', 'string'],
+            'attribute_prices' => ['nullable', 'array'],
+            'attribute_prices.*' => ['nullable', 'array'],
+            'attribute_prices.*.*.attribute_value_id' => ['required', 'integer', Rule::exists('shop_product_attribute_values', 'id')],
+            'attribute_prices.*.*.price' => ['required', 'numeric', 'min:0'],
             'option_code' => ['nullable', 'string', 'max:120'],
             'option_size' => ['nullable', 'string', 'max:120'],
             'option_quantity' => ['nullable', 'string', 'max:120'],
@@ -275,6 +295,7 @@ class ShopProductController extends Controller
             'option_material' => ['nullable', 'string', 'max:120'],
             'option_color_id' => ['nullable', 'integer', Rule::exists('shop_product_colors', 'id')],
             'is_new' => ['required', 'boolean'],
+            'is_temporarily_unavailable' => ['required', 'boolean'],
             'status' => ['required', 'boolean'],
             'sort_order' => ['required', 'integer', 'min:0'],
             'title' => ['required', 'string', 'max:180'],
@@ -317,6 +338,7 @@ class ShopProductController extends Controller
             'slug' => $translation?->slug ?? '',
             'meta_title' => $translation?->meta_title ?? '',
             'price' => $product->price,
+            'attribute_prices' => $this->formatAttributePrices($product),
             'kind' => $product->kind ?? '',
             'option_type_name' => $product->optionType?->name,
             'option_color_name' => $product->optionColor?->name,
@@ -324,6 +346,7 @@ class ShopProductController extends Controller
             'image' => $product->media?->original_path ?: ($product->image ?? ''),
             'media_id' => $product->media_id,
             'is_new' => $product->is_new,
+            'is_temporarily_unavailable' => $product->is_temporarily_unavailable,
             'status' => $product->status,
             'sort_order' => $product->sort_order,
         ];
@@ -425,6 +448,110 @@ class ShopProductController extends Controller
                 ]))
             ->values()
             ->all();
+    }
+
+    private function attributeValueOptions(): array
+    {
+        return ShopProductAttributeValue::query()
+            ->where('status', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['id', 'type', 'name', 'value'])
+            ->groupBy('type')
+            ->map(fn ($items) => $items
+                ->map(fn (ShopProductAttributeValue $item) => [
+                    'value' => $item->id,
+                    'label' => $item->value ? "{$item->name} ({$item->value})" : $item->name,
+                    'name' => $item->name,
+                    'raw_value' => $item->value,
+                ])
+                ->values()
+                ->all())
+            ->all();
+    }
+
+    private function formatAttributePrices(ShopProduct $product): array
+    {
+        $groups = collect(ShopProductAttributeValue::TYPES)->mapWithKeys(fn (string $type) => [$type => []])->all();
+
+        foreach ($product->attributePrices as $price) {
+            $type = $price->attributeValue?->type;
+
+            if (!$type) {
+                continue;
+            }
+
+            $groups[$type][] = [
+                'attribute_value_id' => $price->shop_product_attribute_value_id,
+                'price' => $this->formatPrice($price->price),
+            ];
+        }
+
+        return $groups;
+    }
+
+    private function syncAttributePrices(ShopProduct $product, array $data): void
+    {
+        $payload = $data['attribute_prices'] ?? [];
+        $rows = [];
+        $seenValueIds = [];
+
+        foreach (ShopProductAttributeValue::TYPES as $type) {
+            foreach (($payload[$type] ?? []) as $item) {
+                $valueId = (int) ($item['attribute_value_id'] ?? 0);
+
+                if ($valueId <= 0 || isset($seenValueIds[$valueId])) {
+                    continue;
+                }
+
+                $attributeValue = ShopProductAttributeValue::query()
+                    ->where('type', $type)
+                    ->where('status', true)
+                    ->find($valueId);
+
+                if (!$attributeValue) {
+                    continue;
+                }
+
+                $seenValueIds[$valueId] = true;
+                $rows[] = [
+                    'shop_product_id' => $product->id,
+                    'shop_product_attribute_value_id' => $valueId,
+                    'price' => $item['price'] ?? 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+
+        ShopProductAttributePrice::query()
+            ->where('shop_product_id', $product->id)
+            ->delete();
+
+        if (!empty($rows)) {
+            ShopProductAttributePrice::query()->insert($rows);
+        }
+    }
+
+    private function basePrice(array $data): float
+    {
+        $prices = collect($data['attribute_prices'] ?? [])
+            ->flatMap(fn ($items) => is_array($items) ? $items : [])
+            ->pluck('price')
+            ->filter(fn ($price) => is_numeric($price))
+            ->map(fn ($price) => (float) $price)
+            ->filter(fn (float $price) => $price >= 0);
+
+        if ($prices->isNotEmpty()) {
+            return (float) $prices->min();
+        }
+
+        return array_key_exists('attribute_prices', $data) ? 0 : (float) ($data['price'] ?? 0);
+    }
+
+    private function formatPrice($price): string
+    {
+        return rtrim(rtrim(number_format((float) $price, 2, '.', ''), '0'), '.');
     }
 
     private function parseGallery(?string $value): array

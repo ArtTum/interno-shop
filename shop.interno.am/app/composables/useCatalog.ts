@@ -20,10 +20,18 @@ interface Product {
   image: string
   gallery?: string[]
   options?: Record<string, string>
+  priceOptions?: Record<string, Array<{ id: number, name: string, value?: string | null, label: string, price: string }>>
   isNew?: boolean
+  isTemporarilyUnavailable?: boolean
   status?: boolean
   categoryKey?: string | null
   categoryChildIndex?: number | null
+}
+
+interface Craftsman {
+  id: number | null
+  code: string
+  name: string
 }
 
 interface CartItem {
@@ -195,6 +203,9 @@ const translations = {
     emptyCartTitle: 'Զամբյուղը դատարկ է',
     firstName: 'Անուն',
     firstNamePlaceholder: 'Անուն',
+    craftsmanCode: 'Արհեստավորի կոդ',
+    craftsmanName: 'Արհեստավորի անուն-ազգանուն',
+    craftsmanSearchPlaceholder: 'Գրեք կոդը կամ անունը',
     home: 'Գլխավոր',
     lastName: 'Ազգանուն',
     linePrice: 'Գին',
@@ -232,7 +243,8 @@ const translations = {
     searchResultsTitle: 'Որոնման արդյունքներ',
     similarProducts: 'Նման ապրանքներ',
     sliderControls: 'Սլայդերի կառավարում',
-    social: 'Instagram · Facebook · Privacy Policy'
+    social: 'Instagram · Facebook · Privacy Policy',
+    temporarilyUnavailable: 'Ժամանակավորապես բացակայում է'
   },
   en: {
     add: 'Add',
@@ -270,6 +282,9 @@ const translations = {
     emptyCartTitle: 'Cart is empty',
     firstName: 'First name',
     firstNamePlaceholder: 'First name',
+    craftsmanCode: 'Craftsman code',
+    craftsmanName: 'Craftsman full name',
+    craftsmanSearchPlaceholder: 'Type code or name',
     home: 'Home',
     lastName: 'Last name',
     linePrice: 'Price',
@@ -307,7 +322,8 @@ const translations = {
     searchResultsTitle: 'Search results',
     similarProducts: 'Similar products',
     sliderControls: 'Slider controls',
-    social: 'Instagram · Facebook · Privacy Policy'
+    social: 'Instagram · Facebook · Privacy Policy',
+    temporarilyUnavailable: 'Temporarily unavailable'
   },
   ru: {
     add: 'Добавить',
@@ -345,6 +361,9 @@ const translations = {
     emptyCartTitle: 'Корзина пуста',
     firstName: 'Имя',
     firstNamePlaceholder: 'Имя',
+    craftsmanCode: 'Код мастера',
+    craftsmanName: 'Имя и фамилия мастера',
+    craftsmanSearchPlaceholder: 'Введите код или имя',
     home: 'Главная',
     lastName: 'Фамилия',
     linePrice: 'Цена',
@@ -382,7 +401,8 @@ const translations = {
     searchResultsTitle: 'Результаты поиска',
     similarProducts: 'Похожие товары',
     sliderControls: 'Управление слайдером',
-    social: 'Instagram · Facebook · Privacy Policy'
+    social: 'Instagram · Facebook · Privacy Policy',
+    temporarilyUnavailable: 'Временно отсутствует'
   }
 } satisfies Record<LanguageCode, Record<string, string>>
 const products: Product[] = [
@@ -548,7 +568,14 @@ export function useCatalog() {
   }))
   const availableLanguages = computed(() => catalogConfig.value.languages)
   const menuGroupList = computed(() => catalogConfig.value.menuGroups)
-  const primaryProducts = computed(() => catalogConfig.value.products)
+  const primaryProducts = computed(() => catalogConfig.value.products
+    .map((product, index) => ({ product, index }))
+    .sort((first, second) => {
+      const availabilityDiff = Number(Boolean(first.product.isTemporarilyUnavailable)) - Number(Boolean(second.product.isTemporarilyUnavailable))
+
+      return availabilityDiff || first.index - second.index
+    })
+    .map((item) => item.product))
   const secondaryProductList = computed(() => primaryProducts.value.slice(0, 5).map((product) => ({
     ...product,
     id: product.id + 20
@@ -619,7 +646,9 @@ export function useCatalog() {
   const cartTotal = computed(() => {
     return cartProducts.value.reduce((total, item) => total + Number(item.product.price) * item.quantity, 0)
   })
-  const cartRecommendations = computed(() => allProducts.value.filter((product) => !cartItems.value.some((item) => item.productId === product.id)).slice(0, 4))
+  const cartRecommendations = computed(() => allProducts.value
+    .filter((product) => !product.isTemporarilyUnavailable && !cartItems.value.some((item) => item.productId === product.id))
+    .slice(0, 4))
   const currentCategoryRoute = computed(() => {
     const match = withoutLanguagePrefix(route.path).match(/^\/categories\/([^/]+)(?:\/(\d+))?$/)
 
@@ -741,6 +770,10 @@ export function useCatalog() {
   }
 
   function addToCart(product: Product) {
+    if (product.isTemporarilyUnavailable) {
+      return
+    }
+
     const existingItem = cartItems.value.find((item) => item.productId === product.id)
 
     if (existingItem) {
@@ -789,9 +822,24 @@ export function useCatalog() {
     selectedProductImage.value = image
   }
 
-  async function submitOrder(customer: Record<string, string>) {
+  async function searchCraftsmen(search: string): Promise<Craftsman[]> {
+    const query = search.trim()
+
+    if (!query) {
+      return []
+    }
+
+    const response = await $fetch<{ data?: Craftsman[] }>(frontApiUrl('/api/front/craftsmen'), {
+      query: { search: query }
+    })
+
+    return response?.data || []
+  }
+
+  async function submitOrder(customer: Record<string, string>, craftsman: Craftsman | null = null) {
     const payload = {
       customer,
+      craftsman,
       items: cartProducts.value.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
@@ -946,6 +994,7 @@ export function useCatalog() {
     socialLinks,
     submitSearch,
     submitOrder,
+    searchCraftsmen,
     toggleMenuGroup,
     updateCartQuantity,
     addToCart,

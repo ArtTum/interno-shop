@@ -11,12 +11,18 @@ const {
   currentLanguageCode,
   localizedPath,
   removeFromCart,
+  searchCraftsmen,
   submitOrder,
   updateCartQuantity
 } = useCatalog()
 
 const isCheckoutOpen = ref(false)
 const router = useRouter()
+type Craftsman = { id: number | null, code: string, name: string }
+const craftsmenSuggestions = ref<Craftsman[]>([])
+const selectedCraftsman = ref<Craftsman | null>(null)
+const isCraftsmanLoading = ref(false)
+let craftsmanSearchTimer: ReturnType<typeof setTimeout> | null = null
 
 const checkoutForm = reactive({
   firstName: '',
@@ -24,6 +30,7 @@ const checkoutForm = reactive({
   phone: '',
   email: '',
   masterCode: '',
+  craftsmanName: '',
   address: ''
 })
 
@@ -33,6 +40,7 @@ const checkoutErrors = reactive({
   phone: '',
   email: '',
   masterCode: '',
+  craftsmanName: '',
   address: ''
 })
 
@@ -65,12 +73,68 @@ function clearCheckoutError(field: keyof typeof checkoutForm) {
   checkoutErrors[field] = ''
 }
 
+function selectCraftsman(craftsman: Craftsman) {
+  selectedCraftsman.value = craftsman
+  checkoutForm.masterCode = craftsman.code
+  checkoutForm.craftsmanName = craftsman.name
+  craftsmenSuggestions.value = []
+}
+
+function searchCraftsman(field: 'code' | 'name') {
+  selectedCraftsman.value = null
+
+  if (craftsmanSearchTimer) {
+    clearTimeout(craftsmanSearchTimer)
+  }
+
+  const query = field === 'code' ? checkoutForm.masterCode : checkoutForm.craftsmanName
+
+  if (!query.trim()) {
+    craftsmenSuggestions.value = []
+    return
+  }
+
+  craftsmanSearchTimer = setTimeout(async () => {
+    isCraftsmanLoading.value = true
+
+    try {
+      const results = await searchCraftsmen(query)
+      craftsmenSuggestions.value = results
+
+      const normalizedQuery = query.trim().toLowerCase()
+      const exactMatch = results.find((craftsman) => {
+        return field === 'code'
+          ? craftsman.code.toLowerCase() === normalizedQuery
+          : craftsman.name.toLowerCase() === normalizedQuery
+      })
+
+      if (exactMatch) {
+        selectCraftsman(exactMatch)
+      }
+    } finally {
+      isCraftsmanLoading.value = false
+    }
+  }, 250)
+}
+
 async function submitCheckout() {
   if (!validateCheckout()) {
     return
   }
 
-  await submitOrder({ ...checkoutForm })
+  const customer = {
+    firstName: checkoutForm.firstName,
+    lastName: checkoutForm.lastName,
+    phone: checkoutForm.phone,
+    email: checkoutForm.email,
+    masterCode: checkoutForm.masterCode,
+    address: checkoutForm.address
+  }
+  const craftsman = selectedCraftsman.value || (checkoutForm.masterCode.trim() || checkoutForm.craftsmanName.trim()
+    ? { id: null, code: checkoutForm.masterCode.trim(), name: checkoutForm.craftsmanName.trim() }
+    : null)
+
+  await submitOrder(customer, craftsman)
   isCheckoutOpen.value = false
   router.push(localizedPath('/checkout-success'))
 }
@@ -143,7 +207,9 @@ async function submitCheckout() {
           <div>
             <h3>{{ product.title[currentLanguageCode] }}</h3>
             <p>{{ product.price }} <span aria-hidden="true">&#1423;</span></p>
-            <button type="button" @click="addToCart(product)">{{ copy.addToCartLong }}</button>
+            <button type="button" :disabled="product.isTemporarilyUnavailable" @click="addToCart(product)">
+              {{ product.isTemporarilyUnavailable ? copy.temporarilyUnavailable : copy.addToCartLong }}
+            </button>
           </div>
         </article>
       </div>
@@ -183,8 +249,20 @@ async function submitCheckout() {
             </label>
 
             <label>
-              <span>{{ copy.masterCode }}</span>
-              <input v-model="checkoutForm.masterCode" type="text" :placeholder="copy.masterCode" />
+              <span>{{ copy.craftsmanCode }}</span>
+              <input v-model="checkoutForm.masterCode" type="text" :placeholder="copy.craftsmanSearchPlaceholder" autocomplete="off" @input="searchCraftsman('code')" />
+            </label>
+
+            <label class="checkout-autocomplete">
+              <span>{{ copy.craftsmanName }}</span>
+              <input v-model="checkoutForm.craftsmanName" type="text" :placeholder="copy.craftsmanSearchPlaceholder" autocomplete="off" @input="searchCraftsman('name')" />
+              <small v-if="isCraftsmanLoading" class="checkout-loading">...</small>
+              <div v-if="craftsmenSuggestions.length" class="craftsman-suggestions">
+                <button v-for="craftsman in craftsmenSuggestions" :key="`${craftsman.id}-${craftsman.code}`" type="button" @click="selectCraftsman(craftsman)">
+                  <strong>{{ craftsman.code }}</strong>
+                  <span>{{ craftsman.name }}</span>
+                </button>
+              </div>
             </label>
 
             <p class="checkout-note">

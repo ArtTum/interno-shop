@@ -79,7 +79,7 @@ onUnmounted(() => {
                         type="button"
                     >
                         <font-awesome-icon :icon="['far', 'magnifying-glass']"/>
-                        Կիրառել որոնումը և ֆիլտրերը
+                        Apply search and filters
                     </CustomButton>
                     <template v-if="saveExists">
                         <CustomButton
@@ -97,7 +97,7 @@ onUnmounted(() => {
                             <CustomButton
                                 class="flex items-center gap-2 rounded bg-meta-3 py-2 px-4.5 font-medium text-white hover:bg-opacity-80">
                                 <font-awesome-icon :icon="'plus'"/>
-                                Ավելացնել
+                                Add
                             </CustomButton>
                         </RouterLink>
                     </template>
@@ -119,7 +119,7 @@ onUnmounted(() => {
                                 class="flex items-center gap-2 rounded bg-primary py-2 px-4.5 font-medium text-white hover:bg-opacity-80 "
                             >
                                 <font-awesome-icon :icon="['far', 'floppy-disk']"/>
-                                Հաստատել
+                                Apply
                             </CustomButton>
                         </template>
                         <template v-if="auth.user_group.permissions_by_name.tax[0].can_add">

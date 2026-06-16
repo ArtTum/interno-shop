@@ -15,6 +15,8 @@ use App\Http\Controllers\API\ERP\PermissionController;
 use App\Http\Controllers\API\ERP\ProgramController;
 use App\Http\Controllers\API\ERP\ShopFrontendController;
 use App\Http\Controllers\API\ERP\ShopCategoryController;
+use App\Http\Controllers\API\ERP\ShopCraftsmanController;
+use App\Http\Controllers\API\ERP\ShopProductAttributeValueController;
 use App\Http\Controllers\API\ERP\ShopProductColorController;
 use App\Http\Controllers\API\ERP\ShopProductController;
 use App\Http\Controllers\API\ERP\ShopProductOptionTypeController;
@@ -99,6 +101,22 @@ Route::group(['prefix' => 'erp'], function () {
                 Route::post('insert', [ShopProductColorController::class, 'insert'])->middleware('check.permission:shop_product_colors,can_add');
                 Route::put('update', [ShopProductColorController::class, 'update'])->middleware('check.permission:shop_product_colors,can_edit');
                 Route::delete('delete/{id}', [ShopProductColorController::class, 'delete'])->middleware('check.permission:shop_product_colors,can_delete');
+            });
+
+            Route::group(['prefix' => 'shop-craftsmen'], function () {
+                Route::get('fetch', [ShopCraftsmanController::class, 'fetch'])->middleware('check.permission:shop_craftsmen,can_view');
+                Route::get('fetch-by-field', [ShopCraftsmanController::class, 'fetchByField'])->middleware('check.permission:shop_craftsmen,can_view');
+                Route::post('insert', [ShopCraftsmanController::class, 'insert'])->middleware('check.permission:shop_craftsmen,can_add');
+                Route::put('update', [ShopCraftsmanController::class, 'update'])->middleware('check.permission:shop_craftsmen,can_edit');
+                Route::delete('delete/{id}', [ShopCraftsmanController::class, 'delete'])->middleware('check.permission:shop_craftsmen,can_delete');
+            });
+
+            Route::group(['prefix' => 'shop-product-attribute-values'], function () {
+                Route::get('fetch', [ShopProductAttributeValueController::class, 'fetch'])->middleware('check.permission:shop_product_attribute_values,can_view');
+                Route::get('fetch-by-field', [ShopProductAttributeValueController::class, 'fetchByField'])->middleware('check.permission:shop_product_attribute_values,can_view');
+                Route::post('insert', [ShopProductAttributeValueController::class, 'insert'])->middleware('check.permission:shop_product_attribute_values,can_add');
+                Route::put('update', [ShopProductAttributeValueController::class, 'update'])->middleware('check.permission:shop_product_attribute_values,can_edit');
+                Route::delete('delete/{id}', [ShopProductAttributeValueController::class, 'delete'])->middleware('check.permission:shop_product_attribute_values,can_delete');
             });
 
             Route::group(['prefix' => 'media'], function () {

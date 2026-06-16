@@ -196,6 +196,72 @@ const routes = [
         ],
     },
     {
+        path: '/shop-craftsmen',
+        meta: { requiresAuth: true },
+        children: [
+            {
+                path: '',
+                component: () => import('@pages/shopCraftsmen/index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_craftsmen',
+                    permission_type: 'can_view',
+                },
+            },
+            {
+                path: 'create',
+                component: () => import('@pages/shopCraftsmen/create.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_craftsmen',
+                    permission_type: 'can_add',
+                },
+            },
+            {
+                path: 'update/:id',
+                component: () => import('@pages/shopCraftsmen/update.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_craftsmen',
+                    permission_type: 'can_view',
+                },
+            },
+        ],
+    },
+    {
+        path: '/shop-product-attribute-values/:type',
+        meta: { requiresAuth: true },
+        children: [
+            {
+                path: '',
+                component: () => import('@pages/shopProductAttributeValues/index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_product_attribute_values',
+                    permission_type: 'can_view',
+                },
+            },
+            {
+                path: 'create',
+                component: () => import('@pages/shopProductAttributeValues/create.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_product_attribute_values',
+                    permission_type: 'can_add',
+                },
+            },
+            {
+                path: 'update/:id',
+                component: () => import('@pages/shopProductAttributeValues/update.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_product_attribute_values',
+                    permission_type: 'can_view',
+                },
+            },
+        ],
+    },
+    {
         path: '/settings',
         redirect: '/settings/languages',
         meta: {

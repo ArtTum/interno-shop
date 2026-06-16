@@ -22,6 +22,7 @@ const params = ref({
     language_id: Number(route.query.language_id) || 0,
     category_id: route.query.category_id === undefined ? -1 : Number(route.query.category_id),
     status: route.query.status === undefined ? -1 : Number(route.query.status),
+    availability: route.query.availability === undefined ? -1 : Number(route.query.availability),
     is_new: route.query.is_new === undefined ? -1 : Number(route.query.is_new),
     kind: route.query.kind || '',
     option_type_id: route.query.option_type_id === undefined ? -1 : Number(route.query.option_type_id),
@@ -40,6 +41,12 @@ const newOptions = [
     {value: -1, label: 'All'},
     {value: 1, label: 'Is new'},
     {value: 0, label: 'Is not new'},
+];
+
+const availabilityOptions = [
+    {value: -1, label: 'All'},
+    {value: 0, label: 'Available'},
+    {value: 1, label: 'Temporarily unavailable'},
 ];
 
 const pageData = computed(() => store.getters['shopProduct/getPageData']);
@@ -154,6 +161,16 @@ fetchPageData();
                 </div>
                 <div>
                     <CustomSelect
+                        v-model="params.availability"
+                        mode="single"
+                        label="Availability"
+                        :options="availabilityOptions"
+                        :searchable="false"
+                        :canClear="false"
+                    />
+                </div>
+                <div>
+                    <CustomSelect
                         v-model="params.is_new"
                         mode="single"
                         label="New"
@@ -185,8 +202,10 @@ fetchPageData();
                 {title: 'Category'},
                 {title: 'Type'},
                 {title: 'Color'},
-                {title: 'Price', key: 'shop_products.price'},
+                {title: 'Min price', key: 'shop_products.price'},
+                {title: 'Sort', key: 'sort_order'},
                 {title: 'New'},
+                {title: 'Availability', key: 'availability'},
                 {title: 'Status', key: 'status'},
                 {title: 'Action'},
             ]"
@@ -240,6 +259,9 @@ fetchPageData();
                     <td class="py-5 px-4 pl-9 xl:pl-11">
                         <span class="font-medium text-black">{{ item.price }}</span>
                     </td>
+                    <td class="py-5 px-4 pl-9 xl:pl-11">
+                        <span class="font-medium text-black">{{ item.sort_order }}</span>
+                    </td>
                     <td class="py-5 px-4">
                         <p
                             class="inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium"
@@ -249,6 +271,17 @@ fetchPageData();
                             }"
                         >
                             {{ item.is_new ? 'New' : 'No' }}
+                        </p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p
+                            class="inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium"
+                            :class="{
+                                'bg-success text-success': !item.is_temporarily_unavailable,
+                                'bg-warning text-warning': item.is_temporarily_unavailable
+                            }"
+                        >
+                            {{ item.is_temporarily_unavailable ? 'Temporarily unavailable' : 'Available' }}
                         </p>
                     </td>
                     <td class="py-5 px-4">

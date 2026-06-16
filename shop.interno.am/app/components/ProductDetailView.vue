@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 const {
   addToCart,
@@ -19,6 +19,7 @@ const {
 
 const touchStartX = ref(0)
 const detailQuantity = ref(1)
+const isCurrentProductUnavailable = computed(() => Boolean(currentProduct.value?.isTemporarilyUnavailable))
 
 function showProductImage(offset: number) {
   if (!detailThumbnails.value.length) {
@@ -52,7 +53,7 @@ function updateDetailQuantity(change: number) {
 }
 
 function addCurrentProductToCart() {
-  if (!currentProduct.value) {
+  if (!currentProduct.value || isCurrentProductUnavailable.value) {
     return
   }
 
@@ -94,6 +95,7 @@ function addCurrentProductToCart() {
 
       <aside class="product-detail-info">
         <h1 id="product-title">{{ currentProduct.title[currentLanguageCode] }}</h1>
+        <p v-if="isCurrentProductUnavailable" class="detail-unavailable">{{ copy.temporarilyUnavailable }}</p>
 
         <form class="product-options" @submit.prevent>
           <label class="option-field option-wide">
@@ -153,8 +155,8 @@ function addCurrentProductToCart() {
               <span>{{ detailQuantity }}</span>
               <button type="button" @click="updateDetailQuantity(1)">+</button>
             </div>
-            <button type="button" :class="{ 'is-added': recentlyAddedProductId === currentProduct.id }" @click="addCurrentProductToCart">
-              {{ recentlyAddedProductId === currentProduct.id ? copy.added : copy.add }}
+            <button type="button" :disabled="isCurrentProductUnavailable" :class="{ 'is-added': recentlyAddedProductId === currentProduct.id }" @click="addCurrentProductToCart">
+              {{ isCurrentProductUnavailable ? copy.temporarilyUnavailable : (recentlyAddedProductId === currentProduct.id ? copy.added : copy.add) }}
             </button>
           </div>
         </div>

@@ -50,6 +50,36 @@ export const routes = [
                 route: '/shop-product-colors',
             },
             {
+                icon: ['far', 'id-card'],
+                label: 'Craftsmen',
+                name: 'shop_craftsmen',
+                route: '/shop-craftsmen',
+            },
+            {
+                icon: ['far', 'ruler-vertical'],
+                label: 'Length',
+                name: 'shop_product_attribute_values',
+                route: '/shop-product-attribute-values/height',
+            },
+            {
+                icon: ['far', 'ruler-combined'],
+                label: 'Measurement unit',
+                name: 'shop_product_attribute_values',
+                route: '/shop-product-attribute-values/unit',
+            },
+            {
+                icon: ['far', 'expand'],
+                label: 'Size',
+                name: 'shop_product_attribute_values',
+                route: '/shop-product-attribute-values/size',
+            },
+            {
+                icon: ['far', 'bolt'],
+                label: 'Power',
+                name: 'shop_product_attribute_values',
+                route: '/shop-product-attribute-values/power',
+            },
+            {
                 icon: ['far', 'screwdriver-wrench'],
                 label: 'Settings',
                 name: 'settings_menu_link',
@@ -60,11 +90,11 @@ export const routes = [
             },
             {
                 icon: ['far', 'user-tie'],
-                label: 'Օգտատերեր',
+                label: 'Users',
                 name: 'users_menu_link',
                 route: '/users/list',
                 children: [
-                    {label: '- Օգտատերեր', route: '/users/list', name: 'users'},
+                    {label: '- Users', route: '/users/list', name: 'users'},
                     {label: '- Groups', route: '/users/user-groups', name: 'users_groups'},
                     {label: '- Permissions', route: '/users/permissions', name: 'permissions'},
                 ]

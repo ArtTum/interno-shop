@@ -7,6 +7,7 @@ use App\Models\Language;
 use App\Models\ShopCategory;
 use App\Models\ShopPrivacyPolicy;
 use App\Models\ShopPrivacyPolicyChecklistItem;
+use App\Models\ShopCraftsman;
 use App\Models\ShopProduct;
 use App\Models\ShopSeoPage;
 use App\Models\ShopPrivacyPolicySection;
@@ -89,6 +90,10 @@ class ShopFrontendController extends Controller
             'customer.email' => ['required', 'email', 'max:160'],
             'customer.address' => ['required', 'string', 'max:500'],
             'customer.masterCode' => ['nullable', 'string', 'max:120'],
+            'craftsman' => ['nullable', 'array'],
+            'craftsman.id' => ['nullable', 'integer'],
+            'craftsman.code' => ['nullable', 'string', 'max:80'],
+            'craftsman.name' => ['nullable', 'string', 'max:240'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.productId' => ['required'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
@@ -108,6 +113,7 @@ class ShopFrontendController extends Controller
             'status' => 'new',
             'created_at' => now()->toDateTimeString(),
             'customer' => $payload['customer'],
+            'craftsman' => $this->resolveOrderCraftsman($payload['craftsman'] ?? null),
             'items' => $payload['items'],
             'total' => $payload['total'],
             'language' => $payload['language'] ?? 'hy',
@@ -129,6 +135,92 @@ class ShopFrontendController extends Controller
             'success' => true,
             'data' => $this->readOrders(),
         ]));
+    }
+
+    public function craftsmen(Request $request): JsonResponse
+    {
+        if (!Schema::hasTable('shop_craftsmen')) {
+            return $this->withCors(response()->json([
+                'success' => true,
+                'data' => [],
+            ]));
+        }
+
+        $search = trim((string) $request->query('search', ''));
+
+        $craftsmen = ShopCraftsman::query()
+            ->where('status', true)
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('code', 'like', "%{$search}%")
+                        ->orWhere('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('sort_order')
+            ->orderBy('first_name')
+            ->limit(10)
+            ->get()
+            ->map(fn (ShopCraftsman $craftsman) => $this->formatPublicCraftsman($craftsman))
+            ->values()
+            ->all();
+
+        return $this->withCors(response()->json([
+            'success' => true,
+            'data' => $craftsmen,
+        ]));
+    }
+
+    private function resolveOrderCraftsman($payload): ?array
+    {
+        if (!is_array($payload)) {
+            return null;
+        }
+
+        $id = (int) ($payload['id'] ?? 0);
+        $code = trim((string) ($payload['code'] ?? ''));
+        $name = trim((string) ($payload['name'] ?? ''));
+
+        if ($id <= 0 && $code === '' && $name === '') {
+            return null;
+        }
+
+        $craftsman = null;
+
+        if (Schema::hasTable('shop_craftsmen')) {
+            $craftsman = ShopCraftsman::query()
+                ->where('status', true)
+                ->when($id > 0, fn ($query) => $query->where('id', $id))
+                ->when($id <= 0 && $code !== '', fn ($query) => $query->where('code', $code))
+                ->when($id <= 0 && $code === '' && $name !== '', function ($query) use ($name) {
+                    $query->where(function ($query) use ($name) {
+                        $query->where('first_name', 'like', "%{$name}%")
+                            ->orWhere('last_name', 'like', "%{$name}%");
+                    });
+                })
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->first();
+        }
+
+        if ($craftsman) {
+            return $this->formatPublicCraftsman($craftsman);
+        }
+
+        return [
+            'id' => null,
+            'code' => $code,
+            'name' => $name,
+        ];
+    }
+
+    private function formatPublicCraftsman(ShopCraftsman $craftsman): array
+    {
+        return [
+            'id' => $craftsman->id,
+            'code' => $craftsman->code,
+            'name' => $craftsman->full_name,
+        ];
     }
 
     private function withCors(JsonResponse $response): JsonResponse
@@ -498,6 +590,9 @@ class ShopFrontendController extends Controller
             return [];
         }
 
+        $hasAvailabilityColumn = Schema::hasColumn('shop_products', 'is_temporarily_unavailable');
+        $hasAttributePriceTables = Schema::hasTable('shop_product_attribute_prices')
+            && Schema::hasTable('shop_product_attribute_values');
         $languageCodes = collect($languages)->pluck('code')->filter()->values();
 
         if ($languageCodes->isEmpty()) {
@@ -510,7 +605,9 @@ class ShopFrontendController extends Controller
                 'translations.language:id,code',
                 'category.parent',
                 'media',
+                ...($hasAttributePriceTables ? ['attributePrices.attributeValue'] : []),
             ])
+            ->when($hasAvailabilityColumn, fn ($query) => $query->orderBy('is_temporarily_unavailable'))
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
@@ -519,21 +616,24 @@ class ShopFrontendController extends Controller
             return [];
         }
 
-        return $products->map(function (ShopProduct $product) use ($languageCodes) {
+        return $products->map(function (ShopProduct $product) use ($languageCodes, $hasAvailabilityColumn, $hasAttributePriceTables) {
             $category = $product->category;
             $parentCategory = $category?->parent ?: $category;
+            $priceOptions = $hasAttributePriceTables ? $this->formatProductPriceOptions($product) : [];
 
             return [
                 'id' => $product->id,
                 'slug' => $product->slug,
                 'title' => $this->mapProductTranslationsByLanguage($product, $languageCodes),
                 'meta' => $this->mapProductMetaByLanguage($product, $languageCodes),
-                'price' => $this->formatPrice($product->price),
+                'price' => $this->formatPrice($this->productDisplayPrice($product, $priceOptions)),
                 'kind' => $product->kind ?? '',
                 'image' => $product->media?->original_path ?: ($product->image ?? ''),
                 'gallery' => $product->gallery ?: array_values(array_filter([$product->image])),
                 'options' => $product->options ?: [],
+                'priceOptions' => $priceOptions,
                 'isNew' => $product->is_new,
+                'isTemporarilyUnavailable' => $hasAvailabilityColumn ? $product->is_temporarily_unavailable : false,
                 'status' => $product->status,
                 'categoryKey' => $parentCategory?->slug,
                 'categoryChildIndex' => $category && $category->parent_id ? $category->sort_order : null,
@@ -568,20 +668,26 @@ class ShopFrontendController extends Controller
                 $baseTitle = collect($titles)->first(fn ($title) => trim((string)$title) !== '') ?: 'product-' . $id;
                 $categoryId = $this->resolveProductCategoryId($payload);
 
+                $productPayload = [
+                    'shop_category_id' => $categoryId,
+                    'slug' => $this->normalizeSlug($payload['slug'] ?? $baseTitle, 'product-' . $id),
+                    'price' => is_numeric($payload['price'] ?? null) ? $payload['price'] : 0,
+                    'kind' => $payload['kind'] ?? null,
+                    'image' => $payload['image'] ?? null,
+                    'gallery' => $payload['gallery'] ?? array_values(array_filter([$payload['image'] ?? null])),
+                    'options' => $payload['options'] ?? [],
+                    'is_new' => (bool)($payload['isNew'] ?? false),
+                    'status' => array_key_exists('status', $payload) ? (bool)$payload['status'] : true,
+                    'sort_order' => $productIndex,
+                ];
+
+                if (Schema::hasColumn('shop_products', 'is_temporarily_unavailable')) {
+                    $productPayload['is_temporarily_unavailable'] = (bool)($payload['isTemporarilyUnavailable'] ?? false);
+                }
+
                 $product = ShopProduct::query()->updateOrCreate(
                     ['id' => $id],
-                    [
-                        'shop_category_id' => $categoryId,
-                        'slug' => $this->normalizeSlug($payload['slug'] ?? $baseTitle, 'product-' . $id),
-                        'price' => is_numeric($payload['price'] ?? null) ? $payload['price'] : 0,
-                        'kind' => $payload['kind'] ?? null,
-                        'image' => $payload['image'] ?? null,
-                        'gallery' => $payload['gallery'] ?? array_values(array_filter([$payload['image'] ?? null])),
-                        'options' => $payload['options'] ?? [],
-                        'is_new' => (bool)($payload['isNew'] ?? false),
-                        'status' => array_key_exists('status', $payload) ? (bool)$payload['status'] : true,
-                        'sort_order' => $productIndex,
-                    ]
+                    $productPayload
                 );
 
                 $this->syncProductTranslations($product, $titles, $languages);
@@ -591,6 +697,45 @@ class ShopFrontendController extends Controller
                 ->whereNotIn('id', $activeProductIds)
                 ->update(['status' => false]);
         });
+    }
+
+    private function formatProductPriceOptions(ShopProduct $product): array
+    {
+        $groups = [
+            'height' => [],
+            'unit' => [],
+            'size' => [],
+            'power' => [],
+        ];
+
+        foreach ($product->attributePrices as $price) {
+            $attribute = $price->attributeValue;
+
+            if (!$attribute || !array_key_exists($attribute->type, $groups)) {
+                continue;
+            }
+
+            $groups[$attribute->type][] = [
+                'id' => $attribute->id,
+                'name' => $attribute->name,
+                'value' => $attribute->value,
+                'label' => $attribute->value ? "{$attribute->name} ({$attribute->value})" : $attribute->name,
+                'price' => $this->formatPrice($price->price),
+            ];
+        }
+
+        return $groups;
+    }
+
+    private function productDisplayPrice(ShopProduct $product, array $priceOptions)
+    {
+        $prices = collect($priceOptions)
+            ->flatMap(fn ($items) => $items)
+            ->pluck('price')
+            ->filter(fn ($price) => is_numeric($price))
+            ->map(fn ($price) => (float) $price);
+
+        return $prices->isNotEmpty() ? $prices->min() : $product->price;
     }
 
     private function resolveProductCategoryId(array $payload): ?int

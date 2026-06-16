@@ -73,6 +73,8 @@ import shopCategory from "@store/modules/shopCategory/index.js";
 import shopProduct from "@store/modules/shopProduct/index.js";
 import shopProductOptionType from "@store/modules/shopProductOptionType/index.js";
 import shopProductColor from "@store/modules/shopProductColor/index.js";
+import shopCraftsman from "@store/modules/shopCraftsman/index.js";
+import shopProductAttributeValue from "@store/modules/shopProductAttributeValue/index.js";
 
 const store = createStore({
     modules: {
@@ -149,6 +151,8 @@ const store = createStore({
         shopProduct,
         shopProductOptionType,
         shopProductColor,
+        shopCraftsman,
+        shopProductAttributeValue,
     }
 });
 export default store;

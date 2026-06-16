@@ -563,7 +563,7 @@ const generateAITranslations = async () => {
                                 :disabled="disableBulkDeleteButton"
                             >
                                 <font-awesome-icon :icon="['far', 'trash']"/>
-                                Ջնջել ընտրվածը
+                                Delete selected
                             </CustomButton>
                         </div>
 
@@ -577,7 +577,7 @@ const generateAITranslations = async () => {
                                     <option :value="300">300</option>
                                     <option :value="400">400</option>
                                     <option :value="500">500</option>
-                                </select> մեկ էջում
+                                </select> per page
                             </label>
                         </div>
 
@@ -661,8 +661,8 @@ const generateAITranslations = async () => {
                         class="datatable-bottom"
                     >
                         <div class="datatable-info">
-                            Ցուցադրվում է {{ tablePagination.showing.from }} -ից {{ tablePagination.showing.to }} գրառումները
-                            {{ tablePagination.total_items }} -ից
+                            Showing {{ tablePagination.showing?.from ?? 0 }} to {{ tablePagination.showing?.to ?? 0 }} of
+                            {{ tablePagination.total_items }} entries
                         </div>
 
                         <vue-awesome-paginate

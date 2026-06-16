@@ -3,8 +3,8 @@ import baseHttp from "@store/api.js";
 const state = () => ({
     deleteModalValue: null,
     deletingItemId: null,
-    pageData: {data: [], pagination: {}, languages: [], categories: [], kinds: [], optionTypes: [], optionColors: []},
-    params: {languages: [], categories: [], kinds: [], optionTypes: [], optionColors: []},
+    pageData: {data: [], pagination: {}, languages: [], categories: [], kinds: [], optionTypes: [], optionColors: [], attributeValues: {}},
+    params: {languages: [], categories: [], kinds: [], optionTypes: [], optionColors: [], attributeValues: {}},
     editData: null,
 });
 

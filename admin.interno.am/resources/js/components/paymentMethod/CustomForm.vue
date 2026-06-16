@@ -375,7 +375,7 @@ const generalParams = computed(() => store.getters['general/getParams']);
                                     type="button"
                                 >
                                     <font-awesome-icon :icon="['far', 'magnifying-glass']"/>
-                                    Կիրառել որոնումը և ֆիլտրերը
+                                    Apply search and filters
                                 </CustomButton>
                             </div>
                         </div>

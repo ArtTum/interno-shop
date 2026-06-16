@@ -82,9 +82,9 @@ const submit = async () => {
 
 <template>
     <DefaultLayoutComponent>
-        <BreadcrumbDefault pageTitle="Ստեղծել օգտատերեր" :breadcrumb="[
+        <BreadcrumbDefault pageTitle="Create user" :breadcrumb="[
             {path: '/dashboard', title: 'Dashboard'},
-            {path: '/users/list', title: 'Օգտատերեր'},
+            {path: '/users/list', title: 'Users'},
         ]"/>
         <div class="grid grid-cols-1 gap-9">
             <div class="flex flex-col gap-9">

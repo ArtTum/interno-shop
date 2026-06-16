@@ -43,7 +43,7 @@ const confirmAction = () => emit("confirm");
                     @click="closeModal"
                     class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
                 >
-                    Փակել
+                    Close
                 </button>
             </div>
         </div>

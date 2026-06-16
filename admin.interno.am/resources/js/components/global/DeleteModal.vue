@@ -71,14 +71,14 @@ const deleteAction = async () => {
                 <font-awesome-icon :icon="['far', 'triangle-exclamation']" class="text-danger" size="2x"/>
             </span>
             <h3 class="mt-5.5 pb-2 text-xl font-bold text-black sm:text-2xl">
-                Հաստատ ե՞ս ուզում ջնջել
+                Are you sure you want to delete?
             </h3>
             <p class="mb-10 font-medium">
                 <template v-if="text !== undefined && text">
                     {{ text }}
                 </template>
                 <template v-else>
-                    Այս գործողությունը կլինի անդառնալի և չի կարող վերականգնվել։ Ջնջելուց հետո այն այլևս հնարավոր չի լինի վերականգնել։
+                    This action is irreversible and cannot be restored after deletion.
                 </template>
             </p>
             <div class="-mx-3 flex flex-wrap gap-y-4">
@@ -91,7 +91,7 @@ const deleteAction = async () => {
                                 })"
                         class="block w-full rounded border border-stroke bg-gray p-3 text-center font-medium text-black hover:bg-opacity-60"
                     >
-                        Չեղարկել
+                        Cancel
                     </button>
                 </div>
                 <div class="w-full px-3 2xsm:w-1/2">
@@ -100,7 +100,7 @@ const deleteAction = async () => {
                         @click="deleteAction()"
                         class="block w-full rounded border border-meta-1 bg-meta-1 p-3 text-center font-medium text-white hover:bg-opacity-90"
                     >
-                        Ջնջել
+                        Delete
                     </button>
                 </div>
             </div>

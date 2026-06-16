@@ -1,0 +1,57 @@
+import baseHttp from "@store/api.js";
+
+const state = () => ({
+    deleteModalValue: null,
+    deletingItemId: null,
+    pageData: {data: [], pagination: {}},
+    editData: null,
+});
+
+const getters = {
+    getDeleteModelValue: (state) => state.deleteModalValue,
+    getPageData: (state) => state.pageData,
+    getEditData: (state) => state.editData,
+};
+
+const actions = {
+    async fetchPageData({commit}, params) {
+        const res = await baseHttp.get('shop-craftsmen/fetch', {params});
+        commit('SET_PAGE_DATA', res.data);
+        return res.data;
+    },
+    async fetchByField({commit}, params) {
+        const res = await baseHttp.get('shop-craftsmen/fetch-by-field', {params});
+        commit('SET_EDIT_DATA', res.data.data);
+        return res.data;
+    },
+    async create({}, params) {
+        return await baseHttp.post('shop-craftsmen/insert', params);
+    },
+    async update({}, params) {
+        return await baseHttp.put('shop-craftsmen/update', params);
+    },
+    async delete({state}) {
+        return await baseHttp.delete(`shop-craftsmen/delete/${state.deletingItemId}`);
+    },
+};
+
+const mutations = {
+    SET_DELETE_MODAL_VALUE(state, data) {
+        if (data.value !== undefined) state.deleteModalValue = data.value;
+        if (data.id !== undefined) state.deletingItemId = data.id;
+    },
+    SET_PAGE_DATA(state, data) {
+        state.pageData = data;
+    },
+    SET_EDIT_DATA(state, data) {
+        state.editData = data;
+    },
+};
+
+export default {
+    namespaced: true,
+    state,
+    getters,
+    actions,
+    mutations,
+};

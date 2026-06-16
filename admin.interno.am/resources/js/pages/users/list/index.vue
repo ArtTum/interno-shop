@@ -36,10 +36,10 @@ watch(
     () => paramsData,
     (newValue) => {
         if (newValue?.value?.userGroups && Array.isArray(newValue.value.userGroups)) {
-            userGroupOptions.value = [{ value: -1, label: 'Բոլորը' }, ...newValue.value.userGroups]
+            userGroupOptions.value = [{ value: -1, label: 'All' }, ...newValue.value.userGroups]
         }
         if (newValue?.value?.customerGroups && Array.isArray(newValue.value.customerGroups)) {
-            customerGroupOptions.value = [{ value: -1, label: 'Բոլորը' }, ...newValue.value.customerGroups]
+            customerGroupOptions.value = [{ value: -1, label: 'All' }, ...newValue.value.customerGroups]
         }
     }, {immediate: true, deep: true}
 );
@@ -78,22 +78,22 @@ const pageData = computed(() => store.getters['user/getPageData']);
 const auth = computed(() => store.getters['auth/getUser']);
 
 const options = [
-    {value: -1, label: 'Բոլորը'},
-    {value: 0, label: 'Ընդհանուր'},
-    {value: 1, label: 'Արգելված'},
+    {value: -1, label: 'All'},
+    {value: 0, label: 'General'},
+    {value: 1, label: 'Blocked'},
 ];
 
 const statusOptions = [
-    {value: -1, label: 'Բոլորը'},
-    {value: 1, label: 'Ակտիվ'},
-    {value: 0, label: 'Ոչ ակտիվ'},
+    {value: -1, label: 'All'},
+    {value: 1, label: 'Active'},
+    {value: 0, label: 'Inactive'},
 ];
 </script>
 
 <template>
     <DefaultLayoutComponent>
-        <BreadcrumbDefault pageTitle="Աշխատակիցներ" :breadcrumb="[
-            {path: '/dashboard', title: 'Վահանակ'},
+        <BreadcrumbDefault pageTitle="Employees" :breadcrumb="[
+            {path: '/dashboard', title: 'Dashboard'},
         ]"/>
         <TableActions
             :createRoute="auth.user_group.permissions_by_name.users[0].can_add ? '/users/list/create' : ''"
@@ -106,7 +106,7 @@ const statusOptions = [
                     <CustomSelect
                         v-model="params.blocked"
                         mode="single"
-                        label="Արգելված"
+                        label="Blocked"
                         :options="options"
                         :searchable="false"
                         :canClear="false"
@@ -116,7 +116,7 @@ const statusOptions = [
                     <CustomSelect
                         v-model="params.user_group"
                         mode="single"
-                        label="Օգտագործողի խումբ"
+                        label="User group"
                         :options="userGroupOptions"
                         :searchable="false"
                         :canClear="false"
@@ -126,7 +126,7 @@ const statusOptions = [
                     <CustomSelect
                         v-model="params.only_actives"
                         mode="single"
-                        label="Կարգավիճակ"
+                        label="Status"
                         :options="statusOptions"
                         :searchable="false"
                         :canClear="false"
@@ -141,10 +141,10 @@ const statusOptions = [
             v-model="params"
             :main-search="{
                 visibility: true,
-                placeholder: 'Փնտրել...',
+                placeholder: 'Search...',
                 tooltip: {
                     button: {showingType: 'info'},
-                    text: 'Անուն, ազգանուն, էլ․ փոստ'
+                    text: 'First name, last name, email'
                 }
             }"
             :page-data="pageData.data"
@@ -152,12 +152,12 @@ const statusOptions = [
             permission-name="users"
             :pagination="pageData.pagination"
             :columns="[
-              { title: 'ՀԱՄԱՐ', key: 'id' },
-              { title: 'Անուն և ազգանուն', key: 'name' },
-              { title: 'Էլ․ փոստ', key: 'email' },
-              { title: 'Աշխատակցի խումբ', key: 'group_name' },
-              { title: 'Արգելված', key: 'blocked' },
-              { title: 'Գործողություն' },
+              { title: 'ID', key: 'id' },
+              { title: 'Full name', key: 'name' },
+              { title: 'Email', key: 'email' },
+              { title: 'Employee group', key: 'group_name' },
+              { title: 'Blocked', key: 'blocked' },
+              { title: 'Action' },
             ]"
         >
             <template v-for="(item, index) in pageData.data" :key="index">
@@ -187,7 +187,7 @@ const statusOptions = [
                             <RouterLink :to="'/users/list/update/' + item.id">
                                 <button
                                     class="hover:text-primary"
-                                    title="Խմբագրել"
+                                    title="Edit"
                                 >
                                     <font-awesome-icon :icon="['far', 'pen-to-square']"/>
                                 </button>
@@ -200,7 +200,7 @@ const statusOptions = [
 <!--                                    id: item.id-->
 <!--                                });"-->
 <!--                                    class="hover:text-primary"-->
-<!--                                    title="Ջնջել"-->
+<!--                                    title="Delete"-->
 <!--                                >-->
 <!--                                    <font-awesome-icon :icon="['fas', 'trash-can']"/>-->
 <!--                                </button>-->

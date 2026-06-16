@@ -108,9 +108,9 @@ const submit = async () => {
 
 <template>
     <DefaultLayoutComponent>
-        <BreadcrumbDefault pageTitle="Խմբագրել օգտատեր" :breadcrumb="[
+        <BreadcrumbDefault pageTitle="Edit user" :breadcrumb="[
             {path: '/dashboard', title: 'Dashboard'},
-            {path: '/users/list', title: 'Օգտատերեր'},
+            {path: '/users/list', title: 'Users'},
         ]"/>
         <DeleteModal
             @fetch="router.push({path: '/users/list'});"

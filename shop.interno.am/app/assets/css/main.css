@@ -1071,6 +1071,46 @@ h2 {
   line-height: 1.2;
 }
 
+.checkout-autocomplete {
+  position: relative;
+}
+
+.checkout-form label small.checkout-loading {
+  color: #6b7280;
+}
+
+.craftsman-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  z-index: 30;
+  overflow: hidden;
+  border: 1px solid #d5dbe6;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(20, 41, 72, 0.14);
+}
+
+.craftsman-suggestions button {
+  display: flex;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #142948;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 9px;
+  text-align: left;
+}
+
+.craftsman-suggestions button:hover {
+  background: #eef3f8;
+}
+
 .checkout-note {
   grid-column: 1 / -1;
   max-width: 360px;
@@ -1598,6 +1638,20 @@ h2 {
   padding: 5px 11px;
 }
 
+.unavailable {
+  display: inline-flex;
+  align-items: center;
+  min-height: 16px;
+  border-radius: 999px 0 0 999px;
+  background: linear-gradient(135deg, #e64e48 0%, #c8342f 100%);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 680;
+  line-height: 1;
+  box-shadow: 0 7px 16px rgba(230, 78, 72, 0.24);
+  padding: 5px 11px;
+}
+
 .product-art {
   position: relative;
   display: grid;
@@ -1711,6 +1765,35 @@ h2 {
   background: linear-gradient(135deg, #19df30 0%, #11c92a 100%);
   color: #10213a;
   box-shadow: 0 12px 22px rgba(25, 223, 48, 0.24);
+}
+
+.product-card button:disabled,
+.cart-recommendation button:disabled,
+.purchase-actions > button:disabled {
+  background: #d1d5db;
+  color: #5b6472;
+  cursor: not-allowed;
+  line-height: 1.15;
+  white-space: normal;
+  box-shadow: none;
+  transform: none;
+}
+
+.product-card button:disabled {
+  min-width: 112px;
+  padding: 7px 10px;
+}
+
+.detail-unavailable {
+  display: inline-flex;
+  align-self: flex-start;
+  border-radius: 999px;
+  background: rgba(230, 78, 72, 0.1);
+  color: #c8342f;
+  font-size: 12px;
+  font-weight: 720;
+  margin: 0 0 12px;
+  padding: 6px 12px;
 }
 
 .footer {
