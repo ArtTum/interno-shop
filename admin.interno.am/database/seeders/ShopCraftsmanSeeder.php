@@ -82,7 +82,7 @@ class ShopCraftsmanSeeder extends Seeder
 
     private function mediaIdForPhoto(string $fileName): ?int
     {
-        $relativePath = "/uploads/seed/workers/{$fileName}";
+        $relativePath = "/assets/craftsmen/{$fileName}";
         $path = public_path($relativePath);
 
         if (!File::exists($path)) {

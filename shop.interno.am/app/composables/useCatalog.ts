@@ -1019,6 +1019,7 @@ export function useCatalog() {
     if (path === '/cart') return 'cart'
     if (path === '/checkout-success') return 'checkout-success'
     if (path === '/search') return 'search'
+    if (path === '/craftsmen') return 'craftsmen'
     if (path === '/privacy-policy') return 'privacy-policy'
     if (path.startsWith('/categories/')) return 'category'
     if (path.startsWith('/products/')) return 'product'
