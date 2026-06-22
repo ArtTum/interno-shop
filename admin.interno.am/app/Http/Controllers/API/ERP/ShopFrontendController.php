@@ -8,6 +8,7 @@ use App\Models\ShopCategory;
 use App\Models\ShopPrivacyPolicy;
 use App\Models\ShopPrivacyPolicyChecklistItem;
 use App\Models\ShopCraftsman;
+use App\Models\ShopFrontendTranslation;
 use App\Models\ShopProduct;
 use App\Models\ShopSeoPage;
 use App\Models\ShopPrivacyPolicySection;
@@ -66,6 +67,7 @@ class ShopFrontendController extends Controller
 
         $this->syncLanguagesToDatabase($payload['languages']);
         $this->syncCategoriesToDatabase($payload['menuGroups']);
+        $this->syncTranslationsToDatabase($payload['translations']);
         $this->syncProductsToDatabase($payload['products']);
         $this->syncSocialLinksToDatabase($payload['settings']['socialLinks'] ?? []);
         $this->syncSeoToDatabase($payload['seo'] ?? []);
@@ -137,6 +139,42 @@ class ShopFrontendController extends Controller
         ]));
     }
 
+    public function translations(): JsonResponse
+    {
+        $config = $this->readConfig();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'languages' => $config['languages'] ?? [],
+                'translations' => $config['translations'] ?? [],
+            ],
+        ]);
+    }
+
+    public function updateTranslations(Request $request): JsonResponse
+    {
+        $payload = $request->validate([
+            'translations' => ['required', 'array'],
+        ]);
+
+        $this->syncTranslationsToDatabase($payload['translations']);
+
+        $config = $this->readConfig();
+        $stored = $this->readJson($this->configPath, config('shop_frontend', []));
+        $stored['translations'] = $config['translations'] ?? $payload['translations'];
+        $this->writeJson($this->configPath, $stored);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Translations saved.',
+            'data' => [
+                'languages' => $config['languages'] ?? [],
+                'translations' => $config['translations'] ?? [],
+            ],
+        ]);
+    }
+
     public function craftsmen(Request $request): JsonResponse
     {
         if (!Schema::hasTable('shop_craftsmen')) {
@@ -147,27 +185,48 @@ class ShopFrontendController extends Controller
         }
 
         $search = trim((string) $request->query('search', ''));
+        $region = trim((string) $request->query('region', ''));
+        $city = trim((string) $request->query('city', ''));
+        $field = trim((string) $request->query('field', ''));
+        $limit = min(100, max(1, (int) $request->query('limit', 10)));
 
         $craftsmen = ShopCraftsman::query()
+            ->with('media:id,original_path,path,type,file_type')
             ->where('status', true)
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('code', 'like', "%{$search}%")
                         ->orWhere('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%");
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('work_region', 'like', "%{$search}%")
+                        ->orWhere('work_city', 'like', "%{$search}%")
+                        ->orWhere('work_field', 'like', "%{$search}%");
                 });
             })
+            ->when($region !== '', fn ($query) => $query->where('work_region', $region))
+            ->when($city !== '', fn ($query) => $query->where('work_city', $city))
+            ->when($field !== '', fn ($query) => $query->where('work_field', $field))
             ->orderBy('sort_order')
             ->orderBy('first_name')
-            ->limit(10)
+            ->limit($limit)
             ->get()
             ->map(fn (ShopCraftsman $craftsman) => $this->formatPublicCraftsman($craftsman))
             ->values()
             ->all();
 
+        $filters = ShopCraftsman::query()
+            ->where('status', true)
+            ->get(['work_region', 'work_city', 'work_field']);
+
         return $this->withCors(response()->json([
             'success' => true,
             'data' => $craftsmen,
+            'filters' => [
+                'regions' => $filters->pluck('work_region')->filter()->unique()->sort()->values()->all(),
+                'cities' => $filters->pluck('work_city')->filter()->unique()->sort()->values()->all(),
+                'fields' => $filters->pluck('work_field')->filter()->unique()->sort()->values()->all(),
+            ],
         ]));
     }
 
@@ -189,6 +248,7 @@ class ShopFrontendController extends Controller
 
         if (Schema::hasTable('shop_craftsmen')) {
             $craftsman = ShopCraftsman::query()
+                ->with('media:id,original_path,path,type,file_type')
                 ->where('status', true)
                 ->when($id > 0, fn ($query) => $query->where('id', $id))
                 ->when($id <= 0 && $code !== '', fn ($query) => $query->where('code', $code))
@@ -220,6 +280,13 @@ class ShopFrontendController extends Controller
             'id' => $craftsman->id,
             'code' => $craftsman->code,
             'name' => $craftsman->full_name,
+            'image' => $craftsman->media?->original_path,
+            'phone' => $craftsman->phone,
+            'work_region' => $craftsman->work_region,
+            'work_city' => $craftsman->work_city,
+            'work_field' => $craftsman->work_field,
+            'has_whatsapp' => $craftsman->has_whatsapp,
+            'has_viber' => $craftsman->has_viber,
         ];
     }
 
@@ -254,6 +321,15 @@ class ShopFrontendController extends Controller
 
         if (!empty($databaseLanguages)) {
             $config['languages'] = $databaseLanguages;
+        }
+
+        $databaseTranslations = $this->readTranslationsFromDatabase(
+            $config['languages'] ?? [],
+            $config['translations'] ?? []
+        );
+
+        if (!empty($databaseTranslations)) {
+            $config['translations'] = $databaseTranslations;
         }
 
         $databaseCategories = $this->readCategoriesFromDatabase($config['languages'] ?? []);
@@ -378,6 +454,96 @@ class ShopFrontendController extends Controller
                 ]
             );
         }
+    }
+
+    private function readTranslationsFromDatabase(array $languages, array $configuredTranslations = []): array
+    {
+        if (!Schema::hasTable('languages') || !Schema::hasTable('shop_frontend_translations')) {
+            return [];
+        }
+
+        $languageCodes = collect($languages)->pluck('code')->filter()->values();
+
+        if ($languageCodes->isEmpty()) {
+            return [];
+        }
+
+        $translations = ShopFrontendTranslation::query()
+            ->with('language:id,code')
+            ->whereHas('language', fn ($query) => $query->whereIn('code', $languageCodes))
+            ->orderBy('key')
+            ->get();
+
+        $result = $languageCodes
+            ->mapWithKeys(fn (string $code) => [$code => []])
+            ->all();
+
+        if ($translations->isEmpty()) {
+            return $result;
+        }
+
+        foreach ($translations as $translation) {
+            $code = $translation->language?->code;
+
+            if (!$code) {
+                continue;
+            }
+
+            $result[$code][$translation->key] = $translation->value ?? '';
+        }
+
+        return $result;
+    }
+
+    private function syncTranslationsToDatabase(array $translations): void
+    {
+        if (!Schema::hasTable('languages') || !Schema::hasTable('shop_frontend_translations')) {
+            return;
+        }
+
+        $languages = Language::query()->where('status', true)->get(['id', 'code'])->keyBy('code');
+
+        if ($languages->isEmpty()) {
+            return;
+        }
+
+        DB::transaction(function () use ($translations, $languages) {
+            foreach ($translations as $code => $items) {
+                $language = $languages->get($code);
+
+                if (!$language || !is_array($items)) {
+                    continue;
+                }
+
+                $activeKeys = collect($items)
+                    ->keys()
+                    ->map(fn ($key) => trim((string) $key))
+                    ->filter()
+                    ->values()
+                    ->all();
+
+                ShopFrontendTranslation::query()
+                    ->where('language_id', $language->id)
+                    ->when(!empty($activeKeys), fn ($query) => $query->whereNotIn('key', $activeKeys))
+                    ->delete();
+
+                foreach ($items as $key => $value) {
+                    $key = trim((string) $key);
+
+                    if ($key === '') {
+                        continue;
+                    }
+
+                    ShopFrontendTranslation::query()->updateOrCreate(
+                        [
+                            'key' => $key,
+                            'language_id' => $language->id,
+                        ],
+                        ['value' => is_scalar($value) ? (string) $value : '']
+                    );
+                }
+            }
+        });
     }
 
     private function readCategoriesFromDatabase(array $languages): array
@@ -625,11 +791,16 @@ class ShopFrontendController extends Controller
                 'id' => $product->id,
                 'slug' => $product->slug,
                 'title' => $this->mapProductTranslationsByLanguage($product, $languageCodes),
+                'shortDescription' => $this->mapProductFieldByLanguage($product, $languageCodes, 'short_description'),
+                'description' => $this->mapProductFieldByLanguage($product, $languageCodes, 'description'),
                 'meta' => $this->mapProductMetaByLanguage($product, $languageCodes),
                 'price' => $this->formatPrice($this->productDisplayPrice($product, $priceOptions)),
                 'kind' => $product->kind ?? '',
                 'image' => $product->media?->original_path ?: ($product->image ?? ''),
-                'gallery' => $product->gallery ?: array_values(array_filter([$product->image])),
+                'gallery' => array_values(array_unique(array_filter([
+                    $product->media?->original_path ?: ($product->image ?? ''),
+                    ...($product->gallery ?: []),
+                ]))),
                 'options' => $product->options ?: [],
                 'priceOptions' => $priceOptions,
                 'isNew' => $product->is_new,
@@ -800,6 +971,18 @@ class ShopFrontendController extends Controller
     {
         return $languageCodes
             ->mapWithKeys(fn (string $code) => [$code => $this->productTitleForLanguage($product, $code)])
+            ->all();
+    }
+
+    private function mapProductFieldByLanguage(ShopProduct $product, $languageCodes, string $field): array
+    {
+        return $languageCodes
+            ->mapWithKeys(function (string $code) use ($product, $field) {
+                $translation = $product->translations->first(fn ($translation) => $translation->language?->code === $code)
+                    ?: $product->translations->first();
+
+                return [$code => $translation?->{$field} ?? ''];
+            })
             ->all();
     }
 

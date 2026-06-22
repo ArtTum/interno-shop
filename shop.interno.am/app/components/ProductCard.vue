@@ -9,7 +9,7 @@ const { addToCart, copy, currentLanguageCode, openProduct, recentlyAddedProductI
     class="product-card"
     role="link"
     tabindex="0"
-    :aria-label="product.title[currentLanguageCode]"
+    :aria-label="product.title[currentLanguageCode] || product.title.hy"
     @click="openProduct(product)"
     @keydown.enter="openProduct(product)"
     @keydown.space.prevent="openProduct(product)"
@@ -20,10 +20,10 @@ const { addToCart, copy, currentLanguageCode, openProduct, recentlyAddedProductI
     </div>
 
     <div class="product-art">
-      <img :src="product.image" :alt="product.title[currentLanguageCode]" />
+      <img :src="product.image" :alt="product.title[currentLanguageCode] || product.title.hy" />
     </div>
 
-    <p>{{ product.title[currentLanguageCode] }}</p>
+    <p>{{ product.title[currentLanguageCode] || product.title.hy }}</p>
     <div class="product-actions">
       <span class="price">{{ product.price }} <span aria-hidden="true">&#1423;</span></span>
       <button type="button" :disabled="product.isTemporarilyUnavailable" :class="{ 'is-added': recentlyAddedProductId === product.id }" @click.stop="addToCart(product)">

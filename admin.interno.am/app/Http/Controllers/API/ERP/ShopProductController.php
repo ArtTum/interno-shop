@@ -63,7 +63,10 @@ class ShopProductController extends Controller
             ->when($isNew >= 0, fn ($query) => $query->where('is_new', (bool) $isNew))
             ->when($kind !== '', fn ($query) => $query->where('kind', $kind))
             ->when($optionTypeId > 0, fn ($query) => $query->where('option_type_id', $optionTypeId))
-            ->when($optionColorId > 0, fn ($query) => $query->where('option_color_id', $optionColorId))
+            ->when($optionColorId > 0, fn ($query) => $query->where(function ($query) use ($optionColorId) {
+                $query->where('option_color_id', $optionColorId)
+                    ->orWhereJsonContains('option_color_ids', $optionColorId);
+            }))
             ->when($search !== '', function ($query) use ($search, $languageId) {
                 $query->where(function ($query) use ($search, $languageId) {
                     $query->where('shop_products.id', (int) $search)
@@ -150,6 +153,7 @@ class ShopProductController extends Controller
                 'option_height' => $product->option_height ?? '',
                 'option_material' => $product->option_material ?? '',
                 'option_color_id' => $product->option_color_id,
+                'option_color_ids' => $this->normalizeColorIds($product->option_color_ids ?: [], $product->option_color_id),
                 'is_new' => $product->is_new,
                 'is_temporarily_unavailable' => $product->is_temporarily_unavailable,
                 'status' => $product->status,
@@ -197,6 +201,7 @@ class ShopProductController extends Controller
                 'option_height' => $data['option_height'] ?? null,
                 'option_material' => $data['option_material'] ?? null,
                 'option_color_id' => $data['option_color_id'] ?? null,
+                'option_color_ids' => $data['option_color_ids'],
                 'is_new' => $data['is_new'],
                 'is_temporarily_unavailable' => $data['is_temporarily_unavailable'],
                 'status' => $data['status'],
@@ -241,6 +246,7 @@ class ShopProductController extends Controller
                 'option_height' => $data['option_height'] ?? null,
                 'option_material' => $data['option_material'] ?? null,
                 'option_color_id' => $data['option_color_id'] ?? null,
+                'option_color_ids' => $data['option_color_ids'],
                 'is_new' => $data['is_new'],
                 'is_temporarily_unavailable' => $data['is_temporarily_unavailable'],
                 'status' => $data['status'],
@@ -269,7 +275,7 @@ class ShopProductController extends Controller
 
     private function validatedPayload(Request $request, ?int $productId = null): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'id' => ['nullable', 'integer'],
             'language_id' => ['required', 'integer', Rule::exists('languages', 'id')],
             'shop_category_id' => ['nullable', 'integer', Rule::exists('shop_categories', 'id')],
@@ -294,6 +300,8 @@ class ShopProductController extends Controller
             'option_height' => ['nullable', 'string', 'max:120'],
             'option_material' => ['nullable', 'string', 'max:120'],
             'option_color_id' => ['nullable', 'integer', Rule::exists('shop_product_colors', 'id')],
+            'option_color_ids' => ['nullable', 'array'],
+            'option_color_ids.*' => ['integer', Rule::exists('shop_product_colors', 'id')],
             'is_new' => ['required', 'boolean'],
             'is_temporarily_unavailable' => ['required', 'boolean'],
             'status' => ['required', 'boolean'],
@@ -306,6 +314,11 @@ class ShopProductController extends Controller
             'meta_description' => ['nullable', 'string'],
             'meta_keywords' => ['nullable', 'string'],
         ]);
+
+        $data['option_color_ids'] = $this->normalizeColorIds($data['option_color_ids'] ?? [], $data['option_color_id'] ?? null);
+        $data['option_color_id'] = $data['option_color_id'] ?? ($data['option_color_ids'][0] ?? null);
+
+        return $data;
     }
 
     private function saveTranslation(ShopProduct $product, array $data): void
@@ -328,6 +341,7 @@ class ShopProductController extends Controller
     {
         $translation = $product->translations->first();
         $categoryTranslation = $product->category?->translations->first();
+        $optionColors = $this->colorsByIds($this->normalizeColorIds($product->option_color_ids ?: [], $product->option_color_id));
 
         return [
             'id' => $product->id,
@@ -341,8 +355,11 @@ class ShopProductController extends Controller
             'attribute_prices' => $this->formatAttributePrices($product),
             'kind' => $product->kind ?? '',
             'option_type_name' => $product->optionType?->name,
+            'option_color_id' => $product->option_color_id,
             'option_color_name' => $product->optionColor?->name,
             'option_color_value' => $product->optionColor?->value,
+            'option_color_ids' => $optionColors->pluck('id')->values()->all(),
+            'option_colors' => $optionColors->map(fn (ShopProductColor $color) => $this->formatColorOption($color))->values()->all(),
             'image' => $product->media?->original_path ?: ($product->image ?? ''),
             'media_id' => $product->media_id,
             'is_new' => $product->is_new,
@@ -628,6 +645,7 @@ class ShopProductController extends Controller
         $color = !empty($data['option_color_id'])
             ? ShopProductColor::query()->find((int) $data['option_color_id'])
             : null;
+        $colors = $this->colorsByIds($data['option_color_ids'] ?? []);
 
         return array_filter([
             'code' => $data['option_code'] ?? null,
@@ -641,7 +659,47 @@ class ShopProductController extends Controller
             'material' => $data['option_material'] ?? null,
             'color' => $color?->value ?: $color?->name,
             'color_id' => $color?->id,
+            'colors' => $colors->map(fn (ShopProductColor $color) => $this->formatColorOption($color))->values()->all(),
+            'color_ids' => $colors->pluck('id')->values()->all(),
         ], fn ($value) => $value !== null && $value !== '');
+    }
+
+    private function normalizeColorIds($colorIds, ?int $mainColorId = null): array
+    {
+        $ids = collect(is_array($colorIds) ? $colorIds : [])
+            ->map(fn ($colorId) => (int) $colorId)
+            ->filter(fn (int $colorId) => $colorId > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($mainColorId && !in_array($mainColorId, $ids, true)) {
+            array_unshift($ids, $mainColorId);
+        }
+
+        return $ids;
+    }
+
+    private function colorsByIds(array $colorIds)
+    {
+        if (empty($colorIds)) {
+            return collect();
+        }
+
+        return ShopProductColor::query()
+            ->whereIn('id', $colorIds)
+            ->get(['id', 'name', 'value'])
+            ->sortBy(fn (ShopProductColor $color) => array_search($color->id, $colorIds, true))
+            ->values();
+    }
+
+    private function formatColorOption(ShopProductColor $color): array
+    {
+        return [
+            'id' => $color->id,
+            'name' => $color->name,
+            'value' => $color->value,
+        ];
     }
 
     private function normalizeSlug(?string $value, string $fallback): string

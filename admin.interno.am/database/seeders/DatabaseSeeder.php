@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
         $this->call(MediaSettingSeeder::class);
         $this->call(DocumentSettingSeeder::class);
         $this->call(PermissionsSeeder::class);
+        $this->call(ShopProductParametersSeeder::class);
+        $this->call(ShopCraftsmanSeeder::class);
         $this->call(GeneralSettingSeeder::class);
         $this->call(CookieSettingsSeeder::class);
     }

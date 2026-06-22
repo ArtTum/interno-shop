@@ -77,7 +77,7 @@ fetchVendors();
                   </span>
                 </button>
             </div>
-            <div class="flex items-center gap-3 2xsm:gap-7">
+            <div class="ml-auto flex items-center justify-end gap-3 2xsm:gap-7">
                 <DropdownUser
                     :vendors-for-switch="getVendorsForSwitch"
                 />

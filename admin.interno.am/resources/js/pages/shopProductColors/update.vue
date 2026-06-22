@@ -47,7 +47,23 @@ fetchColor();
                 <div v-if="form.errors && Object.keys(form.errors).length" class="p-6"><AlertError :errors="form.errors"/></div>
                 <div class="grid grid-cols-4 gap-6 p-6 max-md:grid-cols-1">
                     <CustomInput :disabled="!canEdit" v-model="form.name" name="name" label="Name *" type="text" placeholder="Enter name" :error="form.errors?.name"/>
-                    <CustomInput :disabled="!canEdit" v-model="form.value" name="value" label="Value" type="color" placeholder="#000000" :error="form.errors?.value"/>
+                    <div>
+                        <label class="mb-2.5 block font-medium text-black" for="product_color_value">Value</label>
+                        <input
+                            id="product_color_value"
+                            :disabled="!canEdit"
+                            v-model="form.value"
+                            name="value"
+                            type="color"
+                            placeholder="#000000"
+                            class="product-color-value"
+                            :class="{'is-invalid': form.errors?.value, 'disabled': !canEdit}"
+                        >
+                        <div v-if="form.errors?.value" class="invalid-feedback">
+                            <span v-if="Array.isArray(form.errors.value)">{{ form.errors.value[0] }}</span>
+                            <span v-else>{{ form.errors.value }}</span>
+                        </div>
+                    </div>
                     <CustomInput :disabled="!canEdit" v-model="form.sort_order" name="sort_order" label="Sort order" type="number" placeholder="Enter sort order" :error="form.errors?.sort_order"/>
                     <div class="flex items-end pb-2"><Switch :disabled="!canEdit" @change="(value) => form.status = value" :value="form.status" id="color_status" label="Active"/></div>
                 </div>
@@ -60,3 +76,9 @@ fetchColor();
         </div>
     </DefaultLayoutComponent>
 </template>
+
+<style scoped>
+.product-color-value {
+    width: 100%;
+}
+</style>

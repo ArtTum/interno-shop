@@ -149,8 +149,8 @@ async function submitCheckout() {
       </div>
 
       <div v-if="cartProducts.length" class="cart-items">
-        <article v-for="item in cartProducts" :key="item.productId" class="cart-item">
-          <button class="remove-cart-item" type="button" aria-label="Remove item" @click="removeFromCart(item.productId)">
+        <article v-for="item in cartProducts" :key="item.key" class="cart-item">
+          <button class="remove-cart-item" type="button" aria-label="Remove item" @click="removeFromCart(item.key)">
             <svg width="15" height="17" viewBox="0 0 15 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path d="M9 2.5C9 1.67157 8.32843 1 7.5 1C6.67157 1 6 1.67157 6 2.5H5C5 1.11929 6.11929 0 7.5 0C8.88071 0 10 1.11929 10 2.5H14.5C14.7761 2.5 15 2.72386 15 3C15 3.27614 14.7761 3.5 14.5 3.5H13.946L12.6499 14.7292C12.5335 15.7384 11.679 16.5 10.6631 16.5H4.33688C3.321 16.5 2.4665 15.7384 2.35006 14.7292L1.053 3.5H0.5C0.25454 3.5 0.0503916 3.32312 0.00805569 3.08988L0 3C0 2.72386 0.223858 2.5 0.5 2.5H9ZM12.938 3.5H2.061L3.34347 14.6146C3.40169 15.1192 3.82894 15.5 4.33688 15.5H10.6631C11.1711 15.5 11.5983 15.1192 11.6565 14.6146L12.938 3.5ZM6 6C6.24546 6 6.44961 6.15477 6.49194 6.35886L6.5 6.4375V12.5625C6.5 12.8041 6.27614 13 6 13C5.75454 13 5.55039 12.8452 5.50806 12.6411L5.5 12.5625V6.4375C5.5 6.19588 5.72386 6 6 6ZM9 6C9.24546 6 9.44961 6.15477 9.49194 6.35886L9.5 6.4375V12.5625C9.5 12.8041 9.27614 13 9 13C8.75454 13 8.55039 12.8452 8.50806 12.6411L8.5 12.5625V6.4375C8.5 6.19588 8.72386 6 9 6Z" fill="#E64E48"/>
             </svg>
@@ -166,16 +166,25 @@ async function submitCheckout() {
               <div><dt>{{ copy.optionType }}</dt><dd>{{ item.product.options?.type || copy.optionTypeName }}</dd></div>
               <div><dt>{{ copy.optionUnit }}</dt><dd>{{ item.product.options?.unit || '111' }}</dd></div>
               <div><dt>{{ copy.optionCode }}</dt><dd>{{ item.product.options?.code || '111' }}</dd></div>
-              <div><dt>{{ copy.optionColor }}</dt><dd><span class="cart-color-dot" :style="{ background: item.product.options?.color || undefined }" /></dd></div>
+              <div>
+                <dt>{{ copy.optionColor }}</dt>
+                <dd>
+                  <span
+                    class="cart-color-dot"
+                    :style="{ background: item.color?.value || item.product.options?.color || undefined }"
+                    :title="item.color?.name || copy.optionColor"
+                  />
+                </dd>
+              </div>
               <div><dt>{{ copy.optionMaterial }}</dt><dd>{{ item.product.options?.material || copy.materialName }}</dd></div>
             </dl>
           </div>
 
           <div class="cart-item-actions">
             <div class="quantity-control" aria-label="Quantity">
-              <button type="button" @click="updateCartQuantity(item.productId, -1)">&minus;</button>
+              <button type="button" @click="updateCartQuantity(item.key, -1)">&minus;</button>
               <span>{{ item.quantity }}</span>
-              <button type="button" @click="updateCartQuantity(item.productId, 1)">+</button>
+              <button type="button" @click="updateCartQuantity(item.key, 1)">+</button>
             </div>
             <div class="cart-line-price">
               <small>{{ copy.linePrice }}</small>

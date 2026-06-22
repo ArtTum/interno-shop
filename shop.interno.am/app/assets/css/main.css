@@ -1315,11 +1315,36 @@ h2 {
 
 .product-detail-info h1 {
   max-width: 620px;
-  margin-bottom: 28px;
+  margin-bottom: 14px;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 28px;
   font-weight: 680;
   line-height: 1.15;
+}
+
+.product-short-description,
+.product-description {
+  max-width: 620px;
+  color: #4f5d6f;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.product-short-description {
+  margin-bottom: 12px;
+  font-weight: 650;
+}
+
+.product-description {
+  margin-bottom: 20px;
+}
+
+.product-description :where(p, ul, ol) {
+  margin: 0 0 10px;
+}
+
+.product-description :where(ul, ol) {
+  padding-left: 20px;
 }
 
 .product-options {
@@ -1327,6 +1352,53 @@ h2 {
   grid-template-columns: 132px 132px;
   gap: 18px 28px;
   align-items: end;
+}
+
+.price-options {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 22px;
+}
+
+.price-option-group {
+  display: grid;
+  gap: 8px;
+}
+
+.price-option-group > span {
+  color: #8a94a3;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.price-option-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.price-option-list button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  border: 1px solid #cdd4df;
+  border-radius: 4px;
+  background: #fff;
+  color: #18243a;
+  padding: 6px 10px;
+}
+
+.price-option-list strong,
+.price-option-list small {
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.price-option-list small {
+  color: #6d7786;
+  font-weight: 700;
 }
 
 .option-field {
@@ -1371,6 +1443,11 @@ h2 {
   border: 1px solid rgba(180, 188, 202, 0.72);
   border-radius: 50%;
   cursor: pointer;
+}
+
+.color-dot.is-active {
+  border-color: #111827;
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px rgba(17, 24, 39, 0.22);
 }
 
 .color-white {
@@ -2619,6 +2696,20 @@ h2 {
   .product-options {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px 14px;
+  }
+
+  .price-options {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .price-option-list {
+    gap: 7px;
+  }
+
+  .price-option-list button {
+    min-height: 32px;
+    padding: 6px 9px;
   }
 
   .option-field.option-wide,

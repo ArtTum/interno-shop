@@ -1,15 +1,17 @@
 ﻿<script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const {
   addToCart,
   copy,
   currentLanguageCode,
   currentProduct,
+  currentProductCategoryChild,
+  currentProductCategoryGroup,
   currentProductImage,
+  currentProductPriceOptions,
   detailThumbnails,
   localizedPath,
-  menuGroups,
   relatedProducts,
   recentlyAddedProductId,
   scrollProductSlider,
@@ -19,7 +21,56 @@ const {
 
 const touchStartX = ref(0)
 const detailQuantity = ref(1)
+const selectedColor = ref<any | null>(null)
 const isCurrentProductUnavailable = computed(() => Boolean(currentProduct.value?.isTemporarilyUnavailable))
+const productShortDescription = computed(() => {
+  const record = currentProduct.value?.shortDescription
+
+  return record?.[currentLanguageCode.value] || record?.hy || Object.values(record || {})[0] || ''
+})
+const productDescription = computed(() => {
+  const record = currentProduct.value?.description
+
+  return record?.[currentLanguageCode.value] || record?.hy || Object.values(record || {})[0] || ''
+})
+const productColors = computed(() => {
+  const colors = currentProduct.value?.options?.colors
+
+  if (Array.isArray(colors) && colors.length) {
+    return colors
+      .map((color) => ({
+        id: color.id ?? color.value ?? color.name,
+        name: color.name || color.value || copy.value.optionColor,
+        value: color.value || '#ffffff'
+      }))
+      .filter((color) => color.value)
+  }
+
+  const fallbackColor = currentProduct.value?.options?.color
+
+  return fallbackColor
+    ? [{ id: fallbackColor, name: copy.value.optionColor, value: fallbackColor }]
+    : []
+})
+const selectedProductColor = computed(() => selectedColor.value || productColors.value[0] || null)
+
+watch(
+  productColors,
+  (colors) => {
+    if (!colors.length) {
+      selectedColor.value = null
+      return
+    }
+
+    const selectedId = selectedColor.value?.id
+    const hasSelectedColor = colors.some((color) => color.id === selectedId)
+
+    if (!hasSelectedColor) {
+      selectedColor.value = colors[0]
+    }
+  },
+  { immediate: true }
+)
 
 function showProductImage(offset: number) {
   if (!detailThumbnails.value.length) {
@@ -57,7 +108,7 @@ function addCurrentProductToCart() {
     return
   }
 
-  Array.from({ length: detailQuantity.value }).forEach(() => addToCart(currentProduct.value!))
+  Array.from({ length: detailQuantity.value }).forEach(() => addToCart(currentProduct.value!, selectedProductColor.value))
 }
 </script>
 
@@ -66,9 +117,11 @@ function addCurrentProductToCart() {
     <nav class="product-breadcrumb" aria-label="Breadcrumb">
       <NuxtLink :to="localizedPath('/')">{{ copy.home }}</NuxtLink>
       <span aria-hidden="true">&rsaquo;</span>
-      <span>{{ menuGroups[0].title[currentLanguageCode] }}</span>
-      <span aria-hidden="true">&rsaquo;</span>
-      <strong>{{ menuGroups[0].children[currentLanguageCode][0] }}</strong>
+      <span>{{ currentProductCategoryGroup?.title?.[currentLanguageCode] || currentProductCategoryGroup?.title?.hy || copy.relatedProducts }}</span>
+      <template v-if="currentProductCategoryChild">
+        <span aria-hidden="true">&rsaquo;</span>
+        <strong>{{ currentProductCategoryChild }}</strong>
+      </template>
     </nav>
 
     <div class="product-detail-card">
@@ -82,20 +135,34 @@ function addCurrentProductToCart() {
             :aria-pressed="thumb === currentProductImage"
             @click="selectProductImage(thumb)"
           >
-            <img :src="thumb" :alt="currentProduct.title[currentLanguageCode]" />
+            <img :src="thumb" :alt="currentProduct.title[currentLanguageCode] || currentProduct.title.hy" />
           </button>
         </div>
 
         <div class="mobile-detail-price">{{ currentProduct.price }} <span aria-hidden="true">&#1423;</span></div>
 
         <div class="product-detail-art" @touchstart.passive="startProductTouch" @touchend.passive="finishProductTouch">
-          <img :src="currentProductImage" :alt="currentProduct.title[currentLanguageCode]" />
+          <img :src="currentProductImage" :alt="currentProduct.title[currentLanguageCode] || currentProduct.title.hy" />
         </div>
       </div>
 
       <aside class="product-detail-info">
-        <h1 id="product-title">{{ currentProduct.title[currentLanguageCode] }}</h1>
+        <h1 id="product-title">{{ currentProduct.title[currentLanguageCode] || currentProduct.title.hy }}</h1>
+        <p v-if="productShortDescription" class="product-short-description">{{ productShortDescription }}</p>
+        <div v-if="productDescription" class="product-description" v-html="productDescription"></div>
         <p v-if="isCurrentProductUnavailable" class="detail-unavailable">{{ copy.temporarilyUnavailable }}</p>
+
+        <div v-if="currentProductPriceOptions.length" class="price-options">
+          <div v-for="group in currentProductPriceOptions" :key="group.key" class="price-option-group">
+            <span>{{ group.label }}</span>
+            <div class="price-option-list">
+              <button v-for="option in group.values" :key="`${group.key}-${option.id}`" type="button">
+                <strong>{{ option.label || option.name }}</strong>
+                <small>{{ option.price }} <span aria-hidden="true">&#1423;</span></small>
+              </button>
+            </div>
+          </div>
+        </div>
 
         <form class="product-options" @submit.prevent>
           <label class="option-field option-wide">
@@ -139,10 +206,18 @@ function addCurrentProductToCart() {
 
           <div class="color-options" aria-label="Colors">
             <span>{{ copy.optionColor }}</span>
-            <button type="button" class="color-dot" :style="{ background: currentProduct.options?.color || '#ffffff' }" aria-label="Selected color" />
-            <button type="button" class="color-dot color-cream" aria-label="Cream" />
-            <button type="button" class="color-dot color-gray" aria-label="Gray" />
-            <button type="button" class="color-dot color-dark" aria-label="Dark" />
+            <button
+              v-for="color in productColors"
+              :key="color.id"
+              type="button"
+              class="color-dot"
+              :class="{ 'is-active': selectedProductColor?.id === color.id }"
+              :style="{ background: color.value }"
+              :aria-label="color.name"
+              :aria-pressed="selectedProductColor?.id === color.id"
+              :title="color.name"
+              @click="selectedColor = color"
+            />
           </div>
         </form>
 

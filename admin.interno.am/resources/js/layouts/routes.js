@@ -8,6 +8,12 @@ export const routes = [
                 route: '/shop-contact',
             },
             {
+                icon: ['far', 'house'],
+                label: 'Home Page',
+                name: 'languages',
+                route: '/shop-home',
+            },
+            {
                 icon: ['far', 'file-lines'],
                 label: 'Privacy Policy',
                 name: 'languages',
@@ -18,6 +24,12 @@ export const routes = [
                 label: 'Social Links',
                 name: 'languages',
                 route: '/shop-social',
+            },
+            {
+                icon: ['far', 'language'],
+                label: 'Translations',
+                name: 'shop_frontend_translations',
+                route: '/shop-translations',
             },
             {
                 icon: ['far', 'receipt'],
@@ -51,7 +63,7 @@ export const routes = [
             },
             {
                 icon: ['far', 'id-card'],
-                label: 'Craftsmen',
+                label: 'Արհեստավորներ',
                 name: 'shop_craftsmen',
                 route: '/shop-craftsmen',
             },

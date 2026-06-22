@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
     public: {
-      frontApiBase: process.env.NUXT_PUBLIC_FRONT_API_BASE || 'http://127.0.0.1:8001'
+      frontApiBase: process.env.NUXT_PUBLIC_FRONT_API_BASE || 'http://127.0.0.1:8000'
     }
   },
   devServer: {

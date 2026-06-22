@@ -158,9 +158,60 @@ const removeAttributePrice = (key, index) => {
     attributeRows(key).splice(index, 1);
 };
 
+const ensureColorIds = () => {
+    if (!Array.isArray(form.value.option_color_ids)) {
+        form.value.option_color_ids = form.value.option_color_id ? [form.value.option_color_id] : [];
+    }
+
+    form.value.option_color_ids = [...new Set(
+        form.value.option_color_ids
+            .map((colorId) => Number(colorId))
+            .filter(Boolean)
+    )];
+};
+
+const selectedColorIds = computed(() => (Array.isArray(form.value.option_color_ids) ? form.value.option_color_ids : [])
+    .map((colorId) => Number(colorId))
+    .filter(Boolean));
+
+const mainColorOptions = computed(() => {
+    const selectedIds = selectedColorIds.value.map((colorId) => Number(colorId));
+    const options = (props.params.optionColors || [])
+        .filter((option) => option.value && selectedIds.includes(Number(option.value)));
+
+    return [
+        {value: null, label: 'No main color'},
+        ...options,
+    ];
+});
+
+watch(() => form.value.option_color_ids, () => {
+    ensureColorIds();
+
+    if (!selectedColorIds.value.length) {
+        form.value.option_color_id = null;
+        return;
+    }
+
+    if (!form.value.option_color_id || !selectedColorIds.value.includes(Number(form.value.option_color_id))) {
+        form.value.option_color_id = selectedColorIds.value[0];
+    }
+}, {deep: true});
+
+watch(() => form.value.option_color_id, (colorId) => {
+    ensureColorIds();
+
+    const normalizedColorId = Number(colorId);
+
+    if (normalizedColorId && !selectedColorIds.value.includes(normalizedColorId)) {
+        form.value.option_color_ids = [normalizedColorId, ...selectedColorIds.value];
+    }
+});
+
 const submitForm = () => {
     syncGalleryIds();
     ensureAttributePrices();
+    ensureColorIds();
     emits('submit');
 };
 </script>
@@ -298,12 +349,27 @@ const submitForm = () => {
                     </div>
                     <div>
                         <CustomSelect
-                            label="Color"
-                            v-model="form.option_color_id"
-                            mode="single"
-                            placeholder="Select color"
+                            label="Colors"
+                            v-model="form.option_color_ids"
+                            mode="tags"
+                            placeholder="Select colors"
                             :disabled="!canEdit"
                             :options="params.optionColors"
+                            :searchable="true"
+                            :canClear="true"
+                            :closeOnSelect="false"
+                            class="py-2 rounded-lg border-stroke bg-transparent"
+                            :error="form.errors?.option_color_ids"
+                        />
+                    </div>
+                    <div>
+                        <CustomSelect
+                            label="Main color"
+                            v-model="form.option_color_id"
+                            mode="single"
+                            placeholder="Select main color"
+                            :disabled="!canEdit || !selectedColorIds.length"
+                            :options="mainColorOptions"
                             :searchable="true"
                             :canClear="false"
                             class="py-2 rounded-lg border-stroke bg-transparent"

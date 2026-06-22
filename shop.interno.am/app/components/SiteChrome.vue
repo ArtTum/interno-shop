@@ -13,10 +13,11 @@ const {
   currentCategoryGroup,
   currentCategoryRoute,
   currentLanguage,
-  currentLanguageCode,
   isCategoryPage,
   languages,
   localizedPath,
+  menuGroupChildren,
+  menuGroupTitle,
   menuGroups,
   openCategory,
   scrollProductSlider,
@@ -55,6 +56,7 @@ function openMobileCategory(groupKey: string, childIndex?: number) {
 
       <nav class="desktop-nav" aria-label="Primary">
         <NuxtLink :to="localizedPath('/')">{{ copy.home }}</NuxtLink>
+        <NuxtLink :to="localizedPath('/craftsmen')">{{ copy.craftsmen }}</NuxtLink>
         <NuxtLink :to="localizedPath('/contact')">{{ copy.contact }}</NuxtLink>
       </nav>
 
@@ -121,16 +123,17 @@ function openMobileCategory(groupKey: string, childIndex?: number) {
 
       <nav class="drawer-nav" aria-label="Mobile menu">
         <NuxtLink :to="localizedPath('/')" @click="isMenuOpen = false">{{ copy.home }}</NuxtLink>
+        <NuxtLink :to="localizedPath('/craftsmen')" @click="isMenuOpen = false">{{ copy.craftsmen }}</NuxtLink>
         <div v-for="group in menuGroups" :key="group.key" class="menu-group">
           <button class="menu-trigger" :class="{ 'is-active': currentCategoryGroup?.key === group.key }" type="button" @click="openMobileCategory(group.key)">
             <span class="sidebar-icon">⌘</span>
-            {{ group.title[currentLanguageCode] }}
+            {{ menuGroupTitle(group) }}
             <span class="chevron" :class="{ 'is-open': activeMenuKey === group.key }" aria-hidden="true" @click.stop="toggleMenuGroup(group.key)" />
           </button>
 
           <div v-if="activeMenuKey === group.key" class="submenu">
             <button
-              v-for="(child, childIndex) in group.children[currentLanguageCode]"
+              v-for="(child, childIndex) in menuGroupChildren(group)"
               :key="child"
               :class="{ 'is-active': currentCategoryGroup?.key === group.key && currentCategoryRoute?.childIndex === childIndex }"
               type="button"
@@ -156,13 +159,13 @@ function openMobileCategory(groupKey: string, childIndex?: number) {
         <div v-for="group in menuGroups" :key="group.key" class="menu-group">
           <button class="menu-trigger" :class="{ 'is-active': currentCategoryGroup?.key === group.key }" type="button" @click="openCategory(group.key)">
             <span class="sidebar-icon">⌘</span>
-            {{ group.title[currentLanguageCode] }}
+            {{ menuGroupTitle(group) }}
             <span class="chevron" :class="{ 'is-open': activeMenuKey === group.key }" aria-hidden="true" @click.stop="toggleMenuGroup(group.key)" />
           </button>
 
           <div v-if="activeMenuKey === group.key" class="submenu">
             <button
-              v-for="(child, childIndex) in group.children[currentLanguageCode]"
+              v-for="(child, childIndex) in menuGroupChildren(group)"
               :key="child"
               :class="{ 'is-active': currentCategoryGroup?.key === group.key && currentCategoryRoute?.childIndex === childIndex }"
               type="button"

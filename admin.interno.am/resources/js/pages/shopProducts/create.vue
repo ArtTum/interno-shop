@@ -31,6 +31,7 @@ const form = reactive({
     option_height: '',
     option_material: '',
     option_color_id: null,
+    option_color_ids: [],
     media_id: null,
     media: [],
     image: '',

@@ -25,23 +25,19 @@ const setSidebarState = (value) => {
         }"
     >
         <!-- SIDEBAR HEADER -->
-        <div style="background: white" class="flex items-center justify-center gap-2 px-2 py-4.5 lg:py-4.5">
-            <router-link to="/" style="height: 31px" @click="store.commit('sideBar/UPDATE_NAV_TIMESTAMP')">
+        <div style="background: white" class="flex min-h-18 items-center justify-center gap-2 px-2 py-3">
+            <router-link to="/" class="flex items-center justify-center" @click="store.commit('sideBar/UPDATE_NAV_TIMESTAMP')">
                 <img
-                    width="170px"
-                    height="31px"
                     v-show="isHovered"
                     src="@assets/images/1logo.png"
                     alt="Logo"
-                    class=" transition-all duration-300"
+                    class="h-14 w-44 object-contain transition-all duration-300"
                 />
                 <img
-                    width="31px"
-                    height="31px"
                     v-show="!isHovered"
                     src="@assets/images/1logo.png"
                     alt="Logo"
-                    class=" transition-all duration-300"
+                    class="h-10 w-10 object-contain transition-all duration-300"
                 />
             </router-link>
 

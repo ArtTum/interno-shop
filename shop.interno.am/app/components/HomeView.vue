@@ -1,22 +1,31 @@
 ﻿<script setup lang="ts">
-const { currentLanguageCode, menuGroups, products, secondaryProducts } = useCatalog()
+const { productSections } = useCatalog()
 </script>
 
 <template>
-  <section class="catalog-section" aria-labelledby="stretch-title">
-    <h1 id="stretch-title">{{ menuGroups[0].title[currentLanguageCode] }}</h1>
-    <h2>{{ menuGroups[0].children[currentLanguageCode][0] }}</h2>
+  <section
+    v-for="(section, sectionIndex) in productSections"
+    :key="section.key"
+    class="catalog-section"
+    :aria-labelledby="`catalog-section-${section.key}`"
+  >
+    <template v-for="(list, listIndex) in section.lists" :key="list.key">
+      <h1
+        v-if="sectionIndex === 0 && listIndex === 0"
+        :id="`catalog-section-${section.key}`"
+      >
+        {{ list.title || section.title }}
+      </h1>
+      <h2
+        v-else
+        :id="listIndex === 0 ? `catalog-section-${section.key}` : undefined"
+      >
+        {{ list.title || section.title }}
+      </h2>
 
-    <div class="product-grid">
-      <ProductCard v-for="product in products" :key="product.id" :product="product" />
-    </div>
-  </section>
-
-  <section class="catalog-section" aria-labelledby="mdf-title">
-    <h2 id="mdf-title">{{ menuGroups[1].title[currentLanguageCode] }}</h2>
-
-    <div class="product-grid short-grid">
-      <ProductCard v-for="product in secondaryProducts" :key="product.id" :product="product" />
-    </div>
+      <div class="product-grid">
+        <ProductCard v-for="product in list.products" :key="`${list.key}-${product.id}-${listIndex}`" :product="product" />
+      </div>
+    </template>
   </section>
 </template>

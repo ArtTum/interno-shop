@@ -9,7 +9,7 @@
     <tbody class="tbody">
     <tr class="tr">
         <td class="header td">
-            <img src="/assets/icons/logo.svg" class="img" alt="Logo">
+            <img src="{{ public_path('/icon/Logo-.png') }}" class="img" alt="Logo">
         </td>
         <td class="shop-info td"></td>
     </tr>

@@ -247,7 +247,22 @@ fetchPageData();
                         <span class="font-medium text-black">{{ item.option_type_name || '-' }}</span>
                     </td>
                     <td class="py-5 px-4 pl-9 xl:pl-11">
-                        <span class="inline-flex items-center gap-2 font-medium text-black">
+                        <span v-if="item.option_colors?.length" class="inline-flex flex-wrap items-center gap-2 font-medium text-black">
+                            <span
+                                v-for="color in item.option_colors"
+                                :key="color.id"
+                                class="inline-flex items-center gap-1"
+                                :title="color.name"
+                            >
+                                <span
+                                    class="h-4 w-4 rounded border border-stroke"
+                                    :style="{backgroundColor: color.value || '#ffffff'}"
+                                ></span>
+                                <span>{{ color.name }}</span>
+                                <small v-if="Number(color.id) === Number(item.option_color_id)" class="text-primary">(main)</small>
+                            </span>
+                        </span>
+                        <span v-else class="inline-flex items-center gap-2 font-medium text-black">
                             <span
                                 v-if="item.option_color_value"
                                 class="h-4 w-4 rounded border border-stroke"

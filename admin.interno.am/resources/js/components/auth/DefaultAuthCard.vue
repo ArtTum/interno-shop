@@ -15,6 +15,8 @@ const props = defineProps(['subtitle', 'title', 'customClasses'])
                         <img
                             src="@assets/images/1logo.png"
                             alt="Logo"
+                            class="mx-auto w-full max-w-80 object-contain"
+                            style="max-height: 150px"
                         />
                     </router-link>
 

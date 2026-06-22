@@ -33,7 +33,22 @@ const submit = async () => {
                 <div v-if="form.errors && Object.keys(form.errors).length" class="p-6"><AlertError :errors="form.errors"/></div>
                 <div class="grid grid-cols-4 gap-6 p-6 max-md:grid-cols-1">
                     <CustomInput v-model="form.name" name="name" label="Name *" type="text" placeholder="Enter name" :error="form.errors?.name"/>
-                    <CustomInput v-model="form.value" name="value" label="Value" type="color" placeholder="#000000" :error="form.errors?.value"/>
+                    <div>
+                        <label class="mb-2.5 block font-medium text-black" for="product_color_value">Value</label>
+                        <input
+                            id="product_color_value"
+                            v-model="form.value"
+                            name="value"
+                            type="color"
+                            placeholder="#000000"
+                            class="product-color-value"
+                            :class="{'is-invalid': form.errors?.value}"
+                        >
+                        <div v-if="form.errors?.value" class="invalid-feedback">
+                            <span v-if="Array.isArray(form.errors.value)">{{ form.errors.value[0] }}</span>
+                            <span v-else>{{ form.errors.value }}</span>
+                        </div>
+                    </div>
                     <CustomInput v-model="form.sort_order" name="sort_order" label="Sort order" type="number" placeholder="Enter sort order" :error="form.errors?.sort_order"/>
                     <div class="flex items-end pb-2"><Switch @change="(value) => form.status = value" :value="form.status" id="color_status" label="Active"/></div>
                 </div>
@@ -43,3 +58,9 @@ const submit = async () => {
         </div>
     </DefaultLayoutComponent>
 </template>
+
+<style scoped>
+.product-color-value {
+    width: 100%;
+}
+</style>

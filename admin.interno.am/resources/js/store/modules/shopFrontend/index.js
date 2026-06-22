@@ -28,6 +28,16 @@ const actions = {
         commit('SET_ORDERS', res.data.data);
         return res.data.data;
     },
+
+    async fetchTranslations(context, params = {}) {
+        const res = await baseHttp.get('shop-frontend/translations', {params});
+        return res.data.data;
+    },
+
+    async updateTranslations(context, payload) {
+        const res = await baseHttp.put('shop-frontend/translations', payload);
+        return res.data.data;
+    },
 };
 
 const mutations = {

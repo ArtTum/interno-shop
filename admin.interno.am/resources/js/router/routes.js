@@ -19,6 +19,21 @@ const routes = [
         ],
     },
     {
+        path: '/shop-home',
+        meta: { requiresAuth: true },
+        children: [
+            {
+                path: '',
+                component: () => import('@pages/shopHome/index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'languages',
+                    permission_type: 'can_view',
+                },
+            },
+        ],
+    },
+    {
         path: '/shop-privacy',
         meta: { requiresAuth: true },
         children: [
@@ -43,6 +58,21 @@ const routes = [
                 meta: {
                     requiresAuth: true,
                     permission_name: 'languages',
+                    permission_type: 'can_view',
+                },
+            },
+        ],
+    },
+    {
+        path: '/shop-translations',
+        meta: { requiresAuth: true },
+        children: [
+            {
+                path: '',
+                component: () => import('@pages/shopTranslations/index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    permission_name: 'shop_frontend_translations',
                     permission_type: 'can_view',
                 },
             },
