@@ -968,6 +968,220 @@ h2 {
   font-weight: 620;
 }
 
+.craftsmen-page {
+  padding: 12px 0 32px;
+}
+
+.craftsmen-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+
+.craftsmen-head h1 {
+  margin: 0 0 6px;
+  color: #13233d;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.craftsmen-head p {
+  max-width: 620px;
+  margin: 0;
+  color: #637083;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.craftsmen-skip {
+  flex: 0 0 auto;
+  min-height: 36px;
+  border: 1px solid #c9d2df;
+  border-radius: 5px;
+  background: #fff;
+  color: #142948;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0 16px;
+}
+
+.craftsmen-filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+  border: 1px solid #d8dee8;
+  border-radius: 6px;
+  background: #fff;
+  padding: 12px;
+}
+
+.craftsmen-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.craftsmen-filters span {
+  color: #647086;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.craftsmen-filters input,
+.craftsmen-filters select {
+  width: 100%;
+  height: 34px;
+  border: 1px solid #cbd4e0;
+  border-radius: 4px;
+  background: #fff;
+  color: #142948;
+  font-size: 12px;
+  outline: none;
+  padding: 0 10px;
+}
+
+.craftsmen-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.craftsman-card {
+  display: grid;
+  grid-template-columns: 122px minmax(0, 1fr);
+  gap: 14px;
+  min-height: 190px;
+  border: 1px solid #d8dee8;
+  border-radius: 6px;
+  background: #fff;
+  padding: 12px;
+}
+
+.craftsman-card > img,
+.craftsman-photo-fallback {
+  width: 122px;
+  height: 166px;
+  border: 1px solid #d8dee8;
+  border-radius: 5px;
+  background: #eef2f7;
+  object-fit: cover;
+}
+
+.craftsman-photo-fallback {
+  display: grid;
+  place-items: center;
+  color: #142948;
+  font-size: 36px;
+  font-weight: 760;
+}
+
+.craftsman-info {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.craftsman-title-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.craftsman-title-row h2 {
+  margin: 0;
+  color: #13233d;
+  font-size: 15px;
+  font-weight: 760;
+  line-height: 1.25;
+}
+
+.craftsman-title-row strong {
+  align-self: flex-start;
+  border: 1px solid #cbd4e0;
+  border-radius: 4px;
+  color: #142948;
+  font-size: 11px;
+  padding: 4px 7px;
+  white-space: nowrap;
+}
+
+.craftsman-info dl {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+}
+
+.craftsman-info dl div {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.craftsman-info dt {
+  color: #7b8798;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.craftsman-info dd {
+  margin: 0;
+  color: #142948;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.craftsman-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 22px;
+  margin-top: 10px;
+}
+
+.craftsman-badges span {
+  border: 1px solid rgba(20, 41, 72, 0.14);
+  border-radius: 999px;
+  background: #f3f7fb;
+  color: #142948;
+  font-size: 10px;
+  font-weight: 760;
+  padding: 4px 8px;
+}
+
+.craftsman-info > button {
+  width: fit-content;
+  min-height: 32px;
+  margin-top: auto;
+  border: 0;
+  border-radius: 4px;
+  background: #142948;
+  color: #fff;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 720;
+  padding: 0 14px;
+}
+
+.craftsmen-loading,
+.craftsmen-empty {
+  display: grid;
+  min-height: 120px;
+  place-items: center;
+  border: 1px solid #d8dee8;
+  border-radius: 6px;
+  background: #fff;
+  color: #657184;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .checkout-modal {
   position: fixed;
   inset: 0;
@@ -2220,6 +2434,56 @@ h2 {
 
   .search-results-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .craftsmen-page {
+    padding: 2px 0 96px;
+  }
+
+  .craftsmen-head {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .craftsmen-head h1 {
+    font-size: 23px;
+  }
+
+  .craftsmen-skip {
+    width: 100%;
+  }
+
+  .craftsmen-filters,
+  .craftsmen-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .craftsman-card {
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 10px;
+    min-height: 150px;
+    padding: 10px;
+  }
+
+  .craftsman-card > img,
+  .craftsman-photo-fallback {
+    width: 92px;
+    height: 126px;
+  }
+
+  .craftsman-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .craftsman-info dl div {
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .craftsman-info > button {
+    width: 100%;
+    margin-top: 10px;
   }
 
   .cart-page {

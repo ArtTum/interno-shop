@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
 
 const {
   addToCart,
@@ -12,15 +12,18 @@ const {
   localizedPath,
   removeFromCart,
   searchCraftsmen,
+  selectedCraftsman: storedCraftsman,
+  selectCraftsmanForCheckout,
   submitOrder,
   updateCartQuantity
 } = useCatalog()
 
 const isCheckoutOpen = ref(false)
 const router = useRouter()
-type Craftsman = { id: number | null, code: string, name: string }
+const route = useRoute()
+type Craftsman = { id: number | null, code: string, name: string, image?: string | null, phone?: string | null, work_region?: string | null, work_city?: string | null, work_field?: string | null, has_whatsapp?: boolean, has_viber?: boolean }
 const craftsmenSuggestions = ref<Craftsman[]>([])
-const selectedCraftsman = ref<Craftsman | null>(null)
+const selectedCraftsman = ref<Craftsman | null>(storedCraftsman.value)
 const isCraftsmanLoading = ref(false)
 let craftsmanSearchTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -73,15 +76,21 @@ function clearCheckoutError(field: keyof typeof checkoutForm) {
   checkoutErrors[field] = ''
 }
 
-function selectCraftsman(craftsman: Craftsman) {
+function applyCraftsman(craftsman: Craftsman | null) {
   selectedCraftsman.value = craftsman
-  checkoutForm.masterCode = craftsman.code
-  checkoutForm.craftsmanName = craftsman.name
+  checkoutForm.masterCode = craftsman?.code || ''
+  checkoutForm.craftsmanName = craftsman?.name || ''
+}
+
+function selectCraftsman(craftsman: Craftsman) {
+  applyCraftsman(craftsman)
+  selectCraftsmanForCheckout(craftsman)
   craftsmenSuggestions.value = []
 }
 
 function searchCraftsman(field: 'code' | 'name') {
   selectedCraftsman.value = null
+  selectCraftsmanForCheckout(null)
 
   if (craftsmanSearchTimer) {
     clearTimeout(craftsmanSearchTimer)
@@ -138,6 +147,24 @@ async function submitCheckout() {
   isCheckoutOpen.value = false
   router.push(localizedPath('/checkout-success'))
 }
+
+function goToCraftsmen() {
+  if (!cartProducts.value.length) {
+    return
+  }
+
+  router.push(localizedPath('/craftsmen'))
+}
+
+watch(storedCraftsman, (craftsman) => {
+  applyCraftsman(craftsman)
+}, { immediate: true })
+
+watch(() => route.query.checkout, (checkout) => {
+  if (checkout === '1' && cartProducts.value.length) {
+    isCheckoutOpen.value = true
+  }
+}, { immediate: true })
 </script>
 
 <template>
@@ -206,7 +233,7 @@ async function submitCheckout() {
           <span style="margin-right: 10px;">{{ copy.paymentDue }}</span>
           <strong>{{ cartTotal }} <span aria-hidden="true">&#1423;</span></strong>
         </div>
-        <button type="button" @click="isCheckoutOpen = true">{{ copy.pay }}</button>
+        <button type="button" @click="goToCraftsmen">{{ copy.pay }}</button>
       </div>
 
       <div class="cart-recommendations">
