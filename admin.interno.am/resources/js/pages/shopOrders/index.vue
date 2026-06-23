@@ -54,7 +54,8 @@ const productTitle = (item, language = 'hy') => {
 
 const OPTION_LABELS = {
     code: 'Կոդ', size: 'Չափ', height: 'Բարձրություն', unit: 'Չափիչ',
-    piece: 'Հատ', type: 'Տեսակ', material: 'Նյութ', color: 'Գույն', quantity: 'Քանակ',
+    piece: 'Հատ', type: 'Տեսակ', material: 'Նյութ', color: 'Գույն',
+    quantity: 'Քանակ', power: 'Հզորություն',
 };
 
 const optionEntries = (item) =>

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 
 const {
@@ -81,13 +81,13 @@ const selectedOptionSummary = computed(() => {
     .join(' · ') || null
 })
 
-// Armenian labels for attribute groups
+// Labels for attribute groups — reactive to current language via copy
 function attrGroupLabel(key: string): string {
   const map: Record<string, string> = {
-    height: copy.value.optionHeight || 'Բարձրություն',
-    unit: copy.value.optionUnitLong || 'Չափ. միավոր',
-    size: copy.value.optionSize || 'Չափ',
-    power: 'Հզորություն'
+    height: copy.value.optionHeight,
+    unit: copy.value.optionUnitLong,
+    size: copy.value.optionSize,
+    power: copy.value.optionPower
   }
 
   return map[key] || (key.charAt(0).toUpperCase() + key.slice(1))

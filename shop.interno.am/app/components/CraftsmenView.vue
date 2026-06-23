@@ -127,7 +127,7 @@ onMounted(loadCraftsmen)
       </label>
     </div>
 
-    <div v-if="isLoading" class="craftsmen-loading">...</div>
+    <div v-if="isLoading" class="craftsmen-loading">{{ copy.loading }}</div>
 
     <div v-else-if="craftsmen.length" class="craftsmen-list">
       <article v-for="craftsman in craftsmen" :key="`${craftsman.id}-${craftsman.code}`" class="craftsman-row">
@@ -153,8 +153,8 @@ onMounted(loadCraftsmen)
         <div class="craftsman-side">
           <strong class="craftsman-code">{{ craftsman.code }}</strong>
           <div class="craftsman-badges">
-            <span v-if="craftsman.has_whatsapp">WhatsApp</span>
-            <span v-if="craftsman.has_viber">Viber</span>
+            <span v-if="craftsman.has_whatsapp">{{ copy.whatsApp }}</span>
+            <span v-if="craftsman.has_viber">{{ copy.viber }}</span>
           </div>
           <button type="button" @click="chooseCraftsman(craftsman)">
             {{ copy.craftsmenChoose }}
