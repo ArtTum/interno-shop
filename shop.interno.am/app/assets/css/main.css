@@ -2104,6 +2104,29 @@ h2 {
   -webkit-line-clamp: 3;
 }
 
+.card-colors {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 0 10px;
+  flex-wrap: wrap;
+}
+
+.card-color-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  cursor: default;
+  flex-shrink: 0;
+}
+
+.card-color-more {
+  font-size: 10px;
+  color: #8a94a3;
+  font-weight: 700;
+}
+
 .product-actions {
   display: flex;
   align-items: center;
@@ -3077,18 +3100,16 @@ h2 {
   }
 
   .price-options {
+    grid-template-columns: 1fr;
     gap: 10px;
     margin-bottom: 16px;
   }
 
-  .price-option-list {
-    gap: 7px;
+  .price-option-select {
+    height: 40px;
+    font-size: 13px;
   }
 
-  .price-option-list button {
-    min-height: 32px;
-    padding: 6px 9px;
-  }
 
   .option-field.option-wide,
   .color-options {

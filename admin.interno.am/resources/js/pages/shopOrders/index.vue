@@ -266,9 +266,12 @@ fetchOrders();
                                                     <div class="p-4">
                                                         <!-- Price row -->
                                                         <div class="mb-3 flex items-center justify-between rounded-lg bg-green-50 px-3 py-2">
-                                                            <span class="text-xs font-bold uppercase tracking-wide text-green-700">Գին × {{ item.quantity }}</span>
+                                                            <div>
+                                                                <span class="text-xs font-bold uppercase tracking-wide text-green-700">Գին × {{ item.quantity }}</span>
+                                                                <span v-if="item.selectedOptionLabel" class="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">{{ item.selectedOptionLabel }}</span>
+                                                            </div>
                                                             <strong class="text-base font-bold text-green-800">
-                                                                {{ formatPrice(Number(item.product?.price || 0) * item.quantity) }} ֏
+                                                                {{ formatPrice((item.effectivePrice != null ? Number(item.effectivePrice) : Number(item.product?.price || 0)) * item.quantity) }} ֏
                                                             </strong>
                                                         </div>
 

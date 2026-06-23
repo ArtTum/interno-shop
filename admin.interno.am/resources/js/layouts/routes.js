@@ -34,7 +34,7 @@ export const routes = [
             {
                 icon: ['far', 'receipt'],
                 label: 'Shop Orders',
-                name: 'languages',
+                name: 'shop_orders',
                 route: '/shop-orders',
             },
             {
