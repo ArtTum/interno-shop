@@ -129,22 +129,29 @@ onMounted(loadCraftsmen)
 
     <div v-if="isLoading" class="craftsmen-loading">...</div>
 
-    <div v-else-if="craftsmen.length" class="craftsmen-grid">
-      <article v-for="craftsman in craftsmen" :key="`${craftsman.id}-${craftsman.code}`" class="craftsman-card">
-        <img v-if="craftsman.image" :src="craftsman.image" :alt="craftsman.name" />
-        <div v-else class="craftsman-photo-fallback">{{ craftsman.name.slice(0, 1) }}</div>
+    <div v-else-if="craftsmen.length" class="craftsmen-list">
+      <article v-for="craftsman in craftsmen" :key="`${craftsman.id}-${craftsman.code}`" class="craftsman-row">
+        <figure class="craftsman-avatar">
+          <img v-if="craftsman.image" :src="craftsman.image" :alt="craftsman.name" />
+          <div v-else class="craftsman-avatar-fallback">{{ craftsman.name.slice(0, 1) }}</div>
+        </figure>
 
-        <div class="craftsman-info">
-          <div class="craftsman-title-row">
+        <div class="craftsman-main">
+          <div class="craftsman-name-row">
             <h2>{{ craftsman.name }}</h2>
-            <strong>{{ craftsman.code }}</strong>
+            <span v-if="craftsman.work_field" class="craftsman-field-tag">{{ craftsman.work_field }}</span>
           </div>
-          <dl>
-            <div v-if="craftsman.work_region"><dt>{{ copy.craftsmenRegion }}</dt><dd>{{ craftsman.work_region }}</dd></div>
-            <div v-if="craftsman.work_city"><dt>{{ copy.craftsmenCity }}</dt><dd>{{ craftsman.work_city }}</dd></div>
-            <div v-if="craftsman.work_field"><dt>{{ copy.craftsmenField }}</dt><dd>{{ craftsman.work_field }}</dd></div>
-            <div v-if="craftsman.phone"><dt>{{ copy.craftsmenPhone }}</dt><dd>{{ craftsman.phone }}</dd></div>
-          </dl>
+          <div class="craftsman-meta">
+            <span v-if="craftsman.work_region">{{ craftsman.work_region }}</span>
+            <span v-if="craftsman.work_city" class="meta-sep">·</span>
+            <span v-if="craftsman.work_city">{{ craftsman.work_city }}</span>
+            <span v-if="craftsman.phone" class="meta-sep">·</span>
+            <a v-if="craftsman.phone" :href="`tel:${craftsman.phone}`" class="craftsman-phone">{{ craftsman.phone }}</a>
+          </div>
+        </div>
+
+        <div class="craftsman-side">
+          <strong class="craftsman-code">{{ craftsman.code }}</strong>
           <div class="craftsman-badges">
             <span v-if="craftsman.has_whatsapp">WhatsApp</span>
             <span v-if="craftsman.has_viber">Viber</span>

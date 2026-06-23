@@ -1,0 +1,19 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" width="400" height="300">
+  <rect width="400" height="300" fill="#f0f2f5"/>
+  <!-- Shadow -->
+  <polygon points="205,82 215,82 215,222 365,222 365,232 205,232" fill="#909498" opacity="0.3"/>
+  <!-- L-shaped corner profile — vertical arm -->
+  <rect x="195" y="78" width="22" height="140" rx="2" fill="#222" stroke="#111" stroke-width="1"/>
+  <!-- L-shaped corner profile — horizontal arm -->
+  <rect x="195" y="196" width="160" height="22" rx="2" fill="#222" stroke="#111" stroke-width="1"/>
+  <!-- Inner corner -->
+  <rect x="195" y="196" width="22" height="22" fill="#1a1a1a"/>
+  <!-- Highlight edges -->
+  <line x1="196" y1="78" x2="196" y2="218" stroke="#444" stroke-width="1.5" opacity="0.8"/>
+  <line x1="195" y1="197" x2="355" y2="197" stroke="#444" stroke-width="1.5" opacity="0.8"/>
+  <!-- Thickness detail on vertical -->
+  <rect x="217" y="78" width="3" height="140" rx="1" fill="#333" opacity="0.6"/>
+  <!-- Thickness detail on horizontal -->
+  <rect x="195" y="218" width="160" height="3" rx="1" fill="#333" opacity="0.6"/>
+  <text x="200" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">Corner Aluminum Profile — Black</text>
+</svg>

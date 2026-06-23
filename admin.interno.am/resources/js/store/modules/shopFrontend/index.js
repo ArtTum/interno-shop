@@ -29,6 +29,12 @@ const actions = {
         return res.data.data;
     },
 
+    async updateOrderStatus({commit}, {id, status}) {
+        const res = await baseHttp.patch(`shop-frontend/orders/${id}/status`, {status});
+        commit('UPDATE_ORDER', res.data.data);
+        return res.data.data;
+    },
+
     async fetchTranslations(context, params = {}) {
         const res = await baseHttp.get('shop-frontend/translations', {params});
         return res.data.data;
@@ -46,6 +52,10 @@ const mutations = {
     },
     SET_ORDERS(state, data) {
         state.orders = data;
+    },
+    UPDATE_ORDER(state, updated) {
+        const index = state.orders.findIndex(o => o.id === updated.id);
+        if (index !== -1) state.orders.splice(index, 1, updated);
     },
 };
 

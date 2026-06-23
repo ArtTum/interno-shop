@@ -1,0 +1,28 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" width="400" height="300">
+  <rect width="400" height="300" fill="#f0f2f5"/>
+  <defs>
+    <linearGradient id="mdfWoodGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#c8903a"/>
+      <stop offset="30%" stop-color="#d8a04a"/>
+      <stop offset="60%" stop-color="#c07830"/>
+      <stop offset="100%" stop-color="#c88838"/>
+    </linearGradient>
+  </defs>
+  <rect x="62" y="162" width="276" height="10" rx="4" fill="#a07838" opacity="0.3"/>
+  <rect x="60" y="120" width="280" height="40" rx="2" fill="url(#mdfWoodGrad)" stroke="#a07030" stroke-width="1"/>
+  <!-- Wood grain lines across skirting -->
+  <line x1="60" y1="128" x2="340" y2="130" stroke="#a06820" stroke-width="0.8" opacity="0.4"/>
+  <line x1="60" y1="135" x2="340" y2="133" stroke="#b87828" stroke-width="1.0" opacity="0.3"/>
+  <line x1="60" y1="142" x2="340" y2="144" stroke="#a06820" stroke-width="0.7" opacity="0.4"/>
+  <line x1="60" y1="150" x2="340" y2="148" stroke="#b87828" stroke-width="0.9" opacity="0.3"/>
+  <!-- Top bevel -->
+  <rect x="60" y="120" width="280" height="5" rx="2" fill="#e8a848" opacity="0.6"/>
+  <!-- Bottom bevel -->
+  <rect x="60" y="155" width="280" height="5" rx="1" fill="#a87030" opacity="0.4"/>
+  <!-- Routed groove -->
+  <rect x="60" y="133" width="280" height="1.5" rx="1" fill="#8a5818" opacity="0.4"/>
+  <rect x="60" y="148" width="280" height="1.5" rx="1" fill="#8a5818" opacity="0.4"/>
+  <rect x="62" y="121" width="276" height="2" rx="1" fill="#f0c060" opacity="0.5"/>
+  <rect x="60" y="120" width="280" height="40" rx="2" fill="none" stroke="#a07030" stroke-width="1"/>
+  <text x="200" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">MDF Panel — Wood Finish</text>
+</svg>

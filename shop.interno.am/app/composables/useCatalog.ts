@@ -62,6 +62,8 @@ interface CartItem {
   productId: number
   quantity: number
   color?: ProductColor | null
+  effectivePrice?: number | null
+  selectedOptionLabel?: string | null
 }
 
 interface ShopFrontendSettings {
@@ -479,12 +481,7 @@ const translations = {
     temporarilyUnavailable: 'Временно отсутствует'
   }
 } satisfies Record<LanguageCode, Record<string, string>>
-const products: Product[] = [
-  {
-    id: 1,
-    title: {
-      hy: 'Ալյումինե, երկաթե հիմք նուրբ սև գույնով',
-      en: 'Aluminum profile with a refined black finish',
+const products: Product[] = [ /* fallback intentionally empty — data comes from API */
       ru: 'Алюминиевый профиль с черным покрытием'
     },
     price: '15000',
@@ -652,8 +649,8 @@ function colorKey(color?: ProductColor | null) {
   return String(color?.id ?? color?.value ?? color?.name ?? 'default')
 }
 
-function cartItemKey(item: Pick<CartItem, 'productId' | 'color'>) {
-  return `${item.productId}:${colorKey(item.color)}`
+function cartItemKey(item: Pick<CartItem, 'productId' | 'color' | 'effectivePrice'>) {
+  return `${item.productId}:${colorKey(item.color)}:${item.effectivePrice ?? ''}`
 }
 
 export function useCatalog() {
@@ -667,11 +664,15 @@ export function useCatalog() {
       return ''
     }
 
+    if (path.startsWith('/assets/craftsmen/')) {
+      return `${frontApiBase}${path}`
+    }
+
     if (/^(https?:)?\/\//.test(path) || path.startsWith('data:') || path.startsWith('/assets/')) {
       return path
     }
 
-    return path.startsWith('/') ? `${frontApiBase}${path}` : path
+    return path.startsWith('/') ? `${frontApiBase}${path}` : `${frontApiBase}/${path.replace(/^\/+/, '')}`
   }
   const normalizeProductAssets = (product: Product): Product => ({
     ...product,
@@ -682,6 +683,15 @@ export function useCatalog() {
     ...craftsman,
     image: adminAssetUrl(craftsman.image)
   })
+  const mergedTranslations = (remoteTranslations?: Record<LanguageCode, Record<string, string>>) => {
+    return Object.fromEntries(languages.map((language) => [
+      language.code,
+      {
+        ...(translations[language.code] || {}),
+        ...(remoteTranslations?.[language.code] || {})
+      }
+    ])) as Record<LanguageCode, Record<string, string>>
+  }
   const { data: remoteCatalog } = useFetch<any>(frontApiUrl('/api/front/shop'), {
     key: 'front-shop-config',
     transform: (response: any) => response?.data ?? null,
@@ -707,7 +717,7 @@ export function useCatalog() {
   const catalogConfig = computed<ShopFrontendConfig>(() => ({
     languages: remoteCatalog.value?.languages?.length ? remoteCatalog.value.languages : languages,
     menuGroups: remoteCatalog.value?.menuGroups?.length ? remoteCatalog.value.menuGroups : menuGroups,
-    translations: remoteCatalog.value?.translations || translations,
+    translations: mergedTranslations(remoteCatalog.value?.translations),
     products: (remoteCatalog.value?.products?.length ? remoteCatalog.value.products : products).map(normalizeProductAssets),
     settings: {
       ...defaultSettings,
@@ -894,7 +904,7 @@ export function useCatalog() {
     const product = allProducts.value.find((candidate) => candidate.id === item.productId)
     const color = item.color || productColors(product)[0] || null
 
-    return cartItemKey({ productId: item.productId, color })
+    return cartItemKey({ productId: item.productId, color, effectivePrice: item.effectivePrice })
   }
   const isCartPage = computed(() => withoutLanguagePrefix(route.path) === '/cart')
   const isContactPage = computed(() => withoutLanguagePrefix(route.path) === '/contact')
@@ -949,7 +959,11 @@ export function useCatalog() {
       .filter((item): item is CartItem & { key: string, product: Product } => Boolean(item))
   })
   const cartTotal = computed(() => {
-    return cartProducts.value.reduce((total, item) => total + Number(item.product.price) * item.quantity, 0)
+    return cartProducts.value.reduce((total, item) => {
+      const price = item.effectivePrice != null ? item.effectivePrice : Number(item.product.price)
+
+      return total + price * item.quantity
+    }, 0)
   })
   const cartRecommendations = computed(() => allProducts.value
     .filter((product) => !product.isTemporarilyUnavailable && !cartItems.value.some((item) => item.productId === product.id))
@@ -1110,20 +1124,21 @@ export function useCatalog() {
     router.push(productPath(product))
   }
 
-  function addToCart(product: Product, selectedColor: ProductColor | null = null) {
+  function addToCart(product: Product, selectedColor: ProductColor | null = null, effectivePrice?: number | null, selectedOptionLabel?: string | null) {
     if (product.isTemporarilyUnavailable) {
       return
     }
 
     const color = selectedColor || productColors(product)[0] || null
-    const key = cartItemKey({ productId: product.id, color })
+    const priceToStore = effectivePrice != null ? effectivePrice : null
+    const key = cartItemKey({ productId: product.id, color, effectivePrice: priceToStore })
     const existingItem = cartItems.value.find((item) => cartKeyForItem(item) === key)
 
     if (existingItem) {
       existingItem.quantity += 1
       cartItems.value = [...cartItems.value]
     } else {
-      cartItems.value = [...cartItems.value, { productId: product.id, quantity: 1, color }]
+      cartItems.value = [...cartItems.value, { productId: product.id, quantity: 1, color, effectivePrice: priceToStore, selectedOptionLabel: selectedOptionLabel ?? null }]
     }
 
     recentlyAddedProductId.value = product.id
@@ -1214,6 +1229,8 @@ export function useCatalog() {
         productId: item.productId,
         quantity: item.quantity,
         color: item.color,
+        effectivePrice: item.effectivePrice ?? null,
+        selectedOptionLabel: item.selectedOptionLabel ?? null,
         product: item.product
       })),
       total: cartTotal.value,

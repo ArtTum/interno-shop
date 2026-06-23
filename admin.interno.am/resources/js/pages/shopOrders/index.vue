@@ -7,12 +7,15 @@ import {useStore} from "vuex";
 const store = useStore();
 const isLoading = ref(false);
 const expandedOrderId = ref(null);
+const updatingStatusId = ref(null);
+
+const STATUSES = ['new', 'processing', 'completed', 'cancelled'];
 const orders = computed(() => store.getters['shopFrontend/getOrders'] || []);
 const totalAmount = computed(() => orders.value.reduce((sum, order) => sum + Number(order.total || 0), 0));
+const newOrdersCount = computed(() => orders.value.filter(o => (o.status || 'new') === 'new').length);
 
 const fetchOrders = async () => {
     isLoading.value = true;
-
     try {
         await store.dispatch('shopFrontend/fetchOrders');
     } finally {
@@ -20,47 +23,67 @@ const fetchOrders = async () => {
     }
 };
 
-const formatPrice = (value) => {
-    const price = Number(value || 0);
+const formatPrice = (value) => Number(value || 0).toLocaleString('hy-AM');
 
-    return price.toLocaleString('hy-AM');
+const formatDate = (value) => {
+    if (!value) return '-';
+    const d = new Date(value);
+    if (isNaN(d)) return value;
+    return d.toLocaleDateString('hy-AM', {day: '2-digit', month: 'short', year: 'numeric'})
+        + ', ' + d.toLocaleTimeString('hy-AM', {hour: '2-digit', minute: '2-digit'});
 };
 
 const customerName = (order) => {
-    const customer = order.customer || {};
-
-    return [customer.firstName, customer.lastName].filter(Boolean).join(' ') || '-';
+    const c = order.customer || {};
+    return [c.firstName, c.lastName].filter(Boolean).join(' ') || '-';
 };
 
 const craftsmanInfo = (order) => {
-    const craftsman = order.craftsman || {};
-    const customer = order.customer || {};
-    const code = craftsman.code || customer.masterCode || '';
-    const name = craftsman.name || '';
-
-    return {
-        code,
-        name,
-        label: [code, name].filter(Boolean).join(' - ') || '-',
-    };
+    const cr = order.craftsman || {};
+    const cu = order.customer || {};
+    const code = cr.code || cu.masterCode || '';
+    const name = cr.name || '';
+    return {code, name, label: [code, name].filter(Boolean).join(' · ') || null};
 };
 
 const productTitle = (item, language = 'hy') => {
     const title = item.product?.title;
-
-    if (typeof title === 'string') {
-        return title;
-    }
-
+    if (typeof title === 'string') return title;
     return title?.[language] || title?.hy || Object.values(title || {})[0] || `Product #${item.productId}`;
 };
 
-const optionEntries = (item) => {
-    return Object.entries(item.product?.options || {}).filter(([, value]) => value !== null && value !== undefined && value !== '');
+const OPTION_LABELS = {
+    code: 'Կոդ', size: 'Չափ', height: 'Բարձրություն', unit: 'Չափիչ',
+    piece: 'Հատ', type: 'Տեսակ', material: 'Նյութ', color: 'Գույն', quantity: 'Քանակ',
 };
+
+const optionEntries = (item) =>
+    Object.entries(item.product?.options || {}).filter(([, v]) => v !== null && v !== undefined && v !== '');
+
+const isColorValue = (v) => typeof v === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(v.trim());
 
 const toggleDetails = (orderId) => {
     expandedOrderId.value = expandedOrderId.value === orderId ? null : orderId;
+};
+
+const changeStatus = async (order, status) => {
+    if (order.status === status || updatingStatusId.value === order.id) return;
+    updatingStatusId.value = order.id;
+    try {
+        await store.dispatch('shopFrontend/updateOrderStatus', {id: order.id, status});
+    } finally {
+        updatingStatusId.value = null;
+    }
+};
+
+const statusClass = (status) => {
+    const map = {
+        new: 'bg-blue-50 text-blue-700 border border-blue-200',
+        processing: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+        completed: 'bg-green-50 text-green-700 border border-green-200',
+        cancelled: 'bg-red-50 text-red-700 border border-red-200',
+    };
+    return map[status] || 'bg-gray-100 text-gray-600 border border-gray-200';
 };
 
 fetchOrders();
@@ -70,112 +93,226 @@ fetchOrders();
     <DefaultLayoutComponent>
         <BreadcrumbDefault pageTitle="Shop Orders" :breadcrumb="[{path: '/', title: 'Dashboard'}]"/>
 
-        <div class="space-y-6">
-            <div class="rounded-sm border border-stroke bg-white p-5 shadow-default">
-                <div class="flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                        <h3 class="text-lg font-semibold text-black">Shop Orders</h3>
-                        <p class="text-sm text-gray-500">Orders sent from the frontend and customer details.</p>
-                    </div>
-                    <button :disabled="isLoading" type="button" class="rounded bg-primary px-5 py-2 font-medium text-white disabled:opacity-70" @click="fetchOrders">
-                        {{ isLoading ? 'Loading...' : 'Refresh' }}
-                    </button>
+        <div class="space-y-5">
+
+            <!-- Header -->
+            <div class="rounded-xl border border-stroke bg-white px-6 py-4 shadow-default flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-black">Shop Orders</h2>
+                    <p class="text-sm text-gray-500 mt-0.5">Orders sent from the frontend store.</p>
                 </div>
+                <button
+                    :disabled="isLoading"
+                    type="button"
+                    class="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm disabled:opacity-60 hover:opacity-90 transition"
+                    @click="fetchOrders"
+                >
+                    <font-awesome-icon :icon="['far', 'rotate-right']" :class="{'animate-spin': isLoading}" />
+                    {{ isLoading ? 'Loading…' : 'Refresh' }}
+                </button>
             </div>
 
+            <!-- Stats -->
             <div class="grid grid-cols-3 gap-4 max-md:grid-cols-1">
-                <div class="rounded-sm border border-stroke bg-white p-5 shadow-default">
-                    <span class="text-sm font-medium text-gray-500">Orders</span>
-                    <strong class="mt-2 block text-2xl font-semibold text-black">{{ orders.length }}</strong>
+                <div class="rounded-xl border border-stroke bg-white px-6 py-5 shadow-default flex items-center gap-4">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 text-xl shrink-0">
+                        <font-awesome-icon :icon="['far', 'receipt']" />
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Total Orders</p>
+                        <strong class="mt-0.5 block text-2xl font-bold text-black">{{ orders.length }}</strong>
+                    </div>
                 </div>
-                <div class="rounded-sm border border-stroke bg-white p-5 shadow-default">
-                    <span class="text-sm font-medium text-gray-500">Total amount</span>
-                    <strong class="mt-2 block text-2xl font-semibold text-black">{{ formatPrice(totalAmount) }}</strong>
+                <div class="rounded-xl border border-stroke bg-white px-6 py-5 shadow-default flex items-center gap-4">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 text-green-600 text-xl shrink-0">
+                        <font-awesome-icon :icon="['far', 'circle-dollar']" />
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Total Amount</p>
+                        <strong class="mt-0.5 block text-2xl font-bold text-black">{{ formatPrice(totalAmount) }} ֏</strong>
+                    </div>
                 </div>
-                <div class="rounded-sm border border-stroke bg-white p-5 shadow-default">
-                    <span class="text-sm font-medium text-gray-500">Latest order</span>
-                    <strong class="mt-2 block text-base font-semibold text-black">{{ orders[0]?.created_at || '-' }}</strong>
+                <div class="rounded-xl border border-stroke bg-white px-6 py-5 shadow-default flex items-center gap-4">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50 text-orange-500 text-xl shrink-0">
+                        <font-awesome-icon :icon="['far', 'bell']" />
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">New Orders</p>
+                        <strong class="mt-0.5 block text-2xl font-bold text-black">{{ newOrdersCount }}</strong>
+                    </div>
                 </div>
             </div>
 
-            <div class="rounded-sm border border-stroke bg-white shadow-default">
+            <!-- Table -->
+            <div class="rounded-xl border border-stroke bg-white shadow-default overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full table-auto">
+                    <table class="w-full text-sm">
                         <thead>
-                            <tr class="bg-gray-2 text-left">
-                                <th class="min-w-[90px] py-4 px-4 font-medium text-black">ID</th>
-                                <th class="min-w-[150px] py-4 px-4 font-medium text-black">Date</th>
-                                <th class="min-w-[180px] py-4 px-4 font-medium text-black">Customer</th>
-                                <th class="min-w-[150px] py-4 px-4 font-medium text-black">Phone</th>
-                                <th class="min-w-[210px] py-4 px-4 font-medium text-black">Email</th>
-                                <th class="min-w-[260px] py-4 px-4 font-medium text-black">Address</th>
-                                <th class="min-w-[220px] py-4 px-4 font-medium text-black">Craftsman</th>
-                                <th class="min-w-[110px] py-4 px-4 font-medium text-black">Items</th>
-                                <th class="min-w-[120px] py-4 px-4 font-medium text-black">Total</th>
-                                <th class="min-w-[120px] py-4 px-4 font-medium text-black">Status</th>
-                                <th class="min-w-[100px] py-4 px-4 font-medium text-black">Action</th>
+                            <tr class="border-b border-stroke bg-gray-2">
+                                <th class="py-3.5 px-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-500 w-16">#</th>
+                                <th class="py-3.5 px-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-500">Date</th>
+                                <th class="py-3.5 px-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-500">Customer</th>
+                                <th class="py-3.5 px-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-500">Craftsman</th>
+                                <th class="py-3.5 px-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-500">Items</th>
+                                <th class="py-3.5 px-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-500">Total</th>
+                                <th class="py-3.5 px-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-500">Status</th>
+                                <th class="py-3.5 px-4 w-14"></th>
                             </tr>
                         </thead>
                         <tbody>
                             <template v-if="orders.length">
                                 <template v-for="order in orders" :key="order.id">
-                                    <tr class="border-b border-stroke">
-                                        <td class="py-5 px-4 font-medium text-black">#{{ order.id }}</td>
-                                        <td class="py-5 px-4 text-black">{{ order.created_at || '-' }}</td>
-                                        <td class="py-5 px-4 text-black">{{ customerName(order) }}</td>
-                                        <td class="py-5 px-4 text-black">{{ order.customer?.phone || '-' }}</td>
-                                        <td class="py-5 px-4 text-black">{{ order.customer?.email || '-' }}</td>
-                                        <td class="py-5 px-4 text-black">
-                                            <span class="block max-w-[320px] whitespace-normal break-words">{{ order.customer?.address || '-' }}</span>
+                                    <!-- Main Row -->
+                                    <tr
+                                        class="border-b border-stroke transition-colors"
+                                        :class="expandedOrderId === order.id ? 'bg-blue-50/40' : 'hover:bg-gray-50/60'"
+                                    >
+                                        <td class="py-4 px-4 font-bold text-black">#{{ order.id }}</td>
+                                        <td class="py-4 px-4 text-gray-600 whitespace-nowrap">{{ formatDate(order.created_at) }}</td>
+                                        <td class="py-4 px-4">
+                                            <p class="font-semibold text-black leading-snug">{{ customerName(order) }}</p>
+                                            <p class="text-xs text-gray-500 mt-0.5">{{ order.customer?.phone || '' }}</p>
+                                            <p class="text-xs text-gray-400">{{ order.customer?.email || '' }}</p>
                                         </td>
-                                        <td class="py-5 px-4 text-black">
-                                            <span class="block max-w-[240px] whitespace-normal break-words">{{ craftsmanInfo(order).label }}</span>
+                                        <td class="py-4 px-4">
+                                            <template v-if="craftsmanInfo(order).label">
+                                                <span class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+                                                    <font-awesome-icon :icon="['far', 'id-card']" class="text-indigo-400" />
+                                                    {{ craftsmanInfo(order).label }}
+                                                </span>
+                                            </template>
+                                            <span v-else class="text-gray-400">—</span>
                                         </td>
-                                        <td class="py-5 px-4 text-black">{{ order.items?.length || 0 }}</td>
-                                        <td class="py-5 px-4 font-medium text-black">{{ formatPrice(order.total) }}</td>
-                                        <td class="py-5 px-4">
-                                            <span class="inline-flex rounded-full bg-success bg-opacity-10 py-1 px-3 text-sm font-medium text-success">{{ order.status || 'new' }}</span>
+                                        <td class="py-4 px-4 text-center">
+                                            <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-gray-700">
+                                                {{ order.items?.length || 0 }}
+                                            </span>
                                         </td>
-                                        <td class="py-5 px-4">
-                                            <button type="button" class="hover:text-primary" title="Details" @click="toggleDetails(order.id)">
-                                                <font-awesome-icon :icon="['far', expandedOrderId === order.id ? 'eye-slash' : 'eye']"/>
+                                        <td class="py-4 px-4 font-bold text-black whitespace-nowrap">{{ formatPrice(order.total) }} ֏</td>
+                                        <td class="py-4 px-4">
+                                            <div class="relative inline-flex items-center">
+                                                <select
+                                                    :value="order.status || 'new'"
+                                                    :disabled="updatingStatusId === order.id"
+                                                    class="appearance-none rounded-full border py-0.5 pl-2.5 pr-6 text-xs font-semibold capitalize cursor-pointer focus:outline-none disabled:opacity-60"
+                                                    :class="statusClass(order.status || 'new')"
+                                                    @change="changeStatus(order, $event.target.value)"
+                                                >
+                                                    <option v-for="s in STATUSES" :key="s" :value="s">{{ s }}</option>
+                                                </select>
+                                                <span class="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px]">▾</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4 text-right">
+                                            <button
+                                                type="button"
+                                                class="flex h-8 w-8 items-center justify-center rounded-lg border border-stroke text-gray-500 hover:border-primary hover:text-primary transition"
+                                                :title="expandedOrderId === order.id ? 'Hide details' : 'Show details'"
+                                                @click="toggleDetails(order.id)"
+                                            >
+                                                <font-awesome-icon :icon="['far', expandedOrderId === order.id ? 'chevron-up' : 'chevron-down']" class="text-xs" />
                                             </button>
                                         </td>
                                     </tr>
-                                    <tr v-if="expandedOrderId === order.id" class="border-b border-stroke bg-gray-50">
-                                        <td colspan="11" class="p-4">
-                                            <div class="grid grid-cols-2 gap-4 max-lg:grid-cols-1">
-                                                <div v-for="item in order.items || []" :key="`${order.id}-${item.productId}`" class="rounded border border-stroke bg-white p-4">
-                                                    <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
-                                                        <div>
-                                                            <h4 class="font-semibold text-black">{{ productTitle(item, order.language) }}</h4>
-                                                            <span class="text-sm text-gray-500">Product #{{ item.productId }}</span>
+
+                                    <!-- Detail Row -->
+                                    <tr v-if="expandedOrderId === order.id" class="border-b border-stroke bg-blue-50/20">
+                                        <td colspan="8" class="px-4 py-5">
+                                            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+
+                                                <!-- Customer card -->
+                                                <div class="rounded-xl border border-blue-100 bg-white p-4 col-span-full lg:col-span-1">
+                                                    <p class="mb-3 text-xs font-bold uppercase tracking-wide text-gray-400">Customer Info</p>
+                                                    <div class="space-y-2 text-sm">
+                                                        <div class="flex justify-between gap-2">
+                                                            <span class="text-gray-500">Name</span>
+                                                            <span class="font-semibold text-black">{{ customerName(order) }}</span>
                                                         </div>
-                                                        <span class="rounded bg-gray-100 px-3 py-1 text-sm text-black">x{{ item.quantity }}</span>
-                                                    </div>
-                                                    <div class="grid grid-cols-2 gap-2 text-sm max-sm:grid-cols-1">
-                                                        <span class="text-gray-500">Price</span>
-                                                        <strong class="text-black">{{ formatPrice(item.product?.price) }}</strong>
-                                                        <template v-for="[key, value] in optionEntries(item)" :key="`${item.productId}-${key}`">
-                                                            <span class="capitalize text-gray-500">{{ key }}</span>
-                                                            <strong class="break-words text-black">{{ value }}</strong>
-                                                        </template>
+                                                        <div class="flex justify-between gap-2">
+                                                            <span class="text-gray-500">Phone</span>
+                                                            <a :href="`tel:${order.customer?.phone}`" class="font-semibold text-blue-600 hover:underline">{{ order.customer?.phone || '-' }}</a>
+                                                        </div>
+                                                        <div class="flex justify-between gap-2">
+                                                            <span class="text-gray-500">Email</span>
+                                                            <a :href="`mailto:${order.customer?.email}`" class="font-semibold text-blue-600 hover:underline">{{ order.customer?.email || '-' }}</a>
+                                                        </div>
+                                                        <div class="flex justify-between gap-2">
+                                                            <span class="text-gray-500">Address</span>
+                                                            <span class="font-semibold text-black text-right max-w-[200px]">{{ order.customer?.address || '-' }}</span>
+                                                        </div>
+                                                        <div v-if="craftsmanInfo(order).label" class="flex justify-between gap-2">
+                                                            <span class="text-gray-500">Craftsman</span>
+                                                            <span class="font-semibold text-indigo-700">{{ craftsmanInfo(order).label }}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
+
+                                                <!-- Product cards -->
+                                                <div
+                                                    v-for="item in order.items || []"
+                                                    :key="`${order.id}-${item.productId}`"
+                                                    class="rounded-xl border border-stroke bg-white overflow-hidden"
+                                                >
+                                                    <!-- Card header -->
+                                                    <div class="flex items-start justify-between gap-3 border-b border-stroke bg-gray-50/60 px-4 py-3">
+                                                        <div class="min-w-0">
+                                                            <p class="truncate font-semibold text-black leading-snug">{{ productTitle(item, order.language) }}</p>
+                                                            <p class="text-xs text-gray-400 mt-0.5">ID #{{ item.productId }}</p>
+                                                        </div>
+                                                        <span class="shrink-0 rounded-lg bg-black px-2.5 py-1 text-sm font-bold text-white">×{{ item.quantity }}</span>
+                                                    </div>
+
+                                                    <!-- Params grid -->
+                                                    <div class="p-4">
+                                                        <!-- Price row -->
+                                                        <div class="mb-3 flex items-center justify-between rounded-lg bg-green-50 px-3 py-2">
+                                                            <span class="text-xs font-bold uppercase tracking-wide text-green-700">Գին × {{ item.quantity }}</span>
+                                                            <strong class="text-base font-bold text-green-800">
+                                                                {{ formatPrice(Number(item.product?.price || 0) * item.quantity) }} ֏
+                                                            </strong>
+                                                        </div>
+
+                                                        <!-- Options table -->
+                                                        <div v-if="optionEntries(item).length" class="divide-y divide-stroke rounded-lg border border-stroke overflow-hidden">
+                                                            <div
+                                                                v-for="[key, value] in optionEntries(item)"
+                                                                :key="`${item.productId}-${key}`"
+                                                                class="flex items-center justify-between gap-4 px-3 py-2 text-sm even:bg-gray-50/50"
+                                                            >
+                                                                <span class="shrink-0 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                                                    {{ OPTION_LABELS[key] || key }}
+                                                                </span>
+                                                                <!-- Color swatch -->
+                                                                <div v-if="isColorValue(value)" class="flex items-center gap-2">
+                                                                    <span
+                                                                        class="h-5 w-5 rounded-full border border-black/10 shadow-sm shrink-0"
+                                                                        :style="{background: value}"
+                                                                    />
+                                                                    <span class="font-mono text-xs text-gray-600">{{ value }}</span>
+                                                                </div>
+                                                                <strong v-else class="break-words text-right font-semibold text-black max-w-[200px]">{{ value }}</strong>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                             </div>
                                         </td>
                                     </tr>
                                 </template>
                             </template>
+
                             <tr v-else>
-                                <td colspan="11" class="py-10 px-4 text-center text-black">
-                                    {{ isLoading ? 'Loading orders...' : 'No orders yet.' }}
+                                <td colspan="8" class="py-16 text-center text-gray-400">
+                                    <font-awesome-icon :icon="['far', 'inbox']" class="text-4xl mb-3 block mx-auto opacity-30" />
+                                    {{ isLoading ? 'Loading orders…' : 'No orders yet.' }}
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
+
         </div>
     </DefaultLayoutComponent>
 </template>

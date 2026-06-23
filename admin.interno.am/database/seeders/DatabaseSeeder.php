@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
         $this->call(PermissionsSeeder::class);
         $this->call(ShopProductParametersSeeder::class);
         $this->call(ShopCraftsmanSeeder::class);
+        $this->call(ShopProductSeeder::class);
+        $this->call(ShopOrderSeeder::class);
         $this->call(GeneralSettingSeeder::class);
         $this->call(CookieSettingsSeeder::class);
     }

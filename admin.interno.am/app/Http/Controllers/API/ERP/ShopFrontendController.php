@@ -9,6 +9,7 @@ use App\Models\ShopPrivacyPolicy;
 use App\Models\ShopPrivacyPolicyChecklistItem;
 use App\Models\ShopCraftsman;
 use App\Models\ShopFrontendTranslation;
+use App\Models\ShopOrder;
 use App\Models\ShopProduct;
 use App\Models\ShopSeoPage;
 use App\Models\ShopPrivacyPolicySection;
@@ -25,12 +26,10 @@ use Illuminate\Validation\ValidationException;
 class ShopFrontendController extends Controller
 {
     private string $configPath;
-    private string $ordersPath;
 
     public function __construct()
     {
         $this->configPath = storage_path('app/shop_frontend.json');
-        $this->ordersPath = storage_path('app/shop_orders.json');
     }
 
     public function publicConfig(): JsonResponse
@@ -107,35 +106,59 @@ class ShopFrontendController extends Controller
             throw new ValidationException($validator);
         }
 
-        $orders = $this->readOrders();
-        $nextId = empty($orders) ? 1 : max(array_column($orders, 'id')) + 1;
+        $customer = $payload['customer'];
+        $craftsmanSnapshot = $this->resolveOrderCraftsman($payload['craftsman'] ?? null);
 
-        $order = [
-            'id' => $nextId,
+        $order = ShopOrder::query()->create([
             'status' => 'new',
-            'created_at' => now()->toDateTimeString(),
-            'customer' => $payload['customer'],
-            'craftsman' => $this->resolveOrderCraftsman($payload['craftsman'] ?? null),
+            'language' => $payload['language'] ?? 'hy',
+            'customer_first_name' => $customer['firstName'],
+            'customer_last_name' => $customer['lastName'] ?? null,
+            'customer_phone' => $customer['phone'],
+            'customer_email' => $customer['email'],
+            'customer_address' => $customer['address'] ?? null,
+            'customer_master_code' => $customer['masterCode'] ?? null,
+            'craftsman_id' => $craftsmanSnapshot['id'] ?? null,
+            'craftsman_code' => $craftsmanSnapshot['code'] ?? null,
+            'craftsman_name' => $craftsmanSnapshot['name'] ?? null,
             'items' => $payload['items'],
             'total' => $payload['total'],
-            'language' => $payload['language'] ?? 'hy',
-        ];
-
-        array_unshift($orders, $order);
-        $this->writeJson($this->ordersPath, $orders);
+        ]);
 
         return $this->withCors(response()->json([
             'success' => true,
             'message' => 'Order created.',
-            'data' => $order,
+            'data' => $order->toOrderArray(),
         ], 201));
     }
 
     public function orders(): JsonResponse
     {
+        $orders = ShopOrder::query()
+            ->orderByDesc('id')
+            ->get()
+            ->map(fn (ShopOrder $order) => $order->toOrderArray())
+            ->values()
+            ->all();
+
         return $this->withCors(response()->json([
             'success' => true,
-            'data' => $this->readOrders(),
+            'data' => $orders,
+        ]));
+    }
+
+    public function updateOrderStatus(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'status' => ['required', 'string', 'in:new,processing,completed,cancelled'],
+        ]);
+
+        $order = ShopOrder::query()->findOrFail($id);
+        $order->update(['status' => $request->input('status')]);
+
+        return $this->withCors(response()->json([
+            'success' => true,
+            'data' => $order->toOrderArray(),
         ]));
     }
 
@@ -280,7 +303,7 @@ class ShopFrontendController extends Controller
             'id' => $craftsman->id,
             'code' => $craftsman->code,
             'name' => $craftsman->full_name,
-            'image' => $craftsman->media?->original_path,
+            'image' => $craftsman->media?->original_path ?: $craftsman->media?->path,
             'phone' => $craftsman->phone,
             'work_region' => $craftsman->work_region,
             'work_city' => $craftsman->work_city,
@@ -363,11 +386,6 @@ class ShopFrontendController extends Controller
         }
 
         return $config;
-    }
-
-    private function readOrders(): array
-    {
-        return $this->readJson($this->ordersPath, []);
     }
 
     private function readJson(string $path, array $fallback): array
@@ -782,10 +800,38 @@ class ShopFrontendController extends Controller
             return [];
         }
 
-        return $products->map(function (ShopProduct $product) use ($languageCodes, $hasAvailabilityColumn, $hasAttributePriceTables) {
+        // Pre-load all colors keyed by id for fast lookup
+        $allColors = \App\Models\ShopProductColor::query()
+            ->where('status', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'name', 'value'])
+            ->keyBy('id');
+
+        return $products->map(function (ShopProduct $product) use ($languageCodes, $hasAvailabilityColumn, $hasAttributePriceTables, $allColors) {
             $category = $product->category;
             $parentCategory = $category?->parent ?: $category;
             $priceOptions = $hasAttributePriceTables ? $this->formatProductPriceOptions($product) : [];
+
+            // Build colors array from option_color_ids (falls back to option_color_id)
+            $colorIds = is_array($product->option_color_ids) && count($product->option_color_ids)
+                ? $product->option_color_ids
+                : ($product->option_color_id ? [$product->option_color_id] : []);
+
+            $colors = collect($colorIds)
+                ->map(fn ($id) => $allColors->get($id))
+                ->filter()
+                ->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'value' => $c->value])
+                ->values()
+                ->all();
+
+            $baseOptions = $product->options ?: [];
+            if (count($colors)) {
+                $baseOptions['colors'] = $colors;
+                // Ensure options.color is the main color hex
+                if (empty($baseOptions['color']) && !empty($colors[0]['value'])) {
+                    $baseOptions['color'] = $colors[0]['value'];
+                }
+            }
 
             return [
                 'id' => $product->id,
@@ -801,7 +847,7 @@ class ShopFrontendController extends Controller
                     $product->media?->original_path ?: ($product->image ?? ''),
                     ...($product->gallery ?: []),
                 ]))),
-                'options' => $product->options ?: [],
+                'options' => $baseOptions,
                 'priceOptions' => $priceOptions,
                 'isNew' => $product->is_new,
                 'isTemporarilyUnavailable' => $hasAvailabilityColumn ? $product->is_temporarily_unavailable : false,

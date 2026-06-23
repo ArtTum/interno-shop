@@ -1,0 +1,11 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" width="400" height="300">
+  <rect width="400" height="300" fill="#f0f2f5"/>
+  <rect x="62" y="162" width="276" height="10" rx="4" fill="#909498" opacity="0.4"/>
+  <rect x="60" y="120" width="280" height="40" rx="2" fill="#222222" stroke="#111" stroke-width="1"/>
+  <rect x="60" y="120" width="280" height="6" rx="2" fill="#2e2e2e" stroke="#111" stroke-width="0.5"/>
+  <rect x="60" y="154" width="280" height="6" rx="1" fill="#1a1a1a" stroke="#111" stroke-width="0.5"/>
+  <rect x="60" y="132" width="280" height="2" rx="1" fill="#181818"/>
+  <rect x="60" y="148" width="280" height="2" rx="1" fill="#181818"/>
+  <rect x="62" y="121" width="276" height="2" rx="1" fill="#444444" opacity="0.8"/>
+  <text x="200" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">MDF Skirting Board — Black</text>
+</svg>

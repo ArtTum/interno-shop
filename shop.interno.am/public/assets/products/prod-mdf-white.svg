@@ -1,0 +1,17 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" width="400" height="300">
+  <rect width="400" height="300" fill="#f0f2f5"/>
+  <!-- Shadow -->
+  <rect x="62" y="162" width="276" height="10" rx="4" fill="#c0c4ca" opacity="0.4"/>
+  <!-- MDF skirting board — wide flat horizontal bar -->
+  <rect x="60" y="120" width="280" height="40" rx="2" fill="#f8f8f8" stroke="#ddd" stroke-width="1"/>
+  <!-- Top bevel detail -->
+  <rect x="60" y="120" width="280" height="6" rx="2" fill="#ffffff" stroke="#e0e0e0" stroke-width="0.5"/>
+  <!-- Bottom bevel -->
+  <rect x="60" y="154" width="280" height="6" rx="1" fill="#eeeeee" stroke="#ddd" stroke-width="0.5"/>
+  <!-- Routed profile groove -->
+  <rect x="60" y="132" width="280" height="2" rx="1" fill="#e0e0e0"/>
+  <rect x="60" y="148" width="280" height="2" rx="1" fill="#e0e0e0"/>
+  <!-- Top highlight -->
+  <rect x="62" y="121" width="276" height="2" rx="1" fill="#ffffff" opacity="0.9"/>
+  <text x="200" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">MDF Skirting Board — White</text>
+</svg>

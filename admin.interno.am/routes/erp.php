@@ -69,6 +69,7 @@ Route::group(['prefix' => 'erp'], function () {
                 Route::get('translations', [ShopFrontendController::class, 'translations'])->middleware('check.permission:shop_frontend_translations,can_view');
                 Route::put('translations', [ShopFrontendController::class, 'updateTranslations'])->middleware('check.permission:shop_frontend_translations,can_edit');
                 Route::get('orders', [ShopFrontendController::class, 'orders'])->middleware('check.permission:languages,can_view');
+                Route::patch('orders/{id}/status', [ShopFrontendController::class, 'updateOrderStatus'])->middleware('check.permission:languages,can_edit');
             });
 
             Route::group(['prefix' => 'shop-categories'], function () {

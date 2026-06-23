@@ -1,0 +1,29 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" width="400" height="300">
+  <rect width="400" height="300" fill="#f0f2f5"/>
+  <rect x="60" y="150" width="280" height="10" rx="4" fill="#b0b4ba" opacity="0.4"/>
+  <!-- C-profile body with metallic gradient effect -->
+  <defs>
+    <linearGradient id="silverGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8ecf0"/>
+      <stop offset="30%" stop-color="#c8cdd4"/>
+      <stop offset="60%" stop-color="#a8adb6"/>
+      <stop offset="100%" stop-color="#c0c5cc"/>
+    </linearGradient>
+    <linearGradient id="silverFlange" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0f2f5"/>
+      <stop offset="100%" stop-color="#b8bdc6"/>
+    </linearGradient>
+  </defs>
+  <rect x="60" y="128" width="280" height="20" rx="3" fill="url(#silverGrad)" stroke="#9aa0aa" stroke-width="1"/>
+  <rect x="60" y="124" width="280" height="6" rx="2" fill="url(#silverFlange)" stroke="#9aa0aa" stroke-width="1"/>
+  <rect x="60" y="148" width="280" height="6" rx="2" fill="url(#silverFlange)" stroke="#9aa0aa" stroke-width="1"/>
+  <rect x="62" y="125" width="276" height="2" rx="1" fill="#ffffff" opacity="0.9"/>
+  <rect x="64" y="132" width="272" height="12" rx="1" fill="#b0b5be"/>
+  <!-- Metallic sheen lines -->
+  <line x1="100" y1="124" x2="100" y2="154" stroke="#d0d5dc" stroke-width="0.5" opacity="0.6"/>
+  <line x1="200" y1="124" x2="200" y2="154" stroke="#e0e5ec" stroke-width="0.5" opacity="0.6"/>
+  <line x1="300" y1="124" x2="300" y2="154" stroke="#d0d5dc" stroke-width="0.5" opacity="0.6"/>
+  <rect x="58" y="122" width="6" height="36" rx="2" fill="#c8cdd4" stroke="#9aa0aa" stroke-width="1"/>
+  <rect x="336" y="122" width="6" height="36" rx="2" fill="#c8cdd4" stroke="#9aa0aa" stroke-width="1"/>
+  <text x="200" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">Stretch Ceiling Profile — Silver Aluminum</text>
+</svg>

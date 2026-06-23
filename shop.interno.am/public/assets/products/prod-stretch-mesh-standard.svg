@@ -1,0 +1,17 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" width="400" height="300">
+  <rect width="400" height="300" fill="#f0f2f5"/>
+  <defs>
+    <pattern id="grid" width="12" height="12" patternUnits="userSpaceOnUse">
+      <path d="M 12 0 L 0 0 0 12" fill="none" stroke="#a0a8b0" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <!-- Panel shadow -->
+  <rect x="82" y="82" width="240" height="145" rx="4" fill="#c8ccd2" opacity="0.5"/>
+  <!-- Panel base -->
+  <rect x="78" y="78" width="240" height="145" rx="4" fill="#d8dce2" stroke="#b8bcc4" stroke-width="1.5"/>
+  <!-- Mesh grid overlay -->
+  <rect x="78" y="78" width="240" height="145" rx="4" fill="url(#grid)"/>
+  <!-- Edge highlight -->
+  <rect x="78" y="78" width="240" height="3" rx="2" fill="#e8ecf0" opacity="0.7"/>
+  <text x="200" y="252" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">Stretch Mesh — Standard Gray</text>
+</svg>

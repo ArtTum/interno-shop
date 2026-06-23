@@ -1,0 +1,40 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" width="400" height="300">
+  <rect width="400" height="300" fill="#f0f2f5"/>
+  <defs>
+    <linearGradient id="channelGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e0e6ec"/>
+      <stop offset="40%" stop-color="#c0c8d0"/>
+      <stop offset="100%" stop-color="#a8b2bc"/>
+    </linearGradient>
+    <linearGradient id="channelInner" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d0d8e0"/>
+      <stop offset="100%" stop-color="#b0bcc8"/>
+    </linearGradient>
+  </defs>
+  <!-- Shadow -->
+  <rect x="62" y="152" width="276" height="10" rx="4" fill="#a0a8b2" opacity="0.35"/>
+  <!-- U-channel outer body -->
+  <rect x="60" y="118" width="280" height="36" rx="3" fill="url(#channelGrad)" stroke="#9aa4ae" stroke-width="1.2"/>
+  <!-- U-channel inner cavity (open top) -->
+  <rect x="72" y="118" width="256" height="26" rx="2" fill="url(#channelInner)"/>
+  <!-- LED strip inside -->
+  <rect x="80" y="126" width="240" height="10" rx="2" fill="#ffe8a0" opacity="0.7"/>
+  <!-- LED dots -->
+  <circle cx="100" cy="131" r="3" fill="#ffcc44" opacity="0.9"/>
+  <circle cx="120" cy="131" r="3" fill="#ffcc44" opacity="0.9"/>
+  <circle cx="140" cy="131" r="3" fill="#ffcc44" opacity="0.9"/>
+  <circle cx="160" cy="131" r="3" fill="#ffcc44" opacity="0.9"/>
+  <circle cx="180" cy="131" r="3" fill="#ffcc44" opacity="0.9"/>
+  <circle cx="200" cy="131" r="3" fill="#ffcc44" opacity="0.9"/>
+  <circle cx="220" cy="131" r="3" fill="#ffcc44" opacity="0.9"/>
+  <circle cx="240" cy="131" r="3" fill="#ffcc44" opacity="0.9"/>
+  <circle cx="260" cy="131" r="3" fill="#ffcc44" opacity="0.9"/>
+  <circle cx="280" cy="131" r="3" fill="#ffcc44" opacity="0.9"/>
+  <circle cx="300" cy="131" r="3" fill="#ffcc44" opacity="0.9"/>
+  <!-- Side walls of U -->
+  <rect x="60" y="118" width="14" height="36" rx="2" fill="#b8c2cc" stroke="#9aa4ae" stroke-width="0.8"/>
+  <rect x="326" y="118" width="14" height="36" rx="2" fill="#b8c2cc" stroke="#9aa4ae" stroke-width="0.8"/>
+  <!-- Top highlight -->
+  <line x1="62" y1="119" x2="338" y2="119" stroke="#f0f4f8" stroke-width="1.5" opacity="0.8"/>
+  <text x="200" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">U-Channel LED Profile — Silver</text>
+</svg>

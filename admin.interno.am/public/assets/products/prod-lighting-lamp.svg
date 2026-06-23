@@ -1,0 +1,39 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" width="400" height="300">
+  <rect width="400" height="300" fill="#f0f2f5"/>
+  <defs>
+    <radialGradient id="lampGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fffbe8" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#fff5c0" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#fff5c0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="lampBody" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#f8f8f8"/>
+      <stop offset="50%" stop-color="#e0e0e0"/>
+      <stop offset="100%" stop-color="#c8c8c8"/>
+    </radialGradient>
+    <radialGradient id="lampLens" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#fffef0"/>
+      <stop offset="70%" stop-color="#fff5c0"/>
+      <stop offset="100%" stop-color="#ffd840"/>
+    </radialGradient>
+  </defs>
+  <!-- Glow behind lamp -->
+  <circle cx="200" cy="145" r="85" fill="url(#lampGlow)"/>
+  <!-- Shadow -->
+  <ellipse cx="202" cy="220" rx="52" ry="8" fill="#c0c4ca" opacity="0.4"/>
+  <!-- Lamp housing outer ring -->
+  <circle cx="200" cy="148" r="52" fill="url(#lampBody)" stroke="#b8b8b8" stroke-width="2"/>
+  <!-- Trim ring -->
+  <circle cx="200" cy="148" r="52" fill="none" stroke="#d0d0d0" stroke-width="4"/>
+  <!-- Inner bezel -->
+  <circle cx="200" cy="148" r="44" fill="#e8e8e8" stroke="#c8c8c8" stroke-width="1.5"/>
+  <!-- LED lens -->
+  <circle cx="200" cy="148" r="36" fill="url(#lampLens)"/>
+  <!-- LED center bright spot -->
+  <circle cx="200" cy="148" r="20" fill="#ffffff" opacity="0.9"/>
+  <circle cx="194" cy="142" r="8" fill="#ffffff" opacity="0.6"/>
+  <!-- Mounting point top -->
+  <rect x="188" y="90" width="24" height="10" rx="3" fill="#d0d0d0" stroke="#b8b8b8" stroke-width="1"/>
+  <rect x="196" y="96" width="8" height="6" rx="1" fill="#c0c0c0"/>
+  <text x="200" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">Round LED Spotlight / Downlight</text>
+</svg>

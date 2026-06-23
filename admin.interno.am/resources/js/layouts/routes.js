@@ -63,7 +63,7 @@ export const routes = [
             },
             {
                 icon: ['far', 'id-card'],
-                label: 'Արհեստավորներ',
+                label: 'Craftsmen',
                 name: 'shop_craftsmen',
                 route: '/shop-craftsmen',
             },

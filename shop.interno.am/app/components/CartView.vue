@@ -189,10 +189,14 @@ watch(() => route.query.checkout, (checkout) => {
 
           <div class="cart-item-info">
             <h2>{{ item.product.title[currentLanguageCode] }}</h2>
+
+            <div v-if="item.selectedOptionLabel" class="cart-selected-option">
+              <span class="cart-option-badge">{{ item.selectedOptionLabel }}</span>
+            </div>
+
             <dl class="cart-item-options">
-              <div><dt>{{ copy.optionType }}</dt><dd>{{ item.product.options?.type || copy.optionTypeName }}</dd></div>
-              <div><dt>{{ copy.optionUnit }}</dt><dd>{{ item.product.options?.unit || '111' }}</dd></div>
-              <div><dt>{{ copy.optionCode }}</dt><dd>{{ item.product.options?.code || '111' }}</dd></div>
+              <div><dt>{{ copy.optionCode }}</dt><dd>{{ item.product.options?.code || '—' }}</dd></div>
+              <div><dt>{{ copy.optionType }}</dt><dd>{{ item.product.options?.type || '—' }}</dd></div>
               <div>
                 <dt>{{ copy.optionColor }}</dt>
                 <dd>
@@ -201,9 +205,10 @@ watch(() => route.query.checkout, (checkout) => {
                     :style="{ background: item.color?.value || item.product.options?.color || undefined }"
                     :title="item.color?.name || copy.optionColor"
                   />
+                  <span v-if="item.color?.name" class="cart-color-name">{{ item.color.name }}</span>
                 </dd>
               </div>
-              <div><dt>{{ copy.optionMaterial }}</dt><dd>{{ item.product.options?.material || copy.materialName }}</dd></div>
+              <div><dt>{{ copy.optionMaterial }}</dt><dd>{{ item.product.options?.material || '—' }}</dd></div>
             </dl>
           </div>
 
@@ -215,7 +220,7 @@ watch(() => route.query.checkout, (checkout) => {
             </div>
             <div class="cart-line-price">
               <small>{{ copy.linePrice }}</small>
-              <strong>{{ Number(item.product.price) * item.quantity }} <span aria-hidden="true">&#1423;</span></strong>
+              <strong>{{ (item.effectivePrice != null ? item.effectivePrice : Number(item.product.price)) * item.quantity }} <span aria-hidden="true">&#1423;</span></strong>
             </div>
           </div>
         </article>
