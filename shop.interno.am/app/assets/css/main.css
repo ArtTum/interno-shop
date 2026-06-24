@@ -307,7 +307,7 @@ input {
   grid-template-columns: 224px minmax(0, 1fr);
   gap: 16px;
   flex: 1;
-  padding: 14px 16px 12px;
+  padding: 14px 0px 12px;
 }
 
 .layout.is-product-page {
@@ -2525,7 +2525,7 @@ h2 {
 
   .layout {
     display: block;
-    padding: 10px 16px 0;
+    padding: 10px 0 0;
   }
 
   .sidebar {
