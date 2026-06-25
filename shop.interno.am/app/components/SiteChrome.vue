@@ -60,6 +60,19 @@ function openMobileCategory(groupKey: string, childIndex?: number) {
         <NuxtLink :to="localizedPath('/contact')">{{ copy.contact }}</NuxtLink>
       </nav>
 
+      <button
+        class="mobile-menu"
+        type="button"
+        :aria-label="copy.openMenu"
+        :aria-expanded="isMenuOpen"
+        aria-controls="mobile-drawer"
+        @click="isMenuOpen = true"
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+
       <form class="search" role="search" @submit.prevent="submitSearch">
         <img src="/assets/icons/search.svg" alt="" aria-hidden="true" />
         <input v-model="searchTerm" type="search" :placeholder="copy.search" />
@@ -134,59 +147,11 @@ function openMobileCategory(groupKey: string, childIndex?: number) {
       </nav>
     </aside>
 
-    <div class="mobile-categories" aria-label="Categories">
-      <button
-        class="mobile-menu"
-        type="button"
-        :aria-label="copy.openMenu"
-        :aria-expanded="isMenuOpen"
-        aria-controls="mobile-drawer"
-        @click="isMenuOpen = true"
-      >
-        <span class="mobile-menu-bars" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </span>
+    <div v-if="showCatalogNav && !isCategoryPage" class="mobile-categories" aria-label="Categories">
+      <button v-for="(category, categoryIndex) in categories" :key="category" type="button" @click="openCategory(menuGroups[categoryIndex].key)">
+        <span class="chip-icon">⌘</span>
+        {{ category }}
       </button>
-
-      <template v-if="showCatalogNav && !isCategoryPage">
-        <NuxtLink class="mobile-craftsmen-chip" :to="localizedPath('/craftsmen')">
-          {{ copy.craftsmen }}
-        </NuxtLink>
-        <div class="mobile-category-scroll">
-          <button v-for="(category, categoryIndex) in categories" :key="category" type="button" @click="openCategory(menuGroups[categoryIndex].key)">
-            <span class="chip-icon">⌘</span>
-            {{ category }}
-          </button>
-        </div>
-      </template>
-      <div v-else class="mobile-category-scroll" />
-
-      <div class="mobile-lang-picker">
-        <button
-          class="language-trigger"
-          type="button"
-          aria-label="Language menu"
-          :aria-expanded="isLanguageOpen"
-          @click.stop="isLanguageOpen = !isLanguageOpen"
-        >
-          <img class="language-flag" :src="currentLanguage.icon" :alt="currentLanguage.label" />
-          <span class="language-chevron" :class="{ 'is-open': isLanguageOpen }" aria-hidden="true" />
-        </button>
-        <div v-if="isLanguageOpen" class="language-menu language-menu-mobile" @click.stop>
-          <button
-            v-for="language in languages"
-            :key="language.code"
-            :class="{ 'is-selected': currentLanguage.code === language.code }"
-            type="button"
-            @click="chooseLanguage(language)"
-          >
-            <img class="language-flag" :src="language.icon" :alt="language.label" />
-            {{ language.label }}
-          </button>
-        </div>
-      </div>
     </div>
 
     <div class="layout" :class="{ 'is-product-page': wide }">
