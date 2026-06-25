@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-const { categoryProducts, currentCategoryChild, currentCategoryChildren, currentCategoryGroup, currentLanguageCode } = useCatalog()
+const { categoryProducts, copy, currentCategoryChild, currentCategoryChildren, currentCategoryGroup, currentLanguageCode } = useCatalog()
 </script>
 
 <template>
@@ -11,8 +11,11 @@ const { categoryProducts, currentCategoryChild, currentCategoryChildren, current
     </nav>
 
     <div class="category-products-panel">
-      <div class="product-grid category-product-grid">
+      <div v-if="categoryProducts.length" class="product-grid category-product-grid">
         <ProductCard v-for="product in categoryProducts" :key="product.id" :product="product" />
+      </div>
+      <div v-else class="category-empty">
+        {{ copy.categoryEmpty }}
       </div>
     </div>
   </section>
