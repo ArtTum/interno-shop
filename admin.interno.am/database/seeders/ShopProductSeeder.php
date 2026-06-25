@@ -16,6 +16,8 @@ use Illuminate\Support\Str;
 
 class ShopProductSeeder extends Seeder
 {
+    private const PRODUCT_MULTIPLIER = 4;
+
     private array $langIds      = [];
     private array $colorIds     = [];
     private array $typeIds      = [];
@@ -44,9 +46,53 @@ class ShopProductSeeder extends Seeder
             ->mapWithKeys(fn ($v) => ["{$v->type}:{$v->name}" => $v->id])
             ->all();
 
-        foreach ($this->products() as $i => $def) {
+        foreach ($this->expandedProducts() as $i => $def) {
             $this->createProduct($i, $def);
         }
+    }
+
+    private function expandedProducts(): array
+    {
+        $products = [];
+
+        foreach ($this->products() as $def) {
+            for ($variant = 0; $variant < self::PRODUCT_MULTIPLIER; $variant++) {
+                $products[] = $this->productVariant($def, $variant);
+            }
+        }
+
+        return $products;
+    }
+
+    private function productVariant(array $def, int $variant): array
+    {
+        if ($variant === 0) {
+            return $def;
+        }
+
+        $number = $variant + 1;
+        $suffixes = [
+            'hy' => " տարբերակ {$number}",
+            'ru' => " вариант {$number}",
+            'en' => " variant {$number}",
+        ];
+
+        $def['slug'] = "{$def['slug']}-v{$number}";
+        $def['price'] = (int) $def['price'] + ($variant * 750);
+        $def['kind'] = trim(($def['kind'] ?? 'product') . "-v{$number}");
+        $def['is_new'] = $variant % 2 === 1;
+
+        if (isset($def['options']['code'])) {
+            $def['options']['code'] = "{$def['options']['code']}-V{$number}";
+        }
+
+        foreach (['titles', 'short'] as $field) {
+            foreach ($def[$field] ?? [] as $lang => $value) {
+                $def[$field][$lang] = $value . ($suffixes[$lang] ?? " variant {$number}");
+            }
+        }
+
+        return $def;
     }
 
     private function createProduct(int $i, array $def): void
