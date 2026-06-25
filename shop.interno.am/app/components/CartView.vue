@@ -156,10 +156,6 @@ function continueWithoutCraftsman() {
 }
 
 function openCraftsmanPrompt() {
-  if (!cartProducts.value.length) {
-    return
-  }
-
   isCraftsmanPromptOpen.value = true
 }
 

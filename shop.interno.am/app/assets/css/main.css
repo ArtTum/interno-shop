@@ -1281,6 +1281,71 @@ h2 {
   padding: 18px;
 }
 
+.craftsman-prompt-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.craftsman-prompt-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(8, 16, 31, 0.52);
+  cursor: pointer;
+}
+
+.craftsman-prompt-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 380px);
+  border: 1px solid rgba(216, 222, 232, 0.92);
+  border-radius: 10px;
+  background: #fff;
+  padding: 26px 24px 22px;
+  box-shadow: 0 24px 60px rgba(8, 16, 31, 0.22);
+  text-align: center;
+}
+
+.craftsman-prompt-dialog h2 {
+  margin: 0 0 20px;
+  color: #142948;
+  font-size: 18px;
+  font-weight: 760;
+  line-height: 1.35;
+}
+
+.craftsman-prompt-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.craftsman-prompt-actions button {
+  min-width: 92px;
+  min-height: 36px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 760;
+  padding: 0 18px;
+}
+
+.craftsman-prompt-actions button:first-child {
+  background: #142948;
+  color: #fff;
+}
+
+.craftsman-prompt-actions button:last-child {
+  border: 1px solid #d8dee8;
+  background: #fff;
+  color: #142948;
+}
+
 .checkout-backdrop {
   position: absolute;
   inset: 0;
