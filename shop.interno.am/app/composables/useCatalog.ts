@@ -243,7 +243,7 @@ const translations = {
     firstNamePlaceholder: 'Անուն',
     craftsmanCode: 'Արհեստավորի կոդ',
     craftsmanName: 'Արհեստավորի անուն-ազգանուն',
-    craftsmanSearchPlaceholder: 'Գրեք կոդը կամ անունը',
+    craftsmanSearchPlaceholder: 'Կոդ, անուն, ազգանուն կամ հայրանունի առաջին տառ',
     craftsmen: 'Արհեստավորներ',
     craftsmenTitle: 'Ընտրեք արհեստավորին',
     craftsmenIntro: 'Ընտրեք աշխատողին, որպեսզի checkout-ում կոդն ու անունը լրացվեն ավտոմատ։',
@@ -346,7 +346,7 @@ const translations = {
     firstNamePlaceholder: 'First name',
     craftsmanCode: 'Craftsman code',
     craftsmanName: 'Craftsman full name',
-    craftsmanSearchPlaceholder: 'Type code or name',
+    craftsmanSearchPlaceholder: 'Code, name, surname, or patronymic initial',
     craftsmen: 'Craftsmen',
     craftsmenTitle: 'Choose a craftsman',
     craftsmenIntro: 'Choose a worker so their code and name are filled automatically at checkout.',
@@ -449,7 +449,7 @@ const translations = {
     firstNamePlaceholder: 'Имя',
     craftsmanCode: 'Код мастера',
     craftsmanName: 'Имя и фамилия мастера',
-    craftsmanSearchPlaceholder: 'Введите код или имя',
+    craftsmanSearchPlaceholder: 'Код, имя, фамилия или первая буква отчества',
     craftsmen: 'Мастера',
     craftsmenTitle: 'Выберите мастера',
     craftsmenIntro: 'Выберите работника, чтобы код и имя автоматически заполнились при оформлении.',
@@ -825,6 +825,7 @@ export function useCatalog() {
   }
   const isCartPage = computed(() => withoutLanguagePrefix(route.path) === '/cart')
   const isContactPage = computed(() => withoutLanguagePrefix(route.path) === '/contact')
+  const isCraftsmenPage = computed(() => withoutLanguagePrefix(route.path) === '/craftsmen')
   const isSearchPage = computed(() => withoutLanguagePrefix(route.path) === '/search')
   const searchQuery = computed(() => {
     const query = route.query.q
@@ -1282,6 +1283,7 @@ export function useCatalog() {
     isCartPage,
     isCategoryPage,
     isContactPage,
+    isCraftsmenPage,
     isSearchPage,
     languages: availableLanguages,
     localizedPath,

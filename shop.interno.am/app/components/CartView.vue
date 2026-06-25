@@ -19,6 +19,7 @@ const {
 } = useCatalog()
 
 const isCheckoutOpen = ref(false)
+const isCraftsmanPromptOpen = ref(false)
 const router = useRouter()
 const route = useRoute()
 type Craftsman = { id: number | null, code: string, name: string, image?: string | null, phone?: string | null, work_region?: string | null, work_city?: string | null, work_field?: string | null, has_whatsapp?: boolean, has_viber?: boolean }
@@ -148,11 +149,26 @@ async function submitCheckout() {
   router.push(localizedPath('/checkout-success'))
 }
 
+function continueWithoutCraftsman() {
+  selectCraftsmanForCheckout(null)
+  isCraftsmanPromptOpen.value = false
+  isCheckoutOpen.value = true
+}
+
+function openCraftsmanPrompt() {
+  if (!cartProducts.value.length) {
+    return
+  }
+
+  isCraftsmanPromptOpen.value = true
+}
+
 function goToCraftsmen() {
   if (!cartProducts.value.length) {
     return
   }
 
+  isCraftsmanPromptOpen.value = false
   router.push(localizedPath('/craftsmen'))
 }
 
@@ -238,7 +254,7 @@ watch(() => route.query.checkout, (checkout) => {
           <span style="margin-right: 10px;">{{ copy.paymentDue }}</span>
           <strong>{{ cartTotal }} <span aria-hidden="true">&#1423;</span></strong>
         </div>
-        <button type="button" @click="goToCraftsmen">{{ copy.pay }}</button>
+        <button type="button" @click="openCraftsmanPrompt">{{ copy.pay }}</button>
       </div>
 
       <div class="cart-recommendations">
@@ -257,6 +273,17 @@ watch(() => route.query.checkout, (checkout) => {
     </aside>
 
     <Teleport to="body">
+      <div v-if="isCraftsmanPromptOpen" class="craftsman-prompt-modal" role="dialog" aria-modal="true" aria-labelledby="craftsman-prompt-title">
+        <button class="craftsman-prompt-backdrop" type="button" :aria-label="copy.closeDialog" @click="isCraftsmanPromptOpen = false" />
+        <section class="craftsman-prompt-dialog">
+          <h2 id="craftsman-prompt-title">{{ copy.selectCraftsmanQuestion }}</h2>
+          <div class="craftsman-prompt-actions">
+            <button type="button" @click="goToCraftsmen">{{ copy.yes }}</button>
+            <button type="button" @click="continueWithoutCraftsman">{{ copy.no }}</button>
+          </div>
+        </section>
+      </div>
+
       <div v-if="isCheckoutOpen" class="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
         <button class="checkout-backdrop" type="button" :aria-label="copy.closeDialog" @click="isCheckoutOpen = false" />
 

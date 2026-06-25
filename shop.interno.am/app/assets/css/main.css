@@ -3460,3 +3460,1214 @@ h2 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+/* Craftsmen page final polish */
+.craftsmen-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 14px 0 42px;
+}
+
+.craftsmen-head {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 112px;
+  border: 1px solid rgba(203, 212, 226, 0.9);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(25, 223, 48, 0.12), transparent 28%),
+    linear-gradient(135deg, #fff 0%, #f7faff 100%);
+  color: #142948;
+  padding: 22px 24px;
+  box-shadow: 0 10px 28px rgba(20, 41, 72, 0.07);
+}
+
+.craftsmen-head::before {
+  position: absolute;
+  top: 0;
+  right: auto;
+  bottom: auto;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: #19df30;
+  background-image: none;
+  content: "";
+  mask-image: none;
+  pointer-events: none;
+}
+
+.craftsmen-head h1 {
+  margin: 0 0 8px;
+  color: #0f213b;
+  font-size: 29px;
+  font-weight: 760;
+  letter-spacing: 0;
+  line-height: 1.12;
+}
+
+.craftsmen-head p {
+  max-width: 620px;
+  margin: 0;
+  color: #68758a;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.craftsmen-skip {
+  min-height: 40px;
+  border: 0;
+  border-radius: 6px;
+  background: #142948;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 760;
+  padding: 0 18px;
+  white-space: nowrap;
+}
+
+.filters-toggle {
+  display: none;
+}
+
+.craftsmen-filters {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.35fr) repeat(3, minmax(160px, 1fr));
+  gap: 12px;
+  border: 1px solid rgba(203, 212, 226, 0.9);
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px;
+  box-shadow: 0 8px 22px rgba(20, 41, 72, 0.06);
+}
+
+.craftsmen-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.craftsmen-filters label span {
+  color: #607086;
+  font-size: 10px;
+  font-weight: 760;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.craftsmen-filters input,
+.craftsmen-filters select {
+  width: 100%;
+  height: 38px;
+  border: 1px solid #cfd8e6;
+  border-radius: 6px;
+  background: #fbfcff;
+  color: #142948;
+  font-size: 13px;
+  outline: 0;
+  padding: 0 12px;
+}
+
+.craftsmen-filters input:focus,
+.craftsmen-filters select:focus {
+  border-color: #8aa8d6;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(20, 41, 72, 0.08);
+}
+
+.craftsmen-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.craftsman-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  min-height: 126px;
+  overflow: hidden;
+  border: 1px solid rgba(203, 212, 226, 0.95);
+  border-radius: 8px;
+  background: #fff;
+  padding: 0;
+  box-shadow: 0 8px 22px rgba(20, 41, 72, 0.06);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.craftsman-row:hover {
+  border-color: rgba(20, 41, 72, 0.24);
+  box-shadow: 0 13px 30px rgba(20, 41, 72, 0.12);
+  transform: translateY(-1px);
+}
+
+.craftsman-avatar {
+  display: grid;
+  place-items: center;
+  min-height: 126px;
+  margin: 0;
+  overflow: hidden;
+  border-right: 1px solid #edf1f6;
+  background:
+    radial-gradient(circle at 50% 26%, rgba(25, 223, 48, 0.16), transparent 34%),
+    linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+}
+
+.craftsman-avatar img {
+  display: block;
+  width: 72px;
+  height: 72px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #dfe7f1;
+  box-shadow: 0 10px 22px rgba(20, 41, 72, 0.16);
+  object-fit: cover;
+}
+
+.craftsman-avatar-fallback {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  min-height: 0;
+  place-items: center;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #142948, #2e5d99);
+  box-shadow: 0 10px 22px rgba(20, 41, 72, 0.16);
+  color: #fff;
+  font-size: 30px;
+  font-weight: 760;
+}
+
+.craftsman-main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  padding: 13px 14px;
+}
+
+.craftsman-code-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.craftsman-code {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #0b66d8;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0;
+  padding: 0 9px;
+}
+
+.craftsman-field-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  border-radius: 999px;
+  background: #eff6f1;
+  color: #245931;
+  font-size: 10px;
+  font-weight: 720;
+  padding: 0 9px;
+}
+
+.craftsman-name {
+  margin: 0;
+  overflow: hidden;
+  color: #071a35;
+  font-size: 17px;
+  font-weight: 780;
+  line-height: 1.18;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.craftsman-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 7px;
+  color: #738196;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.craftsman-meta .meta-sep {
+  color: #b8c2d0;
+}
+
+.craftsman-phone {
+  color: #0b66d8;
+  font-weight: 680;
+  text-decoration: none;
+}
+
+.craftsman-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.craftsman-badges img {
+  display: block;
+  width: 19px;
+  height: 19px;
+}
+
+.craftsman-choose {
+  align-self: flex-start;
+  min-height: 30px;
+  border: 0;
+  border-radius: 6px;
+  background: #142948;
+  color: #fff;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 760;
+  padding: 0 14px;
+}
+
+.craftsman-choose:hover {
+  background: #0f213b;
+}
+
+.craftsmen-loading,
+.craftsmen-empty {
+  border: 1px solid rgba(203, 212, 226, 0.9);
+  border-radius: 8px;
+  background: #fff;
+  color: #738196;
+  font-size: 13px;
+  padding: 28px;
+  text-align: center;
+}
+
+@media (max-width: 980px) {
+  .topbar {
+    display: grid;
+    grid-template-columns: 108px minmax(0, 1fr);
+    gap: 8px;
+    min-height: auto;
+    padding: 8px 10px;
+  }
+
+  .brand {
+    grid-column: 1;
+    grid-row: 1;
+    width: 108px;
+    height: 36px;
+    padding: 2px 0;
+  }
+
+  .search {
+    grid-column: 2;
+    grid-row: 1;
+    height: 36px;
+    border-radius: 8px;
+  }
+
+  .toolbar {
+    display: none;
+  }
+
+  .mobile-categories {
+    position: sticky;
+    top: 53px;
+    z-index: 4;
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 6px;
+    overflow: visible;
+    border-bottom: 1px solid var(--line);
+    background: #fff;
+    padding: 7px 10px;
+  }
+
+  .mobile-categories.is-craftsmen-page {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-rows: auto auto;
+    gap: 0 6px;
+    padding-top: 0;
+  }
+
+  .mobile-craftsmen-title {
+    display: block;
+    grid-column: 1 / -1;
+    grid-row: 1;
+    margin: 0 -10px 7px;
+    border-bottom: 1px solid var(--line);
+    color: #142948;
+    font-size: 14px;
+    font-weight: 760;
+    line-height: 1;
+    padding: 10px 12px;
+    text-decoration: none;
+  }
+
+  .category-menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    padding: 0 10px;
+  }
+
+  .mobile-menu-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mobile-menu-bars span {
+    display: block;
+    width: 16px;
+    height: 2px;
+    border-radius: 1px;
+    background: #4b5565;
+  }
+
+  .mobile-menu-label {
+    font-size: 11px;
+    font-weight: 720;
+    line-height: 1;
+  }
+
+  .mobile-category-scroll {
+    display: flex;
+    min-width: 0;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .mobile-category-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-category-scroll button,
+  .mobile-craftsmen-chip {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    min-height: 30px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 680;
+    padding: 0 11px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .mobile-craftsmen-chip {
+    border-color: rgba(20, 41, 72, 0.22);
+    background: #eef3fa;
+    color: #142948;
+    font-weight: 760;
+  }
+
+  .mobile-cart-button {
+    position: relative;
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .mobile-cart-button img {
+    width: 25px;
+    height: 25px;
+  }
+
+  .mobile-lang-picker {
+    display: flex;
+    position: relative;
+  }
+
+  .mobile-lang-picker .language-trigger {
+    height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0 7px;
+  }
+
+  .layout {
+    padding: 10px 8px 0;
+  }
+
+  .craftsmen-page {
+    gap: 12px;
+    padding: 0 0 24px;
+  }
+
+  .craftsmen-head {
+    min-height: 0;
+    border-radius: 8px;
+    padding: 16px 14px 15px 18px;
+  }
+
+  .craftsmen-head h1 {
+    font-size: 21px;
+  }
+
+  .craftsmen-head p {
+    font-size: 12px;
+  }
+
+  .craftsmen-skip {
+    min-height: 34px;
+    font-size: 11px;
+    padding: 0 12px;
+  }
+
+  .filters-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    border: 1px solid rgba(203, 212, 226, 0.95);
+    border-radius: 8px;
+    background: #fff;
+    color: #142948;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 760;
+    padding: 0 12px;
+  }
+
+  .filters-toggle-chevron {
+    width: 7px;
+    height: 7px;
+    margin-left: auto;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+  }
+
+  .filters-toggle-chevron.is-open {
+    transform: rotate(225deg);
+  }
+
+  .craftsmen-filters {
+    display: none;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .craftsmen-filters.is-open {
+    display: grid;
+  }
+
+  .craftsmen-list {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .craftsman-row {
+    grid-template-columns: 88px minmax(0, 1fr);
+    min-height: 112px;
+    border-radius: 8px;
+  }
+
+  .craftsman-avatar,
+  .craftsman-avatar-fallback {
+    min-height: 112px;
+  }
+
+  .craftsman-avatar img,
+  .craftsman-avatar-fallback {
+    width: 62px;
+    height: 62px;
+    min-height: 0;
+  }
+
+  .craftsman-avatar-fallback {
+    font-size: 25px;
+  }
+
+  .craftsman-main {
+    gap: 5px;
+    padding: 9px 10px;
+  }
+
+  .craftsman-code,
+  .craftsman-field-tag {
+    min-height: 19px;
+    font-size: 9px;
+    padding: 0 7px;
+  }
+
+  .craftsman-name {
+    font-size: 13px;
+  }
+
+  .craftsman-meta {
+    gap: 3px 5px;
+    font-size: 10.5px;
+  }
+
+  .craftsman-badges img {
+    width: 17px;
+    height: 17px;
+  }
+
+  .craftsman-choose {
+    min-height: 26px;
+    font-size: 10px;
+    padding: 0 10px;
+  }
+
+  .footer {
+    display: none;
+  }
+}
+
+/* Craftsmen avatar final refinement */
+.craftsman-row {
+  grid-template-columns: 124px minmax(0, 1fr);
+}
+
+.craftsman-avatar {
+  position: relative;
+  display: grid;
+  min-height: 138px;
+  place-items: center;
+  border-right: 1px solid #edf1f6;
+  background:
+    linear-gradient(180deg, #f9fbfe 0%, #eef4fb 100%);
+}
+
+.craftsman-avatar::before {
+  position: absolute;
+  inset: 15px 22px;
+  border: 1px solid #dce6f3;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(20, 41, 72, 0.09);
+  content: "";
+}
+
+.craftsman-avatar::after {
+  position: absolute;
+  top: 15px;
+  bottom: 15px;
+  left: 22px;
+  width: 4px;
+  border-radius: 14px 0 0 14px;
+  background: #19df30;
+  content: "";
+}
+
+.craftsman-avatar img,
+.craftsman-avatar-fallback {
+  position: relative;
+  z-index: 1;
+  width: 72px;
+  height: 82px;
+  min-height: 0;
+  border: 0;
+  border-radius: 11px;
+  background: #eef3f8;
+  box-shadow: none;
+  object-fit: cover;
+}
+
+.craftsman-avatar-fallback {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #142948, #2f5f9e);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 760;
+}
+
+@media (max-width: 980px) {
+  .craftsman-row {
+    grid-template-columns: 94px minmax(0, 1fr);
+  }
+
+  .craftsman-avatar {
+    min-height: 112px;
+  }
+
+  .craftsman-avatar::before {
+    inset: 13px 15px;
+    border-radius: 12px;
+  }
+
+  .craftsman-avatar::after {
+    top: 13px;
+    bottom: 13px;
+    left: 15px;
+  }
+
+  .craftsman-avatar img,
+  .craftsman-avatar-fallback {
+    width: 58px;
+    height: 68px;
+    border-radius: 10px;
+  }
+}
+
+/* Craftsmen final balanced layout */
+.craftsmen-page {
+  gap: 16px;
+  padding: 12px 0 38px;
+}
+
+.craftsmen-head {
+  min-height: 106px;
+  border-radius: 8px;
+  padding: 22px 24px 22px 26px;
+}
+
+.craftsmen-head h1 {
+  margin-bottom: 7px;
+  font-size: 28px;
+  line-height: 1.12;
+}
+
+.craftsmen-head p {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.craftsmen-filters {
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.craftsmen-list {
+  gap: 12px;
+}
+
+.craftsman-row {
+  grid-template-columns: 104px minmax(0, 1fr);
+  align-items: stretch;
+  min-height: 122px;
+  border-radius: 8px;
+  padding: 0;
+  box-shadow: 0 8px 22px rgba(20, 41, 72, 0.06);
+}
+
+.craftsman-avatar {
+  display: flex;
+  min-height: 122px;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #edf1f6;
+  background: linear-gradient(180deg, #fbfcff 0%, #f1f5fa 100%);
+}
+
+.craftsman-avatar::before,
+.craftsman-avatar::after {
+  display: none;
+}
+
+.craftsman-avatar img,
+.craftsman-avatar-fallback {
+  width: 68px;
+  height: 68px;
+  min-height: 0;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #e7eef7;
+  box-shadow: 0 8px 18px rgba(20, 41, 72, 0.14);
+  object-fit: cover;
+  object-position: center top;
+}
+
+.craftsman-avatar-fallback {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #142948, #2f5f9e);
+  color: #fff;
+  font-size: 27px;
+  font-weight: 760;
+}
+
+.craftsman-main {
+  justify-content: center;
+  gap: 7px;
+  padding: 15px 16px 14px;
+}
+
+.craftsman-code-row {
+  gap: 6px;
+}
+
+.craftsman-code,
+.craftsman-field-tag {
+  min-height: 21px;
+  font-size: 10px;
+  padding: 0 8px;
+}
+
+.craftsman-name {
+  font-size: 16px;
+  line-height: 1.18;
+}
+
+.craftsman-meta {
+  gap: 4px 7px;
+  font-size: 12px;
+}
+
+.craftsman-badges img {
+  width: 19px;
+  height: 19px;
+}
+
+.craftsman-choose {
+  min-height: 30px;
+  border-radius: 6px;
+  font-size: 11px;
+  padding: 0 14px;
+}
+
+@media (max-width: 980px) {
+  .craftsmen-page {
+    gap: 11px;
+    padding: 0 0 24px;
+  }
+
+  .craftsmen-head {
+    min-height: 0;
+    padding: 15px 14px 15px 18px;
+  }
+
+  .craftsmen-head h1 {
+    font-size: 21px;
+  }
+
+  .craftsmen-filters {
+    padding: 12px;
+  }
+
+  .craftsman-row {
+    grid-template-columns: 82px minmax(0, 1fr);
+    min-height: 104px;
+  }
+
+  .craftsman-avatar {
+    min-height: 104px;
+  }
+
+  .craftsman-avatar img,
+  .craftsman-avatar-fallback {
+    width: 56px;
+    height: 56px;
+    border-width: 2px;
+  }
+
+  .craftsman-main {
+    gap: 5px;
+    padding: 9px 10px;
+  }
+
+  .craftsman-code,
+  .craftsman-field-tag {
+    min-height: 18px;
+    font-size: 8.5px;
+    padding: 0 6px;
+  }
+
+  .craftsman-name {
+    font-size: 13px;
+  }
+
+  .craftsman-meta {
+    gap: 3px 5px;
+    font-size: 10.5px;
+  }
+
+  .craftsman-badges img {
+    width: 17px;
+    height: 17px;
+  }
+
+  .craftsman-choose {
+    min-height: 26px;
+    font-size: 10px;
+    padding: 0 10px;
+  }
+}
+
+/* Clean craftsman photo presentation */
+.craftsman-row {
+  grid-template-columns: 92px minmax(0, 1fr);
+}
+
+.craftsman-avatar {
+  display: flex;
+  min-height: 116px;
+  align-items: center;
+  justify-content: center;
+  border-right: 0;
+  background: #fff;
+  padding: 16px 8px 16px 18px;
+}
+
+.craftsman-avatar::before,
+.craftsman-avatar::after {
+  display: none;
+}
+
+.craftsman-avatar img,
+.craftsman-avatar-fallback {
+  width: 64px;
+  height: 64px;
+  min-height: 0;
+  border: 1px solid #d9e3f0;
+  border-radius: 50%;
+  background: #f5f8fc;
+  box-shadow:
+    0 0 0 4px #fff,
+    0 0 0 5px #edf3fa,
+    0 8px 18px rgba(20, 41, 72, 0.12);
+  object-fit: cover;
+  object-position: center top;
+}
+
+.craftsman-avatar-fallback {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #142948, #2e5d99);
+  color: #fff;
+  font-size: 25px;
+  font-weight: 760;
+}
+
+@media (max-width: 980px) {
+  .craftsman-row {
+    grid-template-columns: 76px minmax(0, 1fr);
+  }
+
+  .craftsman-avatar {
+    min-height: 100px;
+    padding: 13px 6px 13px 14px;
+  }
+
+  .craftsman-avatar img,
+  .craftsman-avatar-fallback {
+    width: 54px;
+    height: 54px;
+  }
+}
+
+/* Final craftsmen profile card style */
+.craftsmen-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.craftsman-row {
+  grid-template-columns: 126px minmax(0, 1fr);
+  min-height: 142px;
+  border: 1px solid #d8dee8;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 10px 26px rgba(20, 41, 72, 0.07);
+}
+
+.craftsman-avatar {
+  position: relative;
+  display: flex;
+  min-height: 142px;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #e7edf5;
+  background: linear-gradient(180deg, #fbfcff 0%, #f1f5fa 100%);
+  padding: 18px 16px;
+}
+
+.craftsman-avatar::before {
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background: #19df30;
+  content: "";
+}
+
+.craftsman-avatar::after {
+  display: none;
+}
+
+.craftsman-avatar img,
+.craftsman-avatar-fallback {
+  position: relative;
+  width: 78px;
+  height: 92px;
+  min-height: 0;
+  border: 1px solid #d6e0ec;
+  border-radius: 12px;
+  background: #eef3f8;
+  box-shadow: 0 12px 24px rgba(20, 41, 72, 0.14);
+  object-fit: cover;
+  object-position: center top;
+}
+
+.craftsman-avatar-fallback {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #142948, #2e5d99);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 760;
+}
+
+.craftsman-main {
+  gap: 8px;
+  padding: 18px 18px 16px;
+}
+
+.craftsman-code,
+.craftsman-field-tag {
+  min-height: 22px;
+  font-size: 10px;
+}
+
+.craftsman-name {
+  font-size: 17px;
+}
+
+.craftsman-meta {
+  font-size: 12px;
+}
+
+.craftsman-choose {
+  min-height: 31px;
+  padding: 0 16px;
+}
+
+@media (max-width: 980px) {
+  .craftsmen-list {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .craftsman-row {
+    grid-template-columns: 92px minmax(0, 1fr);
+    min-height: 112px;
+    border-radius: 9px;
+  }
+
+  .craftsman-avatar {
+    min-height: 112px;
+    padding: 14px 10px;
+  }
+
+  .craftsman-avatar::before {
+    top: 14px;
+    bottom: 14px;
+  }
+
+  .craftsman-avatar img,
+  .craftsman-avatar-fallback {
+    width: 62px;
+    height: 74px;
+    border-radius: 10px;
+  }
+
+  .craftsman-main {
+    gap: 5px;
+    padding: 10px 11px;
+  }
+
+  .craftsman-code,
+  .craftsman-field-tag {
+    min-height: 18px;
+    font-size: 8.5px;
+  }
+
+  .craftsman-name {
+    font-size: 13px;
+  }
+
+  .craftsman-meta {
+    font-size: 10.5px;
+  }
+
+  .craftsman-choose {
+    min-height: 26px;
+    padding: 0 10px;
+  }
+}
+
+/* Craftsman image box and right action */
+.craftsman-row {
+  grid-template-columns: 130px minmax(0, 1fr);
+}
+
+.craftsman-avatar {
+  display: grid;
+  min-height: 132px;
+  place-items: center;
+  border-right: 0;
+  background: #fff;
+  padding: 16px 14px 16px 18px;
+}
+
+.craftsman-avatar::before,
+.craftsman-avatar::after {
+  display: none;
+}
+
+.craftsman-avatar img,
+.craftsman-avatar-fallback {
+  width: 94px;
+  height: 94px;
+  min-height: 0;
+  border: 1px solid #d8dee8;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: none;
+  object-fit: contain;
+  object-position: center;
+  padding: 5px;
+}
+
+.craftsman-avatar-fallback {
+  display: grid;
+  place-items: center;
+  background: #f7f9fc;
+  color: #142948;
+  font-size: 28px;
+  font-weight: 760;
+}
+
+.craftsman-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: center;
+  align-items: center;
+  column-gap: 18px;
+  row-gap: 7px;
+  padding: 18px 20px 18px 4px;
+}
+
+.craftsman-code-row,
+.craftsman-name,
+.craftsman-meta {
+  grid-column: 1;
+}
+
+.craftsman-choose {
+  grid-column: 2;
+  grid-row: 1 / 4;
+  align-self: center;
+  justify-self: end;
+  min-width: 82px;
+}
+
+@media (max-width: 980px) {
+  .craftsman-row {
+    grid-template-columns: 98px minmax(0, 1fr);
+  }
+
+  .craftsman-avatar {
+    min-height: 108px;
+    padding: 12px 10px;
+  }
+
+  .craftsman-avatar img,
+  .craftsman-avatar-fallback {
+    width: 74px;
+    height: 74px;
+    padding: 4px;
+  }
+
+  .craftsman-main {
+    column-gap: 8px;
+    row-gap: 5px;
+    padding: 10px 10px 10px 0;
+  }
+
+  .craftsman-choose {
+    min-width: 62px;
+  }
+}
+
+/* Product-like image frame for craftsmen */
+.craftsman-row {
+  grid-template-columns: 150px minmax(0, 1fr);
+}
+
+.craftsman-avatar {
+  width: 118px;
+  height: 96px;
+  min-height: 0;
+  align-self: center;
+  justify-self: center;
+  margin: 0;
+  border: 1px solid #d8dee8;
+  border-radius: 6px;
+  background: #fff;
+  padding: 8px;
+}
+
+.craftsman-avatar img,
+.craftsman-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  object-fit: contain;
+  object-position: center;
+  padding: 0;
+}
+
+.craftsman-avatar-fallback {
+  border-radius: 4px;
+  background: #f1f5fa;
+}
+
+.craftsman-main {
+  padding-left: 0;
+}
+
+@media (max-width: 980px) {
+  .craftsman-row {
+    grid-template-columns: 104px minmax(0, 1fr);
+  }
+
+  .craftsman-avatar {
+    width: 84px;
+    height: 76px;
+    padding: 6px;
+  }
+}

@@ -35,6 +35,7 @@ const query = reactive({
   city: '',
   field: ''
 })
+const areFiltersOpen = ref(true)
 const isLoading = ref(false)
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -99,7 +100,12 @@ onMounted(loadCraftsmen)
       </button>
     </div>
 
-    <div class="craftsmen-filters">
+    <button class="filters-toggle" type="button" :aria-expanded="areFiltersOpen" @click="areFiltersOpen = !areFiltersOpen">
+      {{ copy.craftsmenSearch }}
+      <span class="filters-toggle-chevron" :class="{ 'is-open': areFiltersOpen }" aria-hidden="true" />
+    </button>
+
+    <div class="craftsmen-filters" :class="{ 'is-open': areFiltersOpen }">
       <label>
         <span>{{ copy.craftsmenSearch }}</span>
         <input v-model="query.search" type="search" :placeholder="copy.craftsmanSearchPlaceholder" />
@@ -137,26 +143,23 @@ onMounted(loadCraftsmen)
         </figure>
 
         <div class="craftsman-main">
-          <div class="craftsman-name-row">
-            <h2>{{ craftsman.name }}</h2>
+          <div class="craftsman-code-row">
+            <strong class="craftsman-code">{{ craftsman.code }}</strong>
             <span v-if="craftsman.work_field" class="craftsman-field-tag">{{ craftsman.work_field }}</span>
           </div>
+          <h2 class="craftsman-name">{{ craftsman.name }}</h2>
           <div class="craftsman-meta">
             <span v-if="craftsman.work_region">{{ craftsman.work_region }}</span>
-            <span v-if="craftsman.work_city" class="meta-sep">·</span>
+            <span v-if="craftsman.work_city" class="meta-sep">&middot;</span>
             <span v-if="craftsman.work_city">{{ craftsman.work_city }}</span>
-            <span v-if="craftsman.phone" class="meta-sep">·</span>
+            <span v-if="craftsman.phone" class="meta-sep">&middot;</span>
             <a v-if="craftsman.phone" :href="`tel:${craftsman.phone}`" class="craftsman-phone">{{ craftsman.phone }}</a>
+            <span v-if="craftsman.has_whatsapp || craftsman.has_viber" class="craftsman-badges">
+              <img v-if="craftsman.has_whatsapp" src="/assets/icons/whatsapp.svg" :alt="copy.whatsApp" />
+              <img v-if="craftsman.has_viber" src="/assets/icons/viber.svg" :alt="copy.viber" />
+            </span>
           </div>
-        </div>
-
-        <div class="craftsman-side">
-          <strong class="craftsman-code">{{ craftsman.code }}</strong>
-          <div class="craftsman-badges">
-            <span v-if="craftsman.has_whatsapp">{{ copy.whatsApp }}</span>
-            <span v-if="craftsman.has_viber">{{ copy.viber }}</span>
-          </div>
-          <button type="button" @click="chooseCraftsman(craftsman)">
+          <button class="craftsman-choose" type="button" @click="chooseCraftsman(craftsman)">
             {{ copy.craftsmenChoose }}
           </button>
         </div>
