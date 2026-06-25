@@ -1922,7 +1922,7 @@ h2 {
   align-items: center;
   gap: 6px;
   color: #142948;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: auto;
   font-size: 30px;
   font-weight: 680;
   line-height: 1;
@@ -3307,7 +3307,7 @@ h2 {
     background: transparent;
     color: #142948;
     box-shadow: none;
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: auto;
     font-size: 19px;
     font-weight: 760;
     line-height: 1;
