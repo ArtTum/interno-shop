@@ -226,6 +226,13 @@ function addCurrentProductToCart() {
         <div v-if="productDescription" class="product-description" v-html="productDescription"></div>
         <p v-if="isCurrentProductUnavailable" class="detail-unavailable">{{ copy.temporarilyUnavailable }}</p>
 
+        <form class="product-code-options" @submit.prevent>
+          <label class="option-field option-wide">
+            <span>{{ copy.optionCode }}</span>
+            <input type="text" :value="currentProduct.options?.code || copy.optionCode" disabled />
+          </label>
+        </form>
+
         <!-- Attribute price selects (height / unit / size / power) -->
         <div v-if="currentProductPriceOptions.length" class="price-options">
           <div v-for="group in currentProductPriceOptions" :key="group.key" class="price-option-group">
@@ -248,11 +255,6 @@ function addCurrentProductToCart() {
         </div>
 
         <form class="product-options" @submit.prevent>
-          <label class="option-field option-wide">
-            <span>{{ copy.optionCode }}</span>
-            <input type="text" :value="currentProduct.options?.code || copy.optionCode" disabled />
-          </label>
-
           <label class="option-field">
             <span>{{ copy.optionSize }}</span>
             <input type="text" :value="currentProduct.options?.size || '—'" disabled />
