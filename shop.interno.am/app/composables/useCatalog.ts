@@ -31,6 +31,7 @@ interface Product {
   priceOptions?: Record<string, Array<{ id: number, name: string, value?: string | null, label: string, price: string }>>
   isNew?: boolean
   isTemporarilyUnavailable?: boolean
+  purchaseQuantityLimited?: boolean
   status?: boolean
   categoryKey?: string | null
   categoryChildIndex?: number | null
@@ -306,7 +307,8 @@ const translations = {
     similarProducts: 'Նման ապրանքներ',
     sliderControls: 'Սլայդերի կառավարում',
     social: 'Instagram · Facebook · Privacy Policy',
-    temporarilyUnavailable: 'Ժամանակավորապես բացակայում է'
+    temporarilyUnavailable: 'Ժամանակավորապես բացակայում է',
+    purchaseQuantityLimitNotice: 'քանակի առկայության համար կարող եք կապվել 044121228 համարով'
   },
   en: {
     add: 'Add',
@@ -410,7 +412,8 @@ const translations = {
     similarProducts: 'Similar products',
     sliderControls: 'Slider controls',
     social: 'Instagram · Facebook · Privacy Policy',
-    temporarilyUnavailable: 'Temporarily unavailable'
+    temporarilyUnavailable: 'Temporarily unavailable',
+    purchaseQuantityLimitNotice: 'For quantity availability, you can contact 044121228'
   },
   ru: {
     add: 'Добавить',
@@ -514,7 +517,8 @@ const translations = {
     similarProducts: 'Похожие товары',
     sliderControls: 'Управление слайдером',
     social: 'Instagram · Facebook · Privacy Policy',
-    temporarilyUnavailable: 'Временно отсутствует'
+    temporarilyUnavailable: 'Временно отсутствует',
+    purchaseQuantityLimitNotice: 'По вопросам наличия количества можно связаться по номеру 044121228'
   }
 } satisfies Record<LanguageCode, Record<string, string>>
 const products: Product[] = []
@@ -632,7 +636,6 @@ export function useCatalog() {
   const activeMenuKey = useState<string | null>('active-menu-key', () => null)
   const searchTerm = useState<string>('search-term', () => '')
   const selectedProductImage = useState<string | null>('selected-product-image', () => null)
-  const homeRandomSeed = useState<number>('home-random-seed', () => Math.random())
 
   const catalogConfig = computed<ShopFrontendConfig>(() => ({
     languages: remoteCatalog.value?.languages?.length ? remoteCatalog.value.languages : languages,
@@ -678,17 +681,7 @@ export function useCatalog() {
 
     return grouped
   })
-  const hashNumber = (value: string) => {
-    let hash = 2166136261
-
-    for (let index = 0; index < value.length; index++) {
-      hash ^= value.charCodeAt(index)
-      hash = Math.imul(hash, 16777619)
-    }
-
-    return hash >>> 0
-  }
-  const shuffledProducts = (items: Product[], key: string, limit?: number | null) => {
+  const shuffledProducts = (items: Product[], _key: string, limit?: number | null) => {
     const sorted = [...items].sort((first, second) => {
       const availabilityDiff = Number(Boolean(first.isTemporarilyUnavailable)) - Number(Boolean(second.isTemporarilyUnavailable))
 
@@ -696,7 +689,7 @@ export function useCatalog() {
         return availabilityDiff
       }
 
-      return hashNumber(`${homeRandomSeed.value}:${key}:${first.id}`) - hashNumber(`${homeRandomSeed.value}:${key}:${second.id}`)
+      return items.indexOf(first) - items.indexOf(second)
     })
     const normalizedLimit = Number(limit || 0)
 
@@ -1295,6 +1288,7 @@ export function useCatalog() {
     menuGroups: menuGroupList,
     openCategory,
     openProduct,
+    productPath,
     productSections,
     products: primaryProducts,
     recentlyAddedProductId,

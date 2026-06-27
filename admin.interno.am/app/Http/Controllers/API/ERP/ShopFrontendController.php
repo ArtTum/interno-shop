@@ -775,6 +775,7 @@ class ShopFrontendController extends Controller
         }
 
         $hasAvailabilityColumn = Schema::hasColumn('shop_products', 'is_temporarily_unavailable');
+        $hasPurchaseQuantityLimitColumn = Schema::hasColumn('shop_products', 'purchase_quantity_limited');
         $hasAttributePriceTables = Schema::hasTable('shop_product_attribute_prices')
             && Schema::hasTable('shop_product_attribute_values');
         $languageCodes = collect($languages)->pluck('code')->filter()->values();
@@ -807,7 +808,7 @@ class ShopFrontendController extends Controller
             ->get(['id', 'name', 'value'])
             ->keyBy('id');
 
-        return $products->map(function (ShopProduct $product) use ($languageCodes, $hasAvailabilityColumn, $hasAttributePriceTables, $allColors) {
+        return $products->map(function (ShopProduct $product) use ($languageCodes, $hasAvailabilityColumn, $hasPurchaseQuantityLimitColumn, $hasAttributePriceTables, $allColors) {
             $category = $product->category;
             $parentCategory = $category?->parent ?: $category;
             $priceOptions = $hasAttributePriceTables ? $this->formatProductPriceOptions($product) : [];
@@ -851,6 +852,7 @@ class ShopFrontendController extends Controller
                 'priceOptions' => $priceOptions,
                 'isNew' => $product->is_new,
                 'isTemporarilyUnavailable' => $hasAvailabilityColumn ? $product->is_temporarily_unavailable : false,
+                'purchaseQuantityLimited' => $hasPurchaseQuantityLimitColumn ? $product->purchase_quantity_limited : false,
                 'status' => $product->status,
                 'categoryKey' => $parentCategory?->slug,
                 'categoryChildIndex' => $category && $category->parent_id ? $category->sort_order : null,
@@ -900,6 +902,10 @@ class ShopFrontendController extends Controller
 
                 if (Schema::hasColumn('shop_products', 'is_temporarily_unavailable')) {
                     $productPayload['is_temporarily_unavailable'] = (bool)($payload['isTemporarilyUnavailable'] ?? false);
+                }
+
+                if (Schema::hasColumn('shop_products', 'purchase_quantity_limited')) {
+                    $productPayload['purchase_quantity_limited'] = (bool)($payload['purchaseQuantityLimited'] ?? false);
                 }
 
                 $product = ShopProduct::query()->updateOrCreate(

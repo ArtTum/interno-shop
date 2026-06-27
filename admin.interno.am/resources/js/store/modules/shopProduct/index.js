@@ -43,6 +43,10 @@ const actions = {
         return await baseHttp.put('shop-products/update', params);
     },
 
+    async reorder({}, params) {
+        return await baseHttp.patch(`shop-products/reorder/${params.id}`, {direction: params.direction});
+    },
+
     async delete({state}) {
         return await baseHttp.delete(`shop-products/delete/${state.deletingItemId}`);
     },

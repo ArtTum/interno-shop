@@ -156,6 +156,7 @@ class ShopProductController extends Controller
                 'option_color_ids' => $this->normalizeColorIds($product->option_color_ids ?: [], $product->option_color_id),
                 'is_new' => $product->is_new,
                 'is_temporarily_unavailable' => $product->is_temporarily_unavailable,
+                'purchase_quantity_limited' => $product->purchase_quantity_limited,
                 'status' => $product->status,
                 'sort_order' => $product->sort_order,
                 'language_id' => $languageId,
@@ -204,6 +205,7 @@ class ShopProductController extends Controller
                 'option_color_ids' => $data['option_color_ids'],
                 'is_new' => $data['is_new'],
                 'is_temporarily_unavailable' => $data['is_temporarily_unavailable'],
+                'purchase_quantity_limited' => $data['purchase_quantity_limited'],
                 'status' => $data['status'],
                 'sort_order' => $data['sort_order'],
             ]);
@@ -249,6 +251,7 @@ class ShopProductController extends Controller
                 'option_color_ids' => $data['option_color_ids'],
                 'is_new' => $data['is_new'],
                 'is_temporarily_unavailable' => $data['is_temporarily_unavailable'],
+                'purchase_quantity_limited' => $data['purchase_quantity_limited'],
                 'status' => $data['status'],
                 'sort_order' => $data['sort_order'],
             ]);
@@ -270,6 +273,48 @@ class ShopProductController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Successfully deleted!',
+        ]);
+    }
+
+    public function reorder(Request $request, int $id): JsonResponse
+    {
+        $data = $request->validate([
+            'direction' => ['required', 'string', Rule::in(['up', 'down'])],
+        ]);
+
+        DB::transaction(function () use ($id, $data) {
+            $product = ShopProduct::query()->findOrFail($id);
+            $products = ShopProduct::query()
+                ->where('shop_category_id', $product->shop_category_id)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+
+            $currentIndex = $products->search(fn (ShopProduct $item) => $item->id === $product->id);
+
+            if ($currentIndex === false) {
+                return;
+            }
+
+            $targetIndex = $data['direction'] === 'up' ? $currentIndex - 1 : $currentIndex + 1;
+
+            if ($targetIndex < 0 || $targetIndex >= $products->count()) {
+                return;
+            }
+
+            $ordered = $products->values()->all();
+            [$ordered[$currentIndex], $ordered[$targetIndex]] = [$ordered[$targetIndex], $ordered[$currentIndex]];
+
+            foreach ($ordered as $index => $item) {
+                if ((int) $item->sort_order !== $index) {
+                    $item->update(['sort_order' => $index]);
+                }
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product position updated.',
         ]);
     }
 
@@ -304,6 +349,7 @@ class ShopProductController extends Controller
             'option_color_ids.*' => ['integer', Rule::exists('shop_product_colors', 'id')],
             'is_new' => ['required', 'boolean'],
             'is_temporarily_unavailable' => ['required', 'boolean'],
+            'purchase_quantity_limited' => ['required', 'boolean'],
             'status' => ['required', 'boolean'],
             'sort_order' => ['required', 'integer', 'min:0'],
             'title' => ['required', 'string', 'max:180'],
@@ -364,6 +410,7 @@ class ShopProductController extends Controller
             'media_id' => $product->media_id,
             'is_new' => $product->is_new,
             'is_temporarily_unavailable' => $product->is_temporarily_unavailable,
+            'purchase_quantity_limited' => $product->purchase_quantity_limited,
             'status' => $product->status,
             'sort_order' => $product->sort_order,
         ];

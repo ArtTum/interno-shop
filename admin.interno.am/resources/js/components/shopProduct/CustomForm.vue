@@ -441,6 +441,15 @@ const submitForm = () => {
                     <div class="flex items-end pb-2">
                         <Switch
                             :disabled="!canEdit"
+                            @change="(value) => form.purchase_quantity_limited = value"
+                            :value="form.purchase_quantity_limited"
+                            id="shop_product_purchase_quantity_limited"
+                            label="Purchase quantity limited"
+                        />
+                    </div>
+                    <div class="flex items-end pb-2">
+                        <Switch
+                            :disabled="!canEdit"
                             @change="(value) => form.status = value"
                             :value="form.status"
                             id="shop_product_status"

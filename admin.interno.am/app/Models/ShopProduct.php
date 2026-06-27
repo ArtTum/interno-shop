@@ -34,6 +34,7 @@ class ShopProduct extends Model
         'option_color_ids',
         'is_new',
         'is_temporarily_unavailable',
+        'purchase_quantity_limited',
         'status',
         'sort_order',
     ];
@@ -45,6 +46,7 @@ class ShopProduct extends Model
         'option_color_ids' => 'array',
         'is_new' => 'boolean',
         'is_temporarily_unavailable' => 'boolean',
+        'purchase_quantity_limited' => 'boolean',
         'status' => 'boolean',
         'sort_order' => 'integer',
         'price' => 'decimal:2',

@@ -40,6 +40,7 @@ const form = reactive({
     gallery_text: '',
     is_new: false,
     is_temporarily_unavailable: false,
+    purchase_quantity_limited: false,
     status: true,
     sort_order: 0,
     title: '',

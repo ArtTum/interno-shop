@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineProps<{ product: any }>()
 
-const { addToCart, copy, currentLanguageCode, openProduct, recentlyAddedProductId } = useCatalog()
+const { addToCart, copy, currentLanguageCode, openProduct, productPath, recentlyAddedProductId } = useCatalog()
 </script>
 
 <template>
@@ -19,11 +19,13 @@ const { addToCart, copy, currentLanguageCode, openProduct, recentlyAddedProductI
       <span v-else-if="product.isNew" class="new">{{ copy.new }}</span>
     </div>
 
-    <div class="product-art">
+    <NuxtLink class="product-art" :to="productPath(product)" @click.stop>
       <img :src="product.image" :alt="product.title[currentLanguageCode] || product.title.hy" />
-    </div>
+    </NuxtLink>
 
-    <p>{{ product.title[currentLanguageCode] || product.title.hy }}</p>
+    <NuxtLink class="product-title-link" :to="productPath(product)" @click.stop>
+      <p>{{ product.title[currentLanguageCode] || product.title.hy }}</p>
+    </NuxtLink>
 
     <!-- Color swatches -->
     <div v-if="product.options?.colors?.length > 1" class="card-colors" @click.stop>
@@ -35,6 +37,10 @@ const { addToCart, copy, currentLanguageCode, openProduct, recentlyAddedProductI
         :title="color.name"
       />
       <span v-if="product.options.colors.length > 6" class="card-color-more">+{{ product.options.colors.length - 6 }}</span>
+    </div>
+
+    <div v-if="product.purchaseQuantityLimited" class="quantity-limit-note">
+      {{ copy.purchaseQuantityLimitNotice }}
     </div>
 
     <div class="product-actions">

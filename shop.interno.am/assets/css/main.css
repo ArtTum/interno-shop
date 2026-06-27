@@ -1221,6 +1221,9 @@ input {
   border-radius: 6px;
   background: #fff;
   padding: 14px 16px 16px;
+  h1 {
+    font-size: 15px;
+  }
 }
 
 h1,
@@ -3287,7 +3290,7 @@ h2 {
   }
 
   h1 {
-    font-size: 20px;
+    font-size: 15px;
   }
 
   h2 {

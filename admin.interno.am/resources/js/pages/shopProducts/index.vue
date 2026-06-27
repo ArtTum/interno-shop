@@ -66,6 +66,7 @@ const optionColorOptions = computed(() => [
 const auth = computed(() => store.getters['auth/getUser']);
 const permission = computed(() => auth.value?.user_group?.permissions_by_name?.shop_products?.[0] || {});
 const canAdd = computed(() => auth.value?.superadmin || permission.value.can_add);
+const canEdit = computed(() => auth.value?.superadmin || permission.value.can_edit);
 const canDelete = computed(() => auth.value?.superadmin || permission.value.can_delete);
 
 const updateQueryParams = async () => {
@@ -91,6 +92,11 @@ const doPageFetching = async (isPagination = false) => {
     }
 
     await updateQueryParams();
+    await fetchPageData();
+};
+
+const moveProduct = async (id, direction) => {
+    await store.dispatch('shopProduct/reorder', {id, direction});
     await fetchPageData();
 };
 
@@ -205,6 +211,7 @@ fetchPageData();
                 {title: 'Min price', key: 'shop_products.price'},
                 {title: 'Sort', key: 'sort_order'},
                 {title: 'New'},
+                {title: 'Qty limit'},
                 {title: 'Availability', key: 'availability'},
                 {title: 'Status', key: 'status'},
                 {title: 'Action'},
@@ -275,7 +282,27 @@ fetchPageData();
                         <span class="font-medium text-black">{{ item.price }}</span>
                     </td>
                     <td class="py-5 px-4 pl-9 xl:pl-11">
-                        <span class="font-medium text-black">{{ item.sort_order }}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-medium text-black">{{ item.sort_order }}</span>
+                            <div v-if="canEdit" class="inline-flex flex-col gap-1">
+                                <button
+                                    type="button"
+                                    class="leading-none hover:text-primary"
+                                    title="Move up"
+                                    @click="moveProduct(item.id, 'up')"
+                                >
+                                    <font-awesome-icon :icon="['fas', 'angle-up']"/>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="leading-none hover:text-primary"
+                                    title="Move down"
+                                    @click="moveProduct(item.id, 'down')"
+                                >
+                                    <font-awesome-icon :icon="['fas', 'angle-down']"/>
+                                </button>
+                            </div>
+                        </div>
                     </td>
                     <td class="py-5 px-4">
                         <p
@@ -286,6 +313,17 @@ fetchPageData();
                             }"
                         >
                             {{ item.is_new ? 'New' : 'No' }}
+                        </p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p
+                            class="inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium"
+                            :class="{
+                                'bg-gray text-black': !item.purchase_quantity_limited,
+                                'bg-warning text-warning': item.purchase_quantity_limited
+                            }"
+                        >
+                            {{ item.purchase_quantity_limited ? 'Limited' : 'No' }}
                         </p>
                     </td>
                     <td class="py-5 px-4">

@@ -225,6 +225,9 @@ function addCurrentProductToCart() {
         <p v-if="productShortDescription" class="product-short-description">{{ productShortDescription }}</p>
         <div v-if="productDescription" class="product-description" v-html="productDescription"></div>
         <p v-if="isCurrentProductUnavailable" class="detail-unavailable">{{ copy.temporarilyUnavailable }}</p>
+        <p v-if="currentProduct.purchaseQuantityLimited" class="quantity-limit-note detail-quantity-limit-note">
+          {{ copy.purchaseQuantityLimitNotice }}
+        </p>
 
         <form class="product-code-options" @submit.prevent>
           <label class="option-field option-wide">
