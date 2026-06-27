@@ -33,6 +33,14 @@ const {
 
 const isMenuOpen = ref(false)
 const isLanguageOpen = ref(false)
+const mobileCategoriesRef = ref<HTMLElement | null>(null)
+const isDraggingCategories = ref(false)
+const categoryDrag = {
+  startX: 0,
+  scrollLeft: 0,
+  pointerId: null as number | null,
+  didDrag: false
+}
 
 function chooseLanguage(language: any) {
   selectLanguage(language)
@@ -42,6 +50,69 @@ function chooseLanguage(language: any) {
 function openMobileCategory(groupKey: string, childIndex?: number) {
   openCategory(groupKey, childIndex)
   isMenuOpen.value = false
+}
+
+function startCategoryDrag(event: PointerEvent) {
+  if (event.pointerType === 'mouse' && event.button !== 0) {
+    return
+  }
+
+  const target = mobileCategoriesRef.value
+
+  if (!target) {
+    return
+  }
+
+  categoryDrag.startX = event.clientX
+  categoryDrag.scrollLeft = target.scrollLeft
+  categoryDrag.pointerId = event.pointerId
+  categoryDrag.didDrag = false
+  isDraggingCategories.value = true
+  target.setPointerCapture?.(event.pointerId)
+}
+
+function moveCategoryDrag(event: PointerEvent) {
+  if (!isDraggingCategories.value || categoryDrag.pointerId !== event.pointerId) {
+    return
+  }
+
+  const target = mobileCategoriesRef.value
+
+  if (!target) {
+    return
+  }
+
+  const distance = event.clientX - categoryDrag.startX
+
+  if (Math.abs(distance) > 4) {
+    categoryDrag.didDrag = true
+  }
+
+  target.scrollLeft = categoryDrag.scrollLeft - distance
+
+  if (categoryDrag.didDrag) {
+    event.preventDefault()
+  }
+}
+
+function endCategoryDrag() {
+  if (categoryDrag.pointerId !== null) {
+    mobileCategoriesRef.value?.releasePointerCapture?.(categoryDrag.pointerId)
+  }
+
+  categoryDrag.pointerId = null
+  isDraggingCategories.value = false
+}
+
+function openCategoryFromStrip(event: MouseEvent, groupKey: string) {
+  if (categoryDrag.didDrag) {
+    event.preventDefault()
+    event.stopPropagation()
+    categoryDrag.didDrag = false
+    return
+  }
+
+  openCategory(groupKey)
 }
 </script>
 
@@ -147,8 +218,19 @@ function openMobileCategory(groupKey: string, childIndex?: number) {
       </nav>
     </aside>
 
-    <div v-if="showCatalogNav && !isCategoryPage" class="mobile-categories" aria-label="Categories">
-      <button v-for="(category, categoryIndex) in categories" :key="category" type="button" @click="openCategory(menuGroups[categoryIndex].key)">
+    <div
+      v-if="showCatalogNav && !isCategoryPage"
+      ref="mobileCategoriesRef"
+      class="mobile-categories"
+      :class="{ 'is-dragging': isDraggingCategories }"
+      aria-label="Categories"
+      @pointerdown="startCategoryDrag"
+      @pointermove="moveCategoryDrag"
+      @pointerup="endCategoryDrag"
+      @pointercancel="endCategoryDrag"
+      @pointerleave="endCategoryDrag"
+    >
+      <button v-for="(category, categoryIndex) in categories" :key="category" type="button" @click="openCategoryFromStrip($event, menuGroups[categoryIndex].key)">
         <span class="chip-icon">⌘</span>
         {{ category }}
       </button>
