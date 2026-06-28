@@ -186,7 +186,12 @@ const mainColorOptions = computed(() => {
 });
 
 watch(() => form.value.option_color_ids, () => {
-    ensureColorIds();
+    if (!Array.isArray(form.value.option_color_ids)) {
+        form.value.option_color_ids = form.value.option_color_id
+            ? [Number(form.value.option_color_id)]
+            : [];
+        return;
+    }
 
     if (!selectedColorIds.value.length) {
         form.value.option_color_id = null;
@@ -196,11 +201,9 @@ watch(() => form.value.option_color_ids, () => {
     if (!form.value.option_color_id || !selectedColorIds.value.includes(Number(form.value.option_color_id))) {
         form.value.option_color_id = selectedColorIds.value[0];
     }
-}, {deep: true});
+});
 
 watch(() => form.value.option_color_id, (colorId) => {
-    ensureColorIds();
-
     const normalizedColorId = Number(colorId);
 
     if (normalizedColorId && !selectedColorIds.value.includes(normalizedColorId)) {
