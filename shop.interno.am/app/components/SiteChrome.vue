@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 
 withDefaults(defineProps<{ wide?: boolean, showCatalogNav?: boolean }>(), {
   wide: false,
@@ -33,7 +33,15 @@ const {
 
 const isMenuOpen = ref(false)
 const isLanguageOpen = ref(false)
+const isSearchOpen = ref(false)
+const mobileSearchInputRef = ref<HTMLInputElement | null>(null)
 const mobileCategoriesRef = ref<HTMLElement | null>(null)
+
+async function openMobileSearch() {
+  isSearchOpen.value = true
+  await nextTick()
+  mobileSearchInputRef.value?.focus()
+}
 const isDraggingCategories = ref(false)
 const categoryDrag = {
   startX: 0,
@@ -118,16 +126,6 @@ function openCategoryFromStrip(event: MouseEvent) {
 
   <div class="site-shell" :class="{ 'menu-is-open': isMenuOpen }">
     <header class="topbar">
-      <NuxtLink class="brand" :to="localizedPath('/')" aria-label="Interino homepage">
-        <img :src="shopSettings.brandLogo" alt="Interino" />
-      </NuxtLink>
-
-      <nav class="desktop-nav" aria-label="Primary">
-        <NuxtLink :to="localizedPath('/')">{{ copy.home }}</NuxtLink>
-        <NuxtLink :to="localizedPath('/craftsmen')">{{ copy.craftsmen }}</NuxtLink>
-        <NuxtLink :to="localizedPath('/contact')">{{ copy.contact }}</NuxtLink>
-      </nav>
-
       <button
         class="mobile-menu"
         type="button"
@@ -141,10 +139,24 @@ function openCategoryFromStrip(event: MouseEvent) {
         <span />
       </button>
 
+      <NuxtLink class="brand" :to="localizedPath('/')" aria-label="Interino homepage">
+        <img :src="shopSettings.brandLogo" alt="Interino" />
+      </NuxtLink>
+
+      <nav class="desktop-nav" aria-label="Primary">
+        <NuxtLink :to="localizedPath('/')">{{ copy.home }}</NuxtLink>
+        <NuxtLink :to="localizedPath('/craftsmen')">{{ copy.craftsmen }}</NuxtLink>
+        <NuxtLink :to="localizedPath('/contact')">{{ copy.contact }}</NuxtLink>
+      </nav>
+
       <form class="search" role="search" @submit.prevent="submitSearch">
         <img src="/assets/icons/search.svg" alt="" aria-hidden="true" />
         <input v-model="searchTerm" type="search" :placeholder="copy.search" />
       </form>
+
+      <button class="mobile-search-btn" type="button" :aria-label="copy.search" @click="openMobileSearch">
+        <img src="/assets/icons/search.svg" alt="" aria-hidden="true" />
+      </button>
 
       <div class="toolbar">
         <NuxtLink class="cart-button" :class="{ 'is-pulsing': recentlyAddedProductId }" :to="localizedPath('/cart')" :aria-label="copy.cart">
@@ -178,6 +190,25 @@ function openCategoryFromStrip(event: MouseEvent) {
           </div>
         </div>
       </div>
+
+      <Transition name="mobile-search">
+        <div v-if="isSearchOpen" class="mobile-search-bar">
+          <button type="button" class="search-back" :aria-label="copy.closeMenu" @click="isSearchOpen = false">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <form role="search" @submit.prevent="() => { isSearchOpen = false; submitSearch() }">
+            <img src="/assets/icons/search.svg" alt="" aria-hidden="true" />
+            <input
+              ref="mobileSearchInputRef"
+              v-model="searchTerm"
+              type="search"
+              :placeholder="copy.search"
+            />
+          </form>
+        </div>
+      </Transition>
     </header>
 
     <div v-if="isLanguageOpen" class="language-backdrop" aria-hidden="true" @click="isLanguageOpen = false" />
