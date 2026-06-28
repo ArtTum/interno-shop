@@ -248,17 +248,10 @@ function openCategoryFromStrip(event: MouseEvent) {
 
     <div
       v-if="showCatalogNav && !isCategoryPage"
-      ref="mobileCategoriesRef"
       class="mobile-categories"
-      :class="{ 'is-dragging': isDraggingCategories }"
       aria-label="Categories"
-      @pointerdown="startCategoryDrag"
-      @pointermove="moveCategoryDrag"
-      @pointerup="endCategoryDrag"
-      @pointercancel="endCategoryDrag"
-      @pointerleave="endCategoryDrag"
     >
-      <NuxtLink v-for="group in menuGroups" :key="group.key" :to="categoryPath(group.key)" @click="openCategoryFromStrip">
+      <NuxtLink v-for="group in menuGroups" :key="group.key" :to="categoryPath(group.key)">
         <span class="chip-icon">⌘</span>
         {{ menuGroupTitle(group) }}
       </NuxtLink>
