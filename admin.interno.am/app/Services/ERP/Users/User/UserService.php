@@ -24,6 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -93,7 +94,21 @@ class UserService implements UserServiceInterface
     public function fetchByField(array $data): JsonResponse
     {
         $select = "users.id, user_group_id, users.name, blocked, last_name, email, gtin, blocked, superadmin, ip, ip_expires_at, balance, newsletter_subscribed, check_client_certificate";
-        $response = $this->repository->fetchByField('id', $data['id'], $select, ['user_billing_address', 'user_shipping_address', 'user_affiliate']);
+        $relations = [];
+
+        if (Schema::hasTable('user_billing_addresses')) {
+            $relations[] = 'user_billing_address';
+        }
+
+        if (Schema::hasTable('user_shipping_addresses')) {
+            $relations[] = 'user_shipping_address';
+        }
+
+        if (Schema::hasTable('user_affiliates')) {
+            $relations[] = 'user_affiliate';
+        }
+
+        $response = $this->repository->fetchByField('id', $data['id'], $select, $relations);
 
         if (!empty($response->ip_expires_at)) {
             $fullDate = $response->ip_expires_at;
