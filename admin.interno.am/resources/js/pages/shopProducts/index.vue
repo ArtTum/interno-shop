@@ -68,6 +68,7 @@ const permission = computed(() => auth.value?.user_group?.permissions_by_name?.s
 const canAdd = computed(() => auth.value?.superadmin || permission.value.can_add);
 const canEdit = computed(() => auth.value?.superadmin || permission.value.can_edit);
 const canDelete = computed(() => auth.value?.superadmin || permission.value.can_delete);
+const reorderingId = ref(null);
 
 const updateQueryParams = async () => {
     await router.push({
@@ -96,8 +97,21 @@ const doPageFetching = async (isPagination = false) => {
 };
 
 const moveProduct = async (id, direction) => {
-    await store.dispatch('shopProduct/reorder', {id, direction});
-    await fetchPageData();
+    if (!canEdit.value || reorderingId.value) {
+        return;
+    }
+
+    reorderingId.value = id;
+
+    try {
+        await store.dispatch('shopProduct/reorder', {id, direction});
+        params.value.ordering_field = 'sort_order';
+        params.value.ordering_direction = 'asc';
+        await updateQueryParams();
+        await fetchPageData();
+    } finally {
+        reorderingId.value = null;
+    }
 };
 
 fetchPageData();
@@ -282,27 +296,7 @@ fetchPageData();
                         <span class="font-medium text-black">{{ item.price }}</span>
                     </td>
                     <td class="py-5 px-4 pl-9 xl:pl-11">
-                        <div class="flex items-center gap-2">
-                            <span class="font-medium text-black">{{ item.sort_order }}</span>
-                            <div v-if="canEdit" class="inline-flex flex-col gap-1">
-                                <button
-                                    type="button"
-                                    class="leading-none hover:text-primary"
-                                    title="Move up"
-                                    @click="moveProduct(item.id, 'up')"
-                                >
-                                    <font-awesome-icon :icon="['fas', 'angle-up']"/>
-                                </button>
-                                <button
-                                    type="button"
-                                    class="leading-none hover:text-primary"
-                                    title="Move down"
-                                    @click="moveProduct(item.id, 'down')"
-                                >
-                                    <font-awesome-icon :icon="['fas', 'angle-down']"/>
-                                </button>
-                            </div>
-                        </div>
+                        <span class="font-medium text-black">{{ item.sort_order }}</span>
                     </td>
                     <td class="py-5 px-4">
                         <p
@@ -350,6 +344,27 @@ fetchPageData();
                     </td>
                     <td class="py-5 px-4">
                         <div class="flex items-center space-x-3.5">
+                            <template v-if="canEdit">
+                                <button
+                                    type="button"
+                                    class="hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                                    title="Move up"
+                                    :disabled="reorderingId !== null"
+                                    @click="moveProduct(item.id, 'up')"
+                                >
+                                    <font-awesome-icon :icon="['fas', 'angle-up']"/>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                                    title="Move down"
+                                    :disabled="reorderingId !== null"
+                                    @click="moveProduct(item.id, 'down')"
+                                >
+                                    <font-awesome-icon :icon="['fas', 'angle-down']"/>
+                                </button>
+                            </template>
+
                             <RouterLink :to="`/shop-products/update/${item.id}/${params.language_id}`">
                                 <button class="hover:text-primary" title="Edit">
                                     <font-awesome-icon :icon="['far', 'pen-to-square']"/>
@@ -395,6 +410,6 @@ fetchPageData();
 
 <style lang="scss" scoped>
 .index tr td:last-child {
-    min-width: 70px;
+    min-width: 120px;
 }
 </style>
