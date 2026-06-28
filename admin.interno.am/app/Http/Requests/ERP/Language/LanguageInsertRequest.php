@@ -20,7 +20,6 @@ class LanguageInsertRequest extends FormRequest
             'name' => 'required|string|max:15',
             'status' => 'required|boolean',
             'draft' => 'required|boolean',
-            'currency_id' => 'nullable|integer',
             'base' => 'required|boolean',
             'hreflang' => 'required|string|max:10',
             'local_for_trustpilot' => 'required|string|max:10',

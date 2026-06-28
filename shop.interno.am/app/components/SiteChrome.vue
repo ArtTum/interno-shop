@@ -8,7 +8,7 @@ withDefaults(defineProps<{ wide?: boolean, showCatalogNav?: boolean }>(), {
 
 const {
   activeMenuKey,
-  categories,
+  categoryPath,
   copy,
   currentCategoryGroup,
   currentCategoryRoute,
@@ -104,15 +104,12 @@ function endCategoryDrag() {
   isDraggingCategories.value = false
 }
 
-function openCategoryFromStrip(event: MouseEvent, groupKey: string) {
+function openCategoryFromStrip(event: MouseEvent) {
   if (categoryDrag.didDrag) {
     event.preventDefault()
     event.stopPropagation()
     categoryDrag.didDrag = false
-    return
   }
-
-  openCategory(groupKey)
 }
 </script>
 
@@ -230,10 +227,10 @@ function openCategoryFromStrip(event: MouseEvent, groupKey: string) {
       @pointercancel="endCategoryDrag"
       @pointerleave="endCategoryDrag"
     >
-      <button v-for="(category, categoryIndex) in categories" :key="category" type="button" @click="openCategoryFromStrip($event, menuGroups[categoryIndex].key)">
+      <NuxtLink v-for="group in menuGroups" :key="group.key" :to="categoryPath(group.key)" @click="openCategoryFromStrip">
         <span class="chip-icon">⌘</span>
-        {{ category }}
-      </button>
+        {{ menuGroupTitle(group) }}
+      </NuxtLink>
     </div>
 
     <div class="layout" :class="{ 'is-product-page': wide }">

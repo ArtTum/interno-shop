@@ -11,7 +11,7 @@ class Language extends Model
     use HasFactory;
 
     protected $fillable = [
-        'currency_id', 'code', 'name', 'status', 'base', 'local_for_trustpilot', 'hreflang', 'default_hreflang', 'email', 'microsoft_access_token', 'microsoft_refresh_token',
+        'code', 'name', 'status', 'base', 'local_for_trustpilot', 'hreflang', 'default_hreflang', 'email', 'microsoft_access_token', 'microsoft_refresh_token',
         'microsoft_token_expires_at', 'oauth_state', 'is_rtl', 'draft'
     ];
 

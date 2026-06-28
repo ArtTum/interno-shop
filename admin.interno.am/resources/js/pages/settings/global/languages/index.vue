@@ -101,7 +101,6 @@ const canDelete = computed(() => auth.value?.superadmin || permission.value.can_
               { title: 'Icon'},
               { title: 'Code', key: 'languages.code' },
               { title: 'Name', key: 'languages.name' },
-              { title: 'Currency' },
               { title: 'Status', key: 'status' },
               { title: 'Draft status', key: 'draft' },
               { title: 'Action' },
@@ -135,9 +134,6 @@ const canDelete = computed(() => auth.value?.superadmin || permission.value.can_
                     </td>
                     <td class="py-5 px-4 pl-9 xl:pl-11">
                         <h5 class="font-medium text-black">{{ item.name }}</h5>
-                    </td>
-                    <td class="py-5 px-4 pl-9 xl:pl-11">
-                        <h5 class="font-medium text-black">{{ item.currency_code }}</h5>
                     </td>
                     <td class="py-5 px-4">
                         <p

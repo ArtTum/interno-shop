@@ -41,9 +41,6 @@ class LanguageRepository extends BaseRepository implements LanguageRepositoryInt
     public function fetchForAdmin(string $select, array $pagination, array $ordering, array $params, array $searchFields, array $joins, ?array $relatedParams = []): Collection
     {
         return self::fetchQuery($select, $pagination, $ordering, $params, $searchFields, $joins)
-            ->leftJoin('currencies', function ($join) {
-                $join->on('currencies.id', '=', 'languages.currency_id');
-            })
             ->when(!empty($pagination), function ($query) use ($pagination) {
                 $query->limit($pagination['limit'])
                     ->offset($pagination['offset']);
@@ -158,7 +155,7 @@ class LanguageRepository extends BaseRepository implements LanguageRepositoryInt
 
     public function getLanguageId(string $locale)
     {
-        return $this->model->select('id as language_id', 'currency_id')
+        return $this->model->select('id as language_id')
             ->where('languages.code', $locale)
             ->where('languages.status', true)
             ->where('languages.draft', false)

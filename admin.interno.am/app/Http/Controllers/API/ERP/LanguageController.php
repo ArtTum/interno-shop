@@ -31,7 +31,7 @@ class LanguageController extends Controller
                 'success' => false,
                 'message' => 'Failed!',
                 'error' => $exception->getMessage()
-            ], ($exception->getCode() ?: 400));
+            ], $this->errorStatus($exception));
         }
     }
 
@@ -46,7 +46,7 @@ class LanguageController extends Controller
                 'success' => false,
                 'message' => 'Failed!',
                 'error' => $exception->getMessage()
-            ], ($exception->getCode() ?: 400));
+            ], $this->errorStatus($exception));
         }
     }
 
@@ -61,7 +61,7 @@ class LanguageController extends Controller
                 'success' => false,
                 'message' => 'Failed!',
                 'error' => $exception->getMessage()
-            ], ($exception->getCode() ?: 400));
+            ], $this->errorStatus($exception));
         }
     }
 
@@ -76,7 +76,7 @@ class LanguageController extends Controller
                 'success' => false,
                 'message' => 'Failed!',
                 'error' => $exception->getMessage()
-            ], ($exception->getCode() ?: 400));
+            ], $this->errorStatus($exception));
         }
     }
 
@@ -91,7 +91,14 @@ class LanguageController extends Controller
                 'success' => false,
                 'message' => 'Failed!',
                 'error' => $exception->getMessage()
-            ], ($exception->getCode() ?: 400));
+            ], $this->errorStatus($exception));
         }
+    }
+
+    private function errorStatus(\Exception $exception): int
+    {
+        $code = $exception->getCode();
+
+        return is_int($code) && $code >= 100 && $code <= 599 ? $code : 400;
     }
 }

@@ -4,7 +4,6 @@ import Switch from "@components/global/Switch.vue";
 import CustomInput from "@components/global/CustomInput.vue";
 import CustomButton from "@components/global/CustomButton.vue";
 import AlertError from "@components/global/Alerts/AlertError.vue";
-import CustomSelect from "@components/global/CustomSelect.vue";
 
 import {computed, ref, toRefs, watch} from "vue";
 
@@ -78,18 +77,6 @@ const canDelete = computed(() => auth.value?.superadmin || permission.value.can_
                     @keyup="form.errors = validate(form)"
                     :error="form.errors['code']"
                 />
-            </div>
-            <div class="px-4">
-                <CustomSelect
-                    label="Base currency"
-                    v-model="form.currency_id"
-                    mode="single"
-                    placeholder="Select currency"
-                    :disabled="emitAction === 'create'"
-                    :options="form.currencies"
-                    class="py-2 rounded-lg border-stroke bg-transparent"
-                />
-
             </div>
             <div class="px-4">
                 <CustomInput

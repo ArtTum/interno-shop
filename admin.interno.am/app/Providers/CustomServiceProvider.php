@@ -640,7 +640,6 @@ class CustomServiceProvider extends ServiceProvider
                 $app->make(UserShippingAddressRepository::class),
                 $app->make(UploadRepository::class),
                 $app->make(CustomerGroupRepository::class),
-                $app->make(CurrencyRepository::class),
                 $app->make(OrderRepository::class),
                 $app->make(OrderItemRepository::class),
                 $app->make(LanguageRepository::class),

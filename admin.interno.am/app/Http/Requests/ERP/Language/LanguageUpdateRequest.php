@@ -22,7 +22,6 @@ class LanguageUpdateRequest extends FormRequest
             'name' => 'required|string',
             'status' => 'required|boolean',
             'draft' => 'required|boolean',
-            'currency_id' => 'nullable|integer',
             'base' => 'required|boolean',
             'hreflang' => 'required|string|max:10',
             'local_for_trustpilot' => 'required|string|max:10',

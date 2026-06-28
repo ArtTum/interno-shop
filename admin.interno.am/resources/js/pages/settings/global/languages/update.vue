@@ -26,8 +26,6 @@ const fetchByField = async () => {
     form.value = {
         id: res.data.id,
         name: res.data.name,
-        currency_id: res.data.currency_id,
-        currencies: res.currencies,
         nameRules: ['required', 'minLength:2', 'maxLength:15'],
         hreflang: res.data.hreflang,
         hreflangRules: ['required', 'minLength:2', 'maxLength:10'],

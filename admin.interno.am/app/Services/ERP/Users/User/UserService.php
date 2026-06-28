@@ -6,7 +6,6 @@ use App\Constants\UploadConstant;
 use App\Export\ERP\DefaultExport;
 use App\Jobs\UploadUsers;
 use App\Repositories\Country\CountryRepository;
-use App\Repositories\Currency\CurrencyRepository;
 use App\Repositories\CustomerGroup\CustomerGroupRepository;
 use App\Repositories\Language\LanguageRepository;
 use App\Repositories\MemberGroup\MemberGroupRepository;
@@ -41,7 +40,6 @@ class UserService implements UserServiceInterface
         UserShippingAddressRepository $userShippingAddressRepository,
         UploadRepository              $uploadRepository,
         CustomerGroupRepository       $customerGroupRepository,
-        CurrencyRepository            $currencyRepository,
         OrderRepository               $orderRepository,
         OrderItemRepository           $orderItemRepository,
         LanguageRepository            $languageRepository,
@@ -56,7 +54,6 @@ class UserService implements UserServiceInterface
         $this->userShippingAddressRepository = $userShippingAddressRepository;
         $this->uploadRepository = $uploadRepository;
         $this->customerGroupRepository = $customerGroupRepository;
-        $this->currencyRepository = $currencyRepository;
         $this->orderRepository = $orderRepository;
         $this->orderItemRepository = $orderItemRepository;
         $this->languageRepository = $languageRepository;
@@ -105,8 +102,6 @@ class UserService implements UserServiceInterface
         }
         $response['transactions'] = null;
 
-
-        $response['base_currency_symbol'] = $this->currencyRepository->getBaseOrFirst();
 
         return response()->json([
             'success' => true,

@@ -3,7 +3,6 @@
 namespace App\Services\ERP\Settings\Language;
 
 use App\Jobs\CountryTranslations;
-use App\Repositories\Currency\CurrencyRepository;
 use App\Repositories\Language\LanguageRepository;
 use App\Services\ERP\Settings\Language\Interfaces\LanguageServiceInterface;
 use Illuminate\Http\JsonResponse;
@@ -13,17 +12,15 @@ class LanguageService implements LanguageServiceInterface
 {
     public function __construct(
         LanguageRepository        $repository,
-        CurrencyRepository        $currencyRepository,
     )
     {
         $this->repository = $repository;
-        $this->currencyRepository = $currencyRepository;
     }
 
     public function fetch(array $data): JsonResponse
     {
         try {
-            $select = "languages.id, languages.code, languages.draft, currencies.code as currency_code, languages.name, status, languages.base, IF(status = 1, 'Active', 'Inactive') as status_text, IF(draft = 0, 'Active', 'Draft') as draft_text";
+            $select = "languages.id, languages.code, languages.draft, languages.name, status, languages.base, IF(status = 1, 'Active', 'Inactive') as status_text, IF(draft = 0, 'Active', 'Draft') as draft_text";
             $pagination = prepare_pagination_array($data['page'], $data['per_page']);
             $ordering = [
                 'field' => $data['ordering_field'],
@@ -47,20 +44,11 @@ class LanguageService implements LanguageServiceInterface
 
     public function fetchByField(array $data): JsonResponse
     {
-        $select = "id, code, name, draft, status, base, default_hreflang, hreflang, local_for_trustpilot, email, currency_id, is_rtl";
+        $select = "id, code, name, draft, status, base, default_hreflang, hreflang, local_for_trustpilot, email, is_rtl";
         $code = $data['code'];
-
-        $orderingCurrency = [
-            'field' => 'code',
-            'direction' => 'asc'
-        ];
-
-        $currencies = $this->currencyRepository->fetch("id, id as value, code as label", [], $orderingCurrency, [], [], []);
-        $currencies = array_merge([['value' => null, 'label' => 'None']], $currencies->toArray());
 
         return response()->json([
             'success' => true,
-            'currencies' => $currencies,
             'message' => 'Successfully reached!',
             'data' => $this->repository->fetchByField('code', $code, $select)
         ]);
@@ -68,6 +56,8 @@ class LanguageService implements LanguageServiceInterface
 
     public function insert(array $data): JsonResponse
     {
+        unset($data['currency_id'], $data['currencies']);
+
         $now = now()->toDateTimeString();
         $data = merge_dates_for_insert($data, $now);
         $vendorName = Auth::user()->getConnectionName();
@@ -89,7 +79,7 @@ class LanguageService implements LanguageServiceInterface
     public function update(array $data): JsonResponse
     {
         $code = $data['old_code'];
-        unset($data['old_code']);
+        unset($data['old_code'], $data['currency_id'], $data['currencies']);
 
         if ($data['base']) $this->repository->updateBaseForAllFalse();
 
