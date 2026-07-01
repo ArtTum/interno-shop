@@ -2,6 +2,7 @@
 
 type ProductKind = string
 type LanguageCode = string
+type ProductPriceOption = { id: number | string, name: string, value?: string | null, label: string, price: string }
 
 interface ProductColor {
   id?: number | string
@@ -28,7 +29,7 @@ interface Product {
   image: string
   gallery?: string[]
   options?: Record<string, any>
-  priceOptions?: Record<string, Array<{ id: number, name: string, value?: string | null, label: string, price: string }>>
+  priceOptions?: Record<string, ProductPriceOption[]>
   isNew?: boolean
   isTemporarilyUnavailable?: boolean
   purchaseQuantityLimited?: boolean
@@ -1132,6 +1133,37 @@ export function useCatalog() {
     return true
   }
 
+  function priceOptionGroupLabel(key: string) {
+    const labels: Record<string, string> = {
+      height: copy.value.optionHeight,
+      length: copy.value.optionHeight,
+      unit: copy.value.optionUnitLong,
+      size: copy.value.optionSize,
+      power: copy.value.optionPower
+    }
+
+    if (labels[key]) {
+      return labels[key]
+    }
+
+    return key
+      .split('_')
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ')
+  }
+
+  function minimumPriceOption(product: Product) {
+    const allowedKeys = ['height', 'length', 'unit', 'size', 'power']
+
+    return Object.entries(product.priceOptions || {})
+      .filter(([key]) => allowedKeys.includes(key))
+      .flatMap(([key, values]) => (Array.isArray(values) ? values : [])
+        .map((option) => ({ key, option, price: Number(option.price) })))
+      .filter((item) => Number.isFinite(item.price))
+      .sort((first, second) => first.price - second.price)[0] || null
+  }
+
   function addToCart(
     product: Product,
     selectedColor: ProductColor | null = null,
@@ -1148,13 +1180,23 @@ export function useCatalog() {
     }
 
     const color = selectedColor || productColors(product)[0] || null
-    const priceToStore = effectivePrice != null ? effectivePrice : null
-    const optionsToStore = selectedOptions?.length ? selectedOptions : null
+    const fallbackOption = effectivePrice == null && !selectedOptions?.length ? minimumPriceOption(product) : null
+    const priceToStore = effectivePrice != null ? effectivePrice : (fallbackOption ? fallbackOption.price : null)
+    const optionLabelToStore = selectedOptionLabel ?? fallbackOption?.option.label ?? null
+    const optionsToStore = selectedOptions?.length
+      ? selectedOptions
+      : (fallbackOption
+          ? [{
+              key: fallbackOption.key,
+              label: priceOptionGroupLabel(fallbackOption.key),
+              value: fallbackOption.option.label || fallbackOption.option.name
+            }]
+          : null)
     const key = cartItemKey({
       productId: product.id,
       color,
       effectivePrice: priceToStore,
-      selectedOptionLabel: selectedOptionLabel ?? null,
+      selectedOptionLabel: optionLabelToStore,
       selectedOptions: optionsToStore
     })
     const existingItem = cartItems.value.find((item) => cartKeyForItem(item) === key)
@@ -1168,7 +1210,7 @@ export function useCatalog() {
         quantity: 1,
         color,
         effectivePrice: priceToStore,
-        selectedOptionLabel: selectedOptionLabel ?? null,
+        selectedOptionLabel: optionLabelToStore,
         selectedOptions: optionsToStore
       }]
     }
