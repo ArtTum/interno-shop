@@ -87,6 +87,7 @@ Route::group(['prefix' => 'erp'], function () {
                 Route::get('fetch-by-field', [ShopProductController::class, 'fetchByField'])->middleware('check.permission:shop_products,can_view');
                 Route::post('insert', [ShopProductController::class, 'insert'])->middleware('check.permission:shop_products,can_add');
                 Route::put('update', [ShopProductController::class, 'update'])->middleware('check.permission:shop_products,can_edit');
+                Route::post('copy/{id}', [ShopProductController::class, 'copy'])->middleware('check.permission:shop_products,can_add');
                 Route::patch('reorder/{id}', [ShopProductController::class, 'reorder'])->middleware('check.permission:shop_products,can_edit');
                 Route::delete('delete/{id}', [ShopProductController::class, 'delete'])->middleware('check.permission:shop_products,can_delete');
             });

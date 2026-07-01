@@ -185,6 +185,13 @@ const mainColorOptions = computed(() => {
     ];
 });
 
+const relatedProductOptions = computed(() => {
+    const currentProductId = Number(form.value.id || 0);
+
+    return (props.params.products || [])
+        .filter((option) => Number(option.value) !== currentProductId);
+});
+
 watch(() => form.value.option_color_ids, () => {
     if (!Array.isArray(form.value.option_color_ids)) {
         form.value.option_color_ids = form.value.option_color_id
@@ -215,6 +222,15 @@ const submitForm = () => {
     syncGalleryIds();
     ensureAttributePrices();
     ensureColorIds();
+    form.value.related_product_ids = [...new Set(
+        (Array.isArray(form.value.related_product_ids) ? form.value.related_product_ids : [])
+            .map((productId) => Number(productId))
+            .filter((productId) => productId && productId !== Number(form.value.id || 0))
+    )];
+    form.value.purchase_quantity_limit = form.value.purchase_quantity_limit
+        ? Number(form.value.purchase_quantity_limit)
+        : null;
+    form.value.purchase_quantity_limited = Boolean(form.value.purchase_quantity_limit);
     emits('submit');
 };
 </script>
@@ -326,17 +342,6 @@ const submitForm = () => {
                         />
                     </div>
                     <div>
-                        <CustomInput
-                            :disabled="!canEdit"
-                            v-model="form.option_quantity"
-                            name="option_quantity"
-                            label="Quantity"
-                            type="text"
-                            placeholder="Enter quantity"
-                            :error="form.errors?.option_quantity"
-                        />
-                    </div>
-                    <div>
                         <CustomSelect
                             label="Type"
                             v-model="form.option_type_id"
@@ -382,28 +387,6 @@ const submitForm = () => {
                     <div>
                         <CustomInput
                             :disabled="!canEdit"
-                            v-model="form.option_unit"
-                            name="option_unit"
-                            label="Unit"
-                            type="text"
-                            placeholder="Enter unit"
-                            :error="form.errors?.option_unit"
-                        />
-                    </div>
-                    <div>
-                        <CustomInput
-                            :disabled="!canEdit"
-                            v-model="form.option_piece"
-                            name="option_piece"
-                            label="Piece"
-                            type="text"
-                            placeholder="Enter piece"
-                            :error="form.errors?.option_piece"
-                        />
-                    </div>
-                    <div>
-                        <CustomInput
-                            :disabled="!canEdit"
                             v-model="form.option_height"
                             name="option_height"
                             label="Height"
@@ -442,12 +425,14 @@ const submitForm = () => {
                         />
                     </div>
                     <div class="flex items-end pb-2">
-                        <Switch
+                        <CustomInput
                             :disabled="!canEdit"
-                            @change="(value) => form.purchase_quantity_limited = value"
-                            :value="form.purchase_quantity_limited"
-                            id="shop_product_purchase_quantity_limited"
-                            label="Purchase quantity limited"
+                            v-model="form.purchase_quantity_limit"
+                            name="purchase_quantity_limit"
+                            label="Purchase quantity limit"
+                            type="number"
+                            placeholder="Empty or 0 = no limit"
+                            :error="form.errors?.purchase_quantity_limit"
                         />
                     </div>
                     <div class="flex items-end pb-2">
@@ -457,6 +442,21 @@ const submitForm = () => {
                             :value="form.status"
                             id="shop_product_status"
                             label="Active"
+                        />
+                    </div>
+                    <div class="col-span-2 max-xl:col-span-2 max-sm:col-span-1">
+                        <CustomSelect
+                            label="Related products"
+                            v-model="form.related_product_ids"
+                            mode="tags"
+                            placeholder="Select related products"
+                            :disabled="!canEdit"
+                            :options="relatedProductOptions"
+                            :searchable="true"
+                            :canClear="true"
+                            :closeOnSelect="false"
+                            class="py-2 rounded-lg border-stroke bg-transparent"
+                            :error="form.errors?.related_product_ids"
                         />
                     </div>
                 </div>

@@ -77,6 +77,17 @@ function clearCheckoutError(field: keyof typeof checkoutForm) {
   checkoutErrors[field] = ''
 }
 
+function cartOptionLabel(option: { key: string, label: string }) {
+  const labels: Record<string, string> = {
+    height: copy.value.optionHeight,
+    unit: copy.value.optionUnitLong,
+    size: copy.value.optionSize,
+    power: copy.value.optionPower
+  }
+
+  return labels[option.key] || option.label
+}
+
 function applyCraftsman(craftsman: Craftsman | null) {
   selectedCraftsman.value = craftsman
   checkoutForm.masterCode = craftsman?.code || ''
@@ -202,12 +213,19 @@ watch(() => route.query.checkout, (checkout) => {
           <div class="cart-item-info">
             <h2>{{ item.product.title[currentLanguageCode] }}</h2>
 
-            <div v-if="item.selectedOptionLabel" class="cart-selected-option">
-              <span class="cart-option-badge">{{ item.selectedOptionLabel }}</span>
-            </div>
-
             <dl class="cart-item-options">
               <div><dt>{{ copy.optionCode }}</dt><dd>{{ item.product.options?.code || '—' }}</dd></div>
+              <div
+                v-for="option in item.selectedOptions || []"
+                :key="`${item.key}-${option.key}`"
+              >
+                <dt>{{ cartOptionLabel(option) }}</dt>
+                <dd>{{ option.value || '—' }}</dd>
+              </div>
+              <div v-if="!item.selectedOptions?.length && item.selectedOptionLabel">
+                <dt>{{ copy.selectedOptions }}</dt>
+                <dd>{{ item.selectedOptionLabel }}</dd>
+              </div>
               <div><dt>{{ copy.optionType }}</dt><dd>{{ item.product.options?.type || '—' }}</dd></div>
               <div>
                 <dt>{{ copy.optionColor }}</dt>
@@ -314,12 +332,12 @@ watch(() => route.query.checkout, (checkout) => {
 
             <label>
               <span>{{ copy.craftsmanCode }}</span>
-              <input v-model="checkoutForm.masterCode" type="text" :placeholder="copy.craftsmanSearchPlaceholder" autocomplete="off" @input="searchCraftsman('code')" />
+              <input v-model="checkoutForm.masterCode" type="text" :placeholder="copy.craftsmanCodePlaceholder" autocomplete="off" @input="searchCraftsman('code')" />
             </label>
 
             <label class="checkout-autocomplete">
               <span>{{ copy.craftsmanName }}</span>
-              <input v-model="checkoutForm.craftsmanName" type="text" :placeholder="copy.craftsmanSearchPlaceholder" autocomplete="off" @input="searchCraftsman('name')" />
+              <input v-model="checkoutForm.craftsmanName" type="text" :placeholder="copy.craftsmanNamePlaceholder" autocomplete="off" @input="searchCraftsman('name')" />
               <small v-if="isCraftsmanLoading" class="checkout-loading">...</small>
               <div v-if="craftsmenSuggestions.length" class="craftsman-suggestions">
                 <button v-for="craftsman in craftsmenSuggestions" :key="`${craftsman.id}-${craftsman.code}`" type="button" @click="selectCraftsman(craftsman)">

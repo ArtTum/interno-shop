@@ -32,6 +32,8 @@ interface Product {
   isNew?: boolean
   isTemporarilyUnavailable?: boolean
   purchaseQuantityLimited?: boolean
+  purchaseQuantityLimit?: number | null
+  relatedProductIds?: number[]
   status?: boolean
   categoryKey?: string | null
   categoryChildIndex?: number | null
@@ -65,6 +67,7 @@ interface CartItem {
   color?: ProductColor | null
   effectivePrice?: number | null
   selectedOptionLabel?: string | null
+  selectedOptions?: Array<{ key: string, label: string, value: string }> | null
 }
 
 interface ShopFrontendSettings {
@@ -217,7 +220,7 @@ const translations = {
     categoryEmpty: 'Ապրանք չկա',
     checkoutSuccessHome: 'Գլխավոր էջ',
     checkoutSuccessTitle: 'Վճարումը հաջողությամբ կատարվել է, դուք կստանաք էլեկտրոնային հաղորդագրություն...',
-    checkoutDeliveryNote: 'Ապրանքի առաքման համար մեր աշխատակիցը կկապվի Ձեզ հետ և կհստակեցնի հասցեն։',
+    checkoutDeliveryNote: 'Առաքումն իրականացվում է Yandex-ի գործող սակագներով։ Մանրամասների համար կապվեք +374 44 121228 համարով։',
     checkoutTitle: 'Անձնական տվյալներ',
     clearCart: 'Մաքրել զամբյուղը',
     closeDialog: 'Փակել պատուհանը',
@@ -245,6 +248,8 @@ const translations = {
     firstNamePlaceholder: 'Անուն',
     craftsmanCode: 'Արհեստավորի կոդ',
     craftsmanName: 'Արհեստավորի անուն-ազգանուն',
+    craftsmanCodePlaceholder: 'Լրացրեք արհեստավորի կոդը, եթե գիտեք',
+    craftsmanNamePlaceholder: 'Լրացրեք արհեստավորի անուն-ազգանունը կամ հայրանունի առաջին տառը',
     craftsmanSearchPlaceholder: 'Կոդ, անուն, ազգանուն կամ հայրանունի առաջին տառ',
     craftsmen: 'Արհեստավորներ',
     craftsmenTitle: 'Ընտրեք արհեստավորին',
@@ -281,6 +286,7 @@ const translations = {
     optionPower: 'Հզորություն',
     optionQuantity: 'Քանակ',
     optionSize: 'Չափ',
+    selectedOptions: 'Ընտրված տարբերակներ',
     optionType: 'Տեսակ',
     optionTypeName: 'Տեսակի անուն',
     optionUnit: 'Չափ. միավոր',
@@ -308,7 +314,8 @@ const translations = {
     sliderControls: 'Սլայդերի կառավարում',
     social: 'Instagram · Facebook · Privacy Policy',
     temporarilyUnavailable: 'Ժամանակավորապես բացակայում է',
-    purchaseQuantityLimitNotice: 'քանակի առկայության համար կարող եք կապվել 044121228 համարով'
+    purchaseQuantityLimitNotice: 'Քանակի առկայությունը ճշտելու համար կարող եք կապվել +374 44 121228 համարով',
+    quantityLimitExceededNotice: 'Քանակի առկայությունը ճշտելու համար կարող եք կապվել +374 44 121228 համարով'
   },
   en: {
     add: 'Add',
@@ -322,7 +329,7 @@ const translations = {
     categoryEmpty: 'No products available',
     checkoutSuccessHome: 'Home page',
     checkoutSuccessTitle: 'Payment was completed successfully. You will receive an email notification...',
-    checkoutDeliveryNote: 'For product delivery, our employee will contact you and confirm the address.',
+    checkoutDeliveryNote: 'Delivery is carried out at current Yandex rates. For details, contact +374 44 121228.',
     checkoutTitle: 'Personal details',
     clearCart: 'Clear cart',
     closeDialog: 'Close dialog',
@@ -350,6 +357,8 @@ const translations = {
     firstNamePlaceholder: 'First name',
     craftsmanCode: 'Craftsman code',
     craftsmanName: 'Craftsman full name',
+    craftsmanCodePlaceholder: 'Enter the craftsman code if you know it',
+    craftsmanNamePlaceholder: 'Enter the craftsman name, surname, or patronymic initial',
     craftsmanSearchPlaceholder: 'Code, name, surname, or patronymic initial',
     craftsmen: 'Craftsmen',
     craftsmenTitle: 'Choose a craftsman',
@@ -386,6 +395,7 @@ const translations = {
     optionPower: 'Power',
     optionQuantity: 'Quantity',
     optionSize: 'Size',
+    selectedOptions: 'Selected options',
     optionType: 'Type',
     optionTypeName: 'Type name',
     optionUnit: 'Unit',
@@ -413,7 +423,8 @@ const translations = {
     sliderControls: 'Slider controls',
     social: 'Instagram · Facebook · Privacy Policy',
     temporarilyUnavailable: 'Temporarily unavailable',
-    purchaseQuantityLimitNotice: 'For quantity availability, you can contact 044121228'
+    purchaseQuantityLimitNotice: 'For quantity availability, you can contact +374 44 121228',
+    quantityLimitExceededNotice: 'For quantity availability, you can contact +374 44 121228'
   },
   ru: {
     add: 'Добавить',
@@ -427,7 +438,7 @@ const translations = {
     categoryEmpty: 'Товаров нет',
     checkoutSuccessHome: 'Главная страница',
     checkoutSuccessTitle: 'Оплата успешно выполнена, вы получите электронное уведомление...',
-    checkoutDeliveryNote: 'Для доставки товара наш сотрудник свяжется с вами и уточнит адрес.',
+    checkoutDeliveryNote: 'Доставка осуществляется по действующим тарифам Yandex. Для подробностей свяжитесь по номеру +374 44 121228.',
     checkoutTitle: 'Личные данные',
     clearCart: 'Очистить корзину',
     closeDialog: 'Закрыть окно',
@@ -455,6 +466,8 @@ const translations = {
     firstNamePlaceholder: 'Имя',
     craftsmanCode: 'Код мастера',
     craftsmanName: 'Имя и фамилия мастера',
+    craftsmanCodePlaceholder: 'Введите код мастера, если знаете его',
+    craftsmanNamePlaceholder: 'Введите имя, фамилию или первую букву отчества мастера',
     craftsmanSearchPlaceholder: 'Код, имя, фамилия или первая буква отчества',
     craftsmen: 'Мастера',
     craftsmenTitle: 'Выберите мастера',
@@ -491,6 +504,7 @@ const translations = {
     optionPower: 'Мощность',
     optionQuantity: 'Количество',
     optionSize: 'Размер',
+    selectedOptions: 'Выбранные параметры',
     optionType: 'Тип',
     optionTypeName: 'Название типа',
     optionUnit: 'Ед. изм.',
@@ -518,13 +532,15 @@ const translations = {
     sliderControls: 'Управление слайдером',
     social: 'Instagram · Facebook · Privacy Policy',
     temporarilyUnavailable: 'Временно отсутствует',
-    purchaseQuantityLimitNotice: 'По вопросам наличия количества можно связаться по номеру 044121228'
+    purchaseQuantityLimitNotice: 'По вопросам наличия количества можно связаться по номеру +374 44 121228',
+    quantityLimitExceededNotice: 'По вопросам наличия количества можно связаться по номеру +374 44 121228'
   }
 } satisfies Record<LanguageCode, Record<string, string>>
 const products: Product[] = []
 
 const recentlyAddedProductId = ref<number | null>(null)
 let addToCartFeedbackTimer: ReturnType<typeof setTimeout> | null = null
+let quantityLimitFeedbackTimer: ReturnType<typeof setTimeout> | null = null
 
 function normalizeProductColor(color: any): ProductColor | null {
   if (!color) {
@@ -573,8 +589,18 @@ function colorKey(color?: ProductColor | null) {
   return String(color?.id ?? color?.value ?? color?.name ?? 'default')
 }
 
-function cartItemKey(item: Pick<CartItem, 'productId' | 'color' | 'effectivePrice'>) {
-  return `${item.productId}:${colorKey(item.color)}:${item.effectivePrice ?? ''}`
+function selectedOptionsKey(item: Pick<CartItem, 'selectedOptions' | 'selectedOptionLabel'>) {
+  const options = item.selectedOptions || []
+
+  if (options.length) {
+    return options.map((option) => `${option.key}:${option.value}`).join('|')
+  }
+
+  return item.selectedOptionLabel || ''
+}
+
+function cartItemKey(item: Pick<CartItem, 'productId' | 'color' | 'effectivePrice' | 'selectedOptions' | 'selectedOptionLabel'>) {
+  return `${item.productId}:${colorKey(item.color)}:${item.effectivePrice ?? ''}:${selectedOptionsKey(item)}`
 }
 
 export function useCatalog() {
@@ -636,6 +662,8 @@ export function useCatalog() {
   const activeMenuKey = useState<string | null>('active-menu-key', () => null)
   const searchTerm = useState<string>('search-term', () => '')
   const selectedProductImage = useState<string | null>('selected-product-image', () => null)
+  const quantityLimitMessage = useState<string | null>('quantity-limit-message', () => null)
+  const homeRandomSeed = useState<number>('home-random-seed', () => Math.random())
 
   const catalogConfig = computed<ShopFrontendConfig>(() => ({
     languages: remoteCatalog.value?.languages?.length ? remoteCatalog.value.languages : languages,
@@ -681,7 +709,17 @@ export function useCatalog() {
 
     return grouped
   })
-  const shuffledProducts = (items: Product[], _key: string, limit?: number | null) => {
+  const randomRank = (product: Product, key: string) => {
+    const source = `${homeRandomSeed.value}:${key}:${product.id}`
+    let hash = 0
+
+    for (let index = 0; index < source.length; index += 1) {
+      hash = ((hash << 5) - hash + source.charCodeAt(index)) | 0
+    }
+
+    return Math.abs(hash)
+  }
+  const shuffledProducts = (items: Product[], key: string, limit?: number | null) => {
     const sorted = [...items].sort((first, second) => {
       const availabilityDiff = Number(Boolean(first.isTemporarilyUnavailable)) - Number(Boolean(second.isTemporarilyUnavailable))
 
@@ -689,7 +727,7 @@ export function useCatalog() {
         return availabilityDiff
       }
 
-      return items.indexOf(first) - items.indexOf(second)
+      return randomRank(first, key) - randomRank(second, key)
     })
     const normalizedLimit = Number(limit || 0)
 
@@ -817,7 +855,13 @@ export function useCatalog() {
     const product = allProducts.value.find((candidate) => candidate.id === item.productId)
     const color = item.color || productColors(product)[0] || null
 
-    return cartItemKey({ productId: item.productId, color, effectivePrice: item.effectivePrice })
+    return cartItemKey({
+      productId: item.productId,
+      color,
+      effectivePrice: item.effectivePrice,
+      selectedOptionLabel: item.selectedOptionLabel,
+      selectedOptions: item.selectedOptions
+    })
   }
   const isCartPage = computed(() => withoutLanguagePrefix(route.path) === '/cart')
   const isContactPage = computed(() => withoutLanguagePrefix(route.path) === '/contact')
@@ -845,7 +889,18 @@ export function useCatalog() {
       ...(currentProduct.value.gallery || [])
     ].filter(Boolean))).slice(0, 8)
   })
-  const relatedProducts = computed(() => primaryProducts.value.filter((product) => product.id !== currentProduct.value?.id))
+  const relatedProducts = computed(() => {
+    const selectedIds = currentProduct.value?.relatedProductIds || []
+
+    if (selectedIds.length) {
+      return selectedIds
+        .map((productId) => allProducts.value.find((product) => product.id === Number(productId)))
+        .filter((product): product is Product => Boolean(product))
+        .filter((product) => product.id !== currentProduct.value?.id)
+    }
+
+    return []
+  })
   const similarProducts = computed(() => allProducts.value.filter((product) => product.id !== currentProduct.value?.id))
   const searchResults = computed(() => {
     const query = searchQuery.value.toLowerCase()
@@ -1038,21 +1093,84 @@ export function useCatalog() {
     router.push(productPath(product))
   }
 
-  function addToCart(product: Product, selectedColor: ProductColor | null = null, effectivePrice?: number | null, selectedOptionLabel?: string | null) {
+  function productPurchaseQuantityLimit(product?: Product | null) {
+    const limit = Number(product?.purchaseQuantityLimit || 0)
+
+    return Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : null
+  }
+
+  function productCartQuantity(productId: number) {
+    return cartItems.value
+      .filter((item) => item.productId === productId)
+      .reduce((total, item) => total + item.quantity, 0)
+  }
+
+  function showQuantityLimitMessage() {
+    quantityLimitMessage.value = copy.value.quantityLimitExceededNotice || copy.value.purchaseQuantityLimitNotice
+
+    if (quantityLimitFeedbackTimer) {
+      clearTimeout(quantityLimitFeedbackTimer)
+    }
+
+    quantityLimitFeedbackTimer = setTimeout(() => {
+      quantityLimitMessage.value = null
+    }, 4200)
+  }
+
+  function canAddProductQuantity(product: Product, quantity = 1) {
+    const limit = productPurchaseQuantityLimit(product)
+
+    if (!limit) {
+      return true
+    }
+
+    if (productCartQuantity(product.id) + quantity > limit) {
+      showQuantityLimitMessage()
+      return false
+    }
+
+    return true
+  }
+
+  function addToCart(
+    product: Product,
+    selectedColor: ProductColor | null = null,
+    effectivePrice?: number | null,
+    selectedOptionLabel?: string | null,
+    selectedOptions?: CartItem['selectedOptions']
+  ) {
     if (product.isTemporarilyUnavailable) {
+      return
+    }
+
+    if (!canAddProductQuantity(product)) {
       return
     }
 
     const color = selectedColor || productColors(product)[0] || null
     const priceToStore = effectivePrice != null ? effectivePrice : null
-    const key = cartItemKey({ productId: product.id, color, effectivePrice: priceToStore })
+    const optionsToStore = selectedOptions?.length ? selectedOptions : null
+    const key = cartItemKey({
+      productId: product.id,
+      color,
+      effectivePrice: priceToStore,
+      selectedOptionLabel: selectedOptionLabel ?? null,
+      selectedOptions: optionsToStore
+    })
     const existingItem = cartItems.value.find((item) => cartKeyForItem(item) === key)
 
     if (existingItem) {
       existingItem.quantity += 1
       cartItems.value = [...cartItems.value]
     } else {
-      cartItems.value = [...cartItems.value, { productId: product.id, quantity: 1, color, effectivePrice: priceToStore, selectedOptionLabel: selectedOptionLabel ?? null }]
+      cartItems.value = [...cartItems.value, {
+        productId: product.id,
+        quantity: 1,
+        color,
+        effectivePrice: priceToStore,
+        selectedOptionLabel: selectedOptionLabel ?? null,
+        selectedOptions: optionsToStore
+      }]
     }
 
     recentlyAddedProductId.value = product.id
@@ -1067,6 +1185,20 @@ export function useCatalog() {
   }
 
   function updateCartQuantity(key: string, change: number) {
+    const targetItem = cartItems.value.find((item) => cartKeyForItem(item) === key)
+
+    if (!targetItem) {
+      return
+    }
+
+    if (change > 0) {
+      const product = allProducts.value.find((candidate) => candidate.id === targetItem.productId)
+
+      if (product && !canAddProductQuantity(product, change)) {
+        return
+      }
+    }
+
     cartItems.value = cartItems.value
       .map((item) => cartKeyForItem(item) === key ? { ...item, quantity: item.quantity + change } : item)
       .filter((item) => item.quantity > 0)
@@ -1145,6 +1277,7 @@ export function useCatalog() {
         color: item.color,
         effectivePrice: item.effectivePrice ?? null,
         selectedOptionLabel: item.selectedOptionLabel ?? null,
+        selectedOptions: item.selectedOptions ?? [],
         product: item.product
       })),
       total: cartTotal.value,
@@ -1291,6 +1424,7 @@ export function useCatalog() {
     productPath,
     productSections,
     products: primaryProducts,
+    quantityLimitMessage,
     recentlyAddedProductId,
     relatedProducts,
     removeFromCart,

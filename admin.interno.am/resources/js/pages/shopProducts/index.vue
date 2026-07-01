@@ -7,7 +7,7 @@ import CustomSelect from "@components/global/CustomSelect.vue";
 import TableActions from "@components/global/TableActions.vue";
 import CustomCopyButton from "@components/global/CustomCopyButton.vue";
 
-import {computed, ref} from "vue";
+import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import {useStore} from "vuex";
 
@@ -69,6 +69,11 @@ const canAdd = computed(() => auth.value?.superadmin || permission.value.can_add
 const canEdit = computed(() => auth.value?.superadmin || permission.value.can_edit);
 const canDelete = computed(() => auth.value?.superadmin || permission.value.can_delete);
 const reorderingId = ref(null);
+const copyingId = ref(null);
+const tableScope = ref(null);
+const topScroll = ref(null);
+const topScrollInner = ref(null);
+let tableScroller = null;
 
 const updateQueryParams = async () => {
     await router.push({
@@ -113,6 +118,83 @@ const moveProduct = async (id, direction) => {
         reorderingId.value = null;
     }
 };
+
+const copyProduct = async (id) => {
+    if (!canAdd.value || copyingId.value) {
+        return;
+    }
+
+    copyingId.value = id;
+
+    try {
+        const response = await store.dispatch('shopProduct/copy', id);
+        const copiedProductId = response.data.data.id;
+
+        store.commit('notification/SET_NOTIFICATION', {
+            visible: true,
+            title: 'Success',
+            message: 'Product copied successfully',
+        });
+
+        await router.push(`/shop-products/update/${copiedProductId}/${params.value.language_id}`);
+    } finally {
+        copyingId.value = null;
+    }
+};
+
+const syncTopScrollWidth = () => {
+    tableScroller = tableScope.value?.querySelector('.table-responsive') || null;
+    const table = tableScope.value?.querySelector('.datatable-table');
+
+    if (!tableScroller || !topScrollInner.value) {
+        return;
+    }
+
+    topScrollInner.value.style.width = `${table?.scrollWidth || tableScroller.scrollWidth}px`;
+    topScroll.value.scrollLeft = tableScroller.scrollLeft;
+};
+
+const bindTableScroll = () => {
+    syncTopScrollWidth();
+
+    if (!tableScroller || !topScroll.value) {
+        return;
+    }
+
+    topScroll.value.onscroll = () => {
+        if (tableScroller) {
+            tableScroller.scrollLeft = topScroll.value.scrollLeft;
+        }
+    };
+
+    tableScroller.onscroll = () => {
+        if (topScroll.value) {
+            topScroll.value.scrollLeft = tableScroller.scrollLeft;
+        }
+    };
+};
+
+const refreshTopScroll = async () => {
+    await nextTick();
+    bindTableScroll();
+};
+
+onMounted(() => {
+    refreshTopScroll();
+    window.addEventListener('resize', syncTopScrollWidth);
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', syncTopScrollWidth);
+    if (topScroll.value) {
+        topScroll.value.onscroll = null;
+    }
+    if (tableScroller) {
+        tableScroller.onscroll = null;
+    }
+});
+
+watch(() => pageData.value.data, refreshTopScroll);
 
 fetchPageData();
 </script>
@@ -202,8 +284,13 @@ fetchPageData();
             </div>
         </TableActions>
 
-        <CustomTable
-            :main-search="{
+        <div ref="tableScope" class="shop-products-table-shell">
+            <div ref="topScroll" class="shop-products-top-scroll" aria-hidden="true">
+                <div ref="topScrollInner" class="shop-products-top-scroll__inner"></div>
+            </div>
+
+            <CustomTable
+                :main-search="{
                 visibility: true,
                 placeholder: 'Search ...',
                 tooltip: {
@@ -211,10 +298,10 @@ fetchPageData();
                     text: 'ID, name, slug, kind, meta title'
                 }
             }"
-            @do-page-fetching="doPageFetching"
-            v-model="params"
-            :pagination="pageData.pagination"
-            :columns="[
+                @do-page-fetching="doPageFetching"
+                v-model="params"
+                :pagination="pageData.pagination"
+                :columns="[
                 {title: 'ID', key: 'shop_products.id'},
                 {title: 'Image'},
                 {title: 'Name'},
@@ -230,9 +317,9 @@ fetchPageData();
                 {title: 'Status', key: 'status'},
                 {title: 'Action'},
             ]"
-        >
-            <template v-for="(item, index) in pageData.data" :key="index">
-                <tr :draggable="false">
+            >
+                <template v-for="(item, index) in pageData.data" :key="index">
+                    <tr :draggable="false">
                     <td class="py-5 px-4 pl-9 xl:pl-11">
                         <div class="flex">
                             <RouterLink :to="`/shop-products/update/${item.id}/${params.language_id}`">
@@ -317,7 +404,7 @@ fetchPageData();
                                 'bg-warning text-warning': item.purchase_quantity_limited
                             }"
                         >
-                            {{ item.purchase_quantity_limited ? 'Limited' : 'No' }}
+                            {{ item.purchase_quantity_limited ? `Max ${item.purchase_quantity_limit || '-'}` : 'No' }}
                         </p>
                     </td>
                     <td class="py-5 px-4">
@@ -371,6 +458,18 @@ fetchPageData();
                                 </button>
                             </RouterLink>
 
+                            <template v-if="canAdd">
+                                <button
+                                    type="button"
+                                    class="hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                                    title="Copy"
+                                    :disabled="copyingId !== null"
+                                    @click="copyProduct(item.id)"
+                                >
+                                    <font-awesome-icon :icon="['far', 'copy']"/>
+                                </button>
+                            </template>
+
                             <template v-if="canDelete">
                                 <button
                                     @click="store.commit('shopProduct/SET_DELETE_MODAL_VALUE', {
@@ -385,9 +484,10 @@ fetchPageData();
                             </template>
                         </div>
                     </td>
-                </tr>
-            </template>
-        </CustomTable>
+                    </tr>
+                </template>
+            </CustomTable>
+        </div>
 
         <DeleteModal
             @fetch="fetchPageData()"
@@ -405,6 +505,32 @@ fetchPageData();
 .data-table-common .datatable-table > tbody > tr > td:first-child,
 .data-table-common .datatable-table > thead > tr > th:first-child {
     padding-left: 15px !important;
+}
+
+.shop-products-top-scroll {
+    height: 14px;
+    margin-bottom: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.shop-products-top-scroll__inner {
+    height: 1px;
+}
+
+.shop-products-top-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.shop-products-top-scroll::-webkit-scrollbar-thumb {
+    background: rgba(60, 80, 224, var(--tw-bg-opacity));
+    border-radius: 10px;
+}
+
+.shop-products-top-scroll::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(60, 80, 224, var(--tw-bg-opacity));
 }
 </style>
 

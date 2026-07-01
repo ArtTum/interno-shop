@@ -37,6 +37,7 @@ const query = reactive({
 })
 const areFiltersOpen = ref(true)
 const isLoading = ref(false)
+const isEmptyCartModalOpen = ref(false)
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
 async function loadCraftsmen() {
@@ -65,11 +66,13 @@ function goToCheckout() {
 }
 
 function chooseCraftsman(craftsman: Craftsman) {
-  selectCraftsmanForCheckout(craftsman)
-
-  if (cartCount.value) {
-    goToCheckout()
+  if (!cartCount.value) {
+    isEmptyCartModalOpen.value = true
+    return
   }
+
+  selectCraftsmanForCheckout(craftsman)
+  goToCheckout()
 }
 
 function skipCraftsman() {
@@ -169,5 +172,17 @@ onMounted(loadCraftsmen)
     <div v-else class="craftsmen-empty">
       {{ copy.craftsmenEmpty }}
     </div>
+
+    <Teleport to="body">
+      <div v-if="isEmptyCartModalOpen" class="craftsman-prompt-modal" role="dialog" aria-modal="true" aria-labelledby="empty-cart-title">
+        <button class="craftsman-prompt-backdrop" type="button" :aria-label="copy.closeDialog" @click="isEmptyCartModalOpen = false" />
+        <section class="craftsman-prompt-dialog">
+          <h2 id="empty-cart-title">{{ copy.emptyCartTitle }}</h2>
+          <div class="craftsman-prompt-actions">
+            <button type="button" @click="isEmptyCartModalOpen = false">{{ copy.closeDialog }}</button>
+          </div>
+        </section>
+      </div>
+    </Teleport>
   </section>
 </template>

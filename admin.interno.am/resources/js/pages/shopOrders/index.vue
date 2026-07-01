@@ -58,10 +58,52 @@ const OPTION_LABELS = {
     quantity: 'Քանակ', power: 'Հզորություն',
 };
 
-const optionEntries = (item) =>
-    Object.entries(item.product?.options || {}).filter(([, v]) => v !== null && v !== undefined && v !== '');
+const IGNORED_OPTION_KEYS = new Set(['colors', 'color_ids', 'type_id']);
+
+const normalizeColorValue = (value) => String(value || '').trim().toLowerCase();
+
+const itemColorDetails = (item) => {
+    const selectedColor = item.color || {};
+    const options = item.product?.options || {};
+    const colors = Array.isArray(options.colors) ? options.colors : [];
+    const value = selectedColor.value || options.color || '';
+    const normalizedValue = normalizeColorValue(value);
+    const matchedColor = colors.find((color) =>
+        normalizeColorValue(color.value) === normalizedValue
+        || (selectedColor.id && Number(color.id) === Number(selectedColor.id))
+    );
+
+    return {
+        name: selectedColor.name || matchedColor?.name || '',
+        value,
+    };
+};
+
+const optionEntries = (item) => {
+    const entries = Object.entries(item.product?.options || {})
+        .filter(([key, value]) => !IGNORED_OPTION_KEYS.has(key) && value !== null && value !== undefined && value !== '')
+        .map(([key, value]) => key === 'color' ? [key, itemColorDetails(item).value || value] : [key, value]);
+    const hasColor = entries.some(([key]) => key === 'color');
+    const selectedColor = itemColorDetails(item);
+
+    if (!hasColor && selectedColor.value) {
+        entries.push(['color', selectedColor.value]);
+    }
+
+    return entries;
+};
 
 const isColorValue = (v) => typeof v === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(v.trim());
+
+const colorNameForValue = (item, value) => {
+    const details = itemColorDetails(item);
+
+    if (normalizeColorValue(details.value) === normalizeColorValue(value)) {
+        return details.name;
+    }
+
+    return '';
+};
 
 const toggleDetails = (orderId) => {
     expandedOrderId.value = expandedOrderId.value === orderId ? null : orderId;
@@ -293,6 +335,9 @@ fetchOrders();
                                                                         :style="{background: value}"
                                                                     />
                                                                     <span class="font-mono text-xs text-gray-600">{{ value }}</span>
+                                                                    <span v-if="colorNameForValue(item, value)" class="text-xs font-semibold text-black">
+                                                                        {{ colorNameForValue(item, value) }}
+                                                                    </span>
                                                                 </div>
                                                                 <strong v-else class="break-words text-right font-semibold text-black max-w-[200px]">{{ value }}</strong>
                                                             </div>

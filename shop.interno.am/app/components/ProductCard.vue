@@ -39,10 +39,6 @@ const { addToCart, copy, currentLanguageCode, openProduct, productPath, recently
       <span v-if="product.options.colors.length > 6" class="card-color-more">+{{ product.options.colors.length - 6 }}</span>
     </div>
 
-    <div v-if="product.purchaseQuantityLimited" class="quantity-limit-note">
-      {{ copy.purchaseQuantityLimitNotice }}
-    </div>
-
     <div class="product-actions">
       <span class="price">{{ product.price }} <span aria-hidden="true">&#1423;</span></span>
       <button type="button" :disabled="product.isTemporarilyUnavailable" :class="{ 'is-added': recentlyAddedProductId === product.id }" @click.stop="addToCart(product)">

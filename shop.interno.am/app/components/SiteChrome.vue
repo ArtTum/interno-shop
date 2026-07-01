@@ -28,6 +28,7 @@ const {
   submitSearch,
   toggleMenuGroup,
   cartCount,
+  quantityLimitMessage,
   recentlyAddedProductId
 } = useCatalog()
 
@@ -210,6 +211,10 @@ function openCategoryFromStrip(event: MouseEvent) {
         </div>
       </Transition>
     </header>
+
+    <div v-if="quantityLimitMessage" class="quantity-limit-toast" role="status">
+      {{ quantityLimitMessage }}
+    </div>
 
     <div v-if="isLanguageOpen" class="language-backdrop" aria-hidden="true" @click="isLanguageOpen = false" />
     <div v-if="isMenuOpen" class="drawer-backdrop" aria-hidden="true" @click="isMenuOpen = false" />

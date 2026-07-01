@@ -43,6 +43,10 @@ const actions = {
         return await baseHttp.put('shop-products/update', params);
     },
 
+    async copy({}, id) {
+        return await baseHttp.post(`shop-products/copy/${id}`);
+    },
+
     async reorder({}, params) {
         return await baseHttp.patch(`shop-products/reorder/${params.id}`, {direction: params.direction});
     },

@@ -56,6 +56,7 @@ class ShopProductController extends Controller
                 'optionType',
                 'optionColor',
                 'attributePrices.attributeValue',
+                'relatedProducts',
             ])
             ->when($categoryId > 0, fn ($query) => $query->where('shop_category_id', $categoryId))
             ->when($status >= 0, fn ($query) => $query->where('status', (bool) $status))
@@ -99,6 +100,7 @@ class ShopProductController extends Controller
             'optionTypes' => $this->optionTypeOptions(),
             'optionColors' => $this->optionColorOptions(),
             'attributeValues' => $this->attributeValueOptions(),
+            'products' => $this->productOptions($languageId),
             'base_language_id' => $languageId,
             'pagination' => prepare_pagination($page, $perPage, $total),
         ]);
@@ -116,6 +118,7 @@ class ShopProductController extends Controller
             'optionTypes' => $this->optionTypeOptions(),
             'optionColors' => $this->optionColorOptions(),
             'attributeValues' => $this->attributeValueOptions(),
+            'products' => $this->productOptions($languageId),
             'base_language_id' => $languageId,
         ]);
     }
@@ -123,7 +126,7 @@ class ShopProductController extends Controller
     public function fetchByField(Request $request): JsonResponse
     {
         $product = ShopProduct::query()
-            ->with(['translations', 'category', 'media', 'optionType', 'optionColor', 'attributePrices.attributeValue'])
+            ->with(['translations', 'category', 'media', 'optionType', 'optionColor', 'attributePrices.attributeValue', 'relatedProducts'])
             ->findOrFail((int) $request->query('id'));
         $languageId = $this->resolveLanguageId((int) $request->query('language_id', 0));
         $translation = $product->translations->firstWhere('language_id', $languageId);
@@ -146,10 +149,7 @@ class ShopProductController extends Controller
                 'attribute_prices' => $this->formatAttributePrices($product),
                 'option_code' => $product->option_code ?? '',
                 'option_size' => $product->option_size ?? '',
-                'option_quantity' => $product->option_quantity ?? '',
                 'option_type_id' => $product->option_type_id,
-                'option_unit' => $product->option_unit ?? '',
-                'option_piece' => $product->option_piece ?? '',
                 'option_height' => $product->option_height ?? '',
                 'option_material' => $product->option_material ?? '',
                 'option_color_id' => $product->option_color_id,
@@ -157,6 +157,8 @@ class ShopProductController extends Controller
                 'is_new' => $product->is_new,
                 'is_temporarily_unavailable' => $product->is_temporarily_unavailable,
                 'purchase_quantity_limited' => $product->purchase_quantity_limited,
+                'purchase_quantity_limit' => $product->purchase_quantity_limit,
+                'related_product_ids' => $product->relatedProducts->pluck('id')->values()->all(),
                 'status' => $product->status,
                 'sort_order' => $product->sort_order,
                 'language_id' => $languageId,
@@ -174,6 +176,7 @@ class ShopProductController extends Controller
             'optionTypes' => $this->optionTypeOptions(),
             'optionColors' => $this->optionColorOptions(),
             'attributeValues' => $this->attributeValueOptions(),
+            'products' => $this->productOptions($languageId, $product->id),
             'base_language_id' => $languageId,
         ]);
     }
@@ -195,10 +198,10 @@ class ShopProductController extends Controller
                 'options' => $this->buildOptions($data),
                 'option_code' => $data['option_code'] ?? null,
                 'option_size' => $data['option_size'] ?? null,
-                'option_quantity' => $data['option_quantity'] ?? null,
+                'option_quantity' => null,
                 'option_type_id' => $data['option_type_id'] ?? null,
-                'option_unit' => $data['option_unit'] ?? null,
-                'option_piece' => $data['option_piece'] ?? null,
+                'option_unit' => null,
+                'option_piece' => null,
                 'option_height' => $data['option_height'] ?? null,
                 'option_material' => $data['option_material'] ?? null,
                 'option_color_id' => $data['option_color_id'] ?? null,
@@ -206,11 +209,13 @@ class ShopProductController extends Controller
                 'is_new' => $data['is_new'],
                 'is_temporarily_unavailable' => $data['is_temporarily_unavailable'],
                 'purchase_quantity_limited' => $data['purchase_quantity_limited'],
+                'purchase_quantity_limit' => $data['purchase_quantity_limit'],
                 'status' => $data['status'],
                 'sort_order' => $data['sort_order'],
             ]);
 
             $this->syncAttributePrices($product, $data);
+            $this->syncRelatedProducts($product, $data['related_product_ids']);
             $this->saveTranslation($product, $data);
 
             return $product;
@@ -241,10 +246,10 @@ class ShopProductController extends Controller
                 'options' => $this->buildOptions($data),
                 'option_code' => $data['option_code'] ?? null,
                 'option_size' => $data['option_size'] ?? null,
-                'option_quantity' => $data['option_quantity'] ?? null,
+                'option_quantity' => null,
                 'option_type_id' => $data['option_type_id'] ?? null,
-                'option_unit' => $data['option_unit'] ?? null,
-                'option_piece' => $data['option_piece'] ?? null,
+                'option_unit' => null,
+                'option_piece' => null,
                 'option_height' => $data['option_height'] ?? null,
                 'option_material' => $data['option_material'] ?? null,
                 'option_color_id' => $data['option_color_id'] ?? null,
@@ -252,11 +257,13 @@ class ShopProductController extends Controller
                 'is_new' => $data['is_new'],
                 'is_temporarily_unavailable' => $data['is_temporarily_unavailable'],
                 'purchase_quantity_limited' => $data['purchase_quantity_limited'],
+                'purchase_quantity_limit' => $data['purchase_quantity_limit'],
                 'status' => $data['status'],
                 'sort_order' => $data['sort_order'],
             ]);
 
             $this->syncAttributePrices($product, $data);
+            $this->syncRelatedProducts($product, $data['related_product_ids']);
             $this->saveTranslation($product, $data);
         });
 
@@ -273,6 +280,59 @@ class ShopProductController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Successfully deleted!',
+        ]);
+    }
+
+    public function copy(int $id): JsonResponse
+    {
+        $sourceProduct = ShopProduct::query()
+            ->with(['translations', 'attributePrices', 'relatedProducts'])
+            ->findOrFail($id);
+
+        $product = DB::transaction(function () use ($sourceProduct) {
+            $product = $sourceProduct->replicate();
+            $product->slug = $this->uniqueGlobalSlug($sourceProduct->slug . '-copy');
+            $product->option_quantity = null;
+            $product->option_unit = null;
+            $product->option_piece = null;
+            $product->options = $this->removeDeprecatedOptionFields($product->options ?: []);
+            $product->sort_order = ((int) ShopProduct::query()
+                ->where('shop_category_id', $sourceProduct->shop_category_id)
+                ->max('sort_order')) + 1;
+            $product->save();
+
+            foreach ($sourceProduct->translations as $translation) {
+                $product->translations()->create([
+                    'language_id' => $translation->language_id,
+                    'title' => $this->copyText($translation->title, 180),
+                    'slug' => $this->normalizeSlug($translation->slug . '-copy', $product->slug),
+                    'short_description' => $translation->short_description,
+                    'description' => $translation->description,
+                    'meta_title' => $this->copyText($translation->meta_title ?: $translation->title, 255),
+                    'meta_description' => $translation->meta_description,
+                    'meta_keywords' => $translation->meta_keywords,
+                ]);
+            }
+
+            foreach ($sourceProduct->attributePrices as $price) {
+                $product->attributePrices()->create([
+                    'shop_product_attribute_value_id' => $price->shop_product_attribute_value_id,
+                    'price' => $price->price,
+                ]);
+            }
+
+            $this->syncRelatedProducts(
+                $product,
+                $sourceProduct->relatedProducts->pluck('id')->values()->all()
+            );
+
+            return $product;
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product copied successfully!',
+            'data' => ['id' => $product->id],
         ]);
     }
 
@@ -338,10 +398,7 @@ class ShopProductController extends Controller
             'attribute_prices.*.*.price' => ['required', 'numeric', 'min:0'],
             'option_code' => ['nullable', 'string', 'max:120'],
             'option_size' => ['nullable', 'string', 'max:120'],
-            'option_quantity' => ['nullable', 'string', 'max:120'],
             'option_type_id' => ['nullable', 'integer', Rule::exists('shop_product_option_types', 'id')],
-            'option_unit' => ['nullable', 'string', 'max:120'],
-            'option_piece' => ['nullable', 'string', 'max:120'],
             'option_height' => ['nullable', 'string', 'max:120'],
             'option_material' => ['nullable', 'string', 'max:120'],
             'option_color_id' => ['nullable', 'integer', Rule::exists('shop_product_colors', 'id')],
@@ -350,6 +407,9 @@ class ShopProductController extends Controller
             'is_new' => ['required', 'boolean'],
             'is_temporarily_unavailable' => ['required', 'boolean'],
             'purchase_quantity_limited' => ['required', 'boolean'],
+            'purchase_quantity_limit' => ['nullable', 'integer', 'min:0'],
+            'related_product_ids' => ['nullable', 'array'],
+            'related_product_ids.*' => ['integer', Rule::exists('shop_products', 'id')],
             'status' => ['required', 'boolean'],
             'sort_order' => ['required', 'integer', 'min:0'],
             'title' => ['required', 'string', 'max:180'],
@@ -363,6 +423,14 @@ class ShopProductController extends Controller
 
         $data['option_color_ids'] = $this->normalizeColorIds($data['option_color_ids'] ?? [], $data['option_color_id'] ?? null);
         $data['option_color_id'] = $data['option_color_id'] ?? ($data['option_color_ids'][0] ?? null);
+        $data['purchase_quantity_limit'] = !empty($data['purchase_quantity_limit']) ? (int) $data['purchase_quantity_limit'] : null;
+        $data['purchase_quantity_limited'] = $data['purchase_quantity_limit'] !== null;
+        $data['related_product_ids'] = collect($data['related_product_ids'] ?? [])
+            ->map(fn ($productId) => (int) $productId)
+            ->filter(fn (int $relatedProductId) => $relatedProductId > 0 && $relatedProductId !== (int) $productId)
+            ->unique()
+            ->values()
+            ->all();
 
         return $data;
     }
@@ -381,6 +449,18 @@ class ShopProductController extends Controller
                 'meta_keywords' => $data['meta_keywords'] ?? null,
             ]
         );
+    }
+
+    private function copyText(?string $value, int $maxLength): string
+    {
+        $value = trim((string) $value);
+        $suffix = ' Copy';
+
+        if ($value === '') {
+            return trim($suffix);
+        }
+
+        return Str::limit($value, max(1, $maxLength - strlen($suffix)), '') . $suffix;
     }
 
     private function formatProduct(ShopProduct $product): array
@@ -411,6 +491,10 @@ class ShopProductController extends Controller
             'is_new' => $product->is_new,
             'is_temporarily_unavailable' => $product->is_temporarily_unavailable,
             'purchase_quantity_limited' => $product->purchase_quantity_limited,
+            'purchase_quantity_limit' => $product->purchase_quantity_limit,
+            'related_product_ids' => $product->relationLoaded('relatedProducts')
+                ? $product->relatedProducts->pluck('id')->values()->all()
+                : [],
             'status' => $product->status,
             'sort_order' => $product->sort_order,
         ];
@@ -493,6 +577,27 @@ class ShopProductController extends Controller
                     'value' => $type->id,
                     'label' => $type->name,
                 ]))
+            ->values()
+            ->all();
+    }
+
+    private function productOptions(int $languageId, ?int $excludeId = null): array
+    {
+        return ShopProduct::query()
+            ->where('status', true)
+            ->when($excludeId, fn ($query) => $query->where('id', '!=', $excludeId))
+            ->with(['translations' => fn ($query) => $query->where('language_id', $languageId)])
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get(['id', 'slug', 'sort_order'])
+            ->map(function (ShopProduct $product) {
+                $title = $product->translations->first()?->title ?: $product->slug;
+
+                return [
+                    'value' => $product->id,
+                    'label' => "#{$product->id} {$title}",
+                ];
+            })
             ->values()
             ->all();
     }
@@ -597,6 +702,23 @@ class ShopProductController extends Controller
         }
     }
 
+    private function syncRelatedProducts(ShopProduct $product, array $relatedProductIds): void
+    {
+        $payload = [];
+
+        foreach ($relatedProductIds as $index => $relatedProductId) {
+            $relatedProductId = (int) $relatedProductId;
+
+            if ($relatedProductId <= 0 || $relatedProductId === (int) $product->id) {
+                continue;
+            }
+
+            $payload[$relatedProductId] = ['sort_order' => $index];
+        }
+
+        $product->relatedProducts()->sync($payload);
+    }
+
     private function basePrice(array $data): float
     {
         $prices = collect($data['attribute_prices'] ?? [])
@@ -684,6 +806,13 @@ class ShopProductController extends Controller
         ];
     }
 
+    private function removeDeprecatedOptionFields(array $options): array
+    {
+        unset($options['quantity'], $options['unit'], $options['piece']);
+
+        return $options;
+    }
+
     private function buildOptions(array $data): array
     {
         $type = !empty($data['option_type_id'])
@@ -697,11 +826,8 @@ class ShopProductController extends Controller
         return array_filter([
             'code' => $data['option_code'] ?? null,
             'size' => $data['option_size'] ?? null,
-            'quantity' => $data['option_quantity'] ?? null,
             'type' => $type?->name,
             'type_id' => $type?->id,
-            'unit' => $data['option_unit'] ?? null,
-            'piece' => $data['option_piece'] ?? null,
             'height' => $data['option_height'] ?? null,
             'material' => $data['option_material'] ?? null,
             'color' => $color?->value ?: $color?->name,

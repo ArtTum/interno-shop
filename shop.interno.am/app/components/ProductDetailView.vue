@@ -59,6 +59,8 @@ const productColors = computed(() => {
 })
 
 const selectedProductColor = computed(() => selectedColor.value || productColors.value[0] || null)
+const visiblePriceOptionGroups = computed(() => currentProductPriceOptions.value
+  .filter((group) => ['height', 'unit'].includes(group.key)))
 
 // Price from selected attribute option (first group wins)
 const displayPrice = computed(() => {
@@ -79,6 +81,22 @@ const selectedOptionSummary = computed(() => {
     .map((opt) => opt.label || opt.name)
     .filter(Boolean)
     .join(' · ') || null
+})
+
+const selectedOptionDetails = computed(() => {
+  return visiblePriceOptionGroups.value
+    .map((group) => {
+      const selected = selectedPriceOptions.value[group.key]
+
+      return selected
+        ? {
+            key: group.key,
+            label: attrGroupLabel(group.key),
+            value: selected.label || selected.name
+          }
+        : null
+    })
+    .filter((option): option is { key: string, label: string, value: string } => Boolean(option))
 })
 
 // Labels for attribute groups — reactive to current language via copy
@@ -112,7 +130,7 @@ watch(
 )
 
 watch(
-  currentProductPriceOptions,
+  visiblePriceOptionGroups,
   (groups) => {
     const newSelections: typeof selectedPriceOptions.value = {}
 
@@ -133,7 +151,7 @@ watch(
 
 function selectPriceOption(groupKey: string, optionId: string | undefined) {
   if (!optionId) return
-  const group = currentProductPriceOptions.value.find((g) => g.key === groupKey)
+  const group = visiblePriceOptionGroups.value.find((g) => g.key === groupKey)
 
   if (!group) return
 
@@ -181,7 +199,13 @@ function addCurrentProductToCart() {
   }
 
   Array.from({ length: detailQuantity.value }).forEach(() =>
-    addToCart(currentProduct.value!, selectedProductColor.value, effectivePrice.value, selectedOptionSummary.value)
+    addToCart(
+      currentProduct.value!,
+      selectedProductColor.value,
+      effectivePrice.value,
+      selectedOptionSummary.value,
+      selectedOptionDetails.value
+    )
   )
 }
 </script>
@@ -225,10 +249,6 @@ function addCurrentProductToCart() {
         <p v-if="productShortDescription" class="product-short-description">{{ productShortDescription }}</p>
         <div v-if="productDescription" class="product-description" v-html="productDescription"></div>
         <p v-if="isCurrentProductUnavailable" class="detail-unavailable">{{ copy.temporarilyUnavailable }}</p>
-        <p v-if="currentProduct.purchaseQuantityLimited" class="quantity-limit-note detail-quantity-limit-note">
-          {{ copy.purchaseQuantityLimitNotice }}
-        </p>
-
         <form class="product-code-options" @submit.prevent>
           <label class="option-field option-wide">
             <span>{{ copy.optionCode }}</span>
@@ -236,9 +256,8 @@ function addCurrentProductToCart() {
           </label>
         </form>
 
-        <!-- Attribute price selects (height / unit / size / power) -->
-        <div v-if="currentProductPriceOptions.length" class="price-options">
-          <div v-for="group in currentProductPriceOptions" :key="group.key" class="price-option-group">
+        <div v-if="visiblePriceOptionGroups.length" class="price-options">
+          <div v-for="group in visiblePriceOptionGroups" :key="group.key" class="price-option-group">
             <label :for="`attr-${group.key}`" class="price-option-label">{{ attrGroupLabel(group.key) }}</label>
             <select
               :id="`attr-${group.key}`"
@@ -259,33 +278,13 @@ function addCurrentProductToCart() {
 
         <form class="product-options" @submit.prevent>
           <label class="option-field">
-            <span>{{ copy.optionSize }}</span>
-            <input type="text" :value="currentProduct.options?.size || '—'" disabled />
-          </label>
-
-          <label class="option-field">
-            <span>{{ copy.optionQuantity }}</span>
-            <input type="text" :value="currentProduct.options?.quantity || '1'" disabled />
-          </label>
-
-          <label class="option-field">
             <span>{{ copy.optionType }}</span>
             <input type="text" :value="currentProduct.options?.type || '—'" disabled />
           </label>
 
           <label class="option-field">
-            <span>{{ copy.optionUnitLong }}</span>
-            <input type="text" :value="currentProduct.options?.unit || '—'" disabled />
-          </label>
-
-          <label class="option-field">
-            <span>{{ copy.optionPiece }}</span>
-            <input type="text" :value="currentProduct.options?.piece || '—'" disabled />
-          </label>
-
-          <label class="option-field">
-            <span>{{ copy.optionHeight }}</span>
-            <input type="text" :value="currentProduct.options?.height || '—'" disabled />
+            <span>{{ copy.optionMaterial }}</span>
+            <input type="text" :value="currentProduct.options?.material || '—'" disabled />
           </label>
 
           <div v-if="productColors.length" class="color-options" aria-label="Colors">
@@ -332,7 +331,7 @@ function addCurrentProductToCart() {
       </aside>
     </div>
 
-    <section class="related-section" aria-labelledby="related-title">
+    <section v-if="relatedProducts.length" class="related-section" aria-labelledby="related-title">
       <div class="slider-head">
         <h2 id="related-title">{{ copy.relatedProducts }}</h2>
         <div class="slider-controls" :aria-label="copy.sliderControls">

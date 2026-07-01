@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ShopProduct extends Model
@@ -35,6 +36,7 @@ class ShopProduct extends Model
         'is_new',
         'is_temporarily_unavailable',
         'purchase_quantity_limited',
+        'purchase_quantity_limit',
         'status',
         'sort_order',
     ];
@@ -47,6 +49,7 @@ class ShopProduct extends Model
         'is_new' => 'boolean',
         'is_temporarily_unavailable' => 'boolean',
         'purchase_quantity_limited' => 'boolean',
+        'purchase_quantity_limit' => 'integer',
         'status' => 'boolean',
         'sort_order' => 'integer',
         'price' => 'decimal:2',
@@ -80,5 +83,18 @@ class ShopProduct extends Model
     public function attributePrices(): HasMany
     {
         return $this->hasMany(ShopProductAttributePrice::class);
+    }
+
+    public function relatedProducts(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            self::class,
+            'shop_product_related_products',
+            'shop_product_id',
+            'related_shop_product_id'
+        )
+            ->withPivot('sort_order')
+            ->orderBy('shop_product_related_products.sort_order')
+            ->orderBy('shop_products.id');
     }
 }

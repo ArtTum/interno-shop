@@ -776,6 +776,8 @@ class ShopFrontendController extends Controller
 
         $hasAvailabilityColumn = Schema::hasColumn('shop_products', 'is_temporarily_unavailable');
         $hasPurchaseQuantityLimitColumn = Schema::hasColumn('shop_products', 'purchase_quantity_limited');
+        $hasPurchaseQuantityLimitValueColumn = Schema::hasColumn('shop_products', 'purchase_quantity_limit');
+        $hasRelatedProductsTable = Schema::hasTable('shop_product_related_products');
         $hasAttributePriceTables = Schema::hasTable('shop_product_attribute_prices')
             && Schema::hasTable('shop_product_attribute_values');
         $languageCodes = collect($languages)->pluck('code')->filter()->values();
@@ -791,6 +793,7 @@ class ShopFrontendController extends Controller
                 'category.parent',
                 'media',
                 ...($hasAttributePriceTables ? ['attributePrices.attributeValue'] : []),
+                ...($hasRelatedProductsTable ? ['relatedProducts'] : []),
             ])
             ->when($hasAvailabilityColumn, fn ($query) => $query->orderBy('is_temporarily_unavailable'))
             ->orderBy('sort_order')
@@ -808,7 +811,7 @@ class ShopFrontendController extends Controller
             ->get(['id', 'name', 'value'])
             ->keyBy('id');
 
-        return $products->map(function (ShopProduct $product) use ($languageCodes, $hasAvailabilityColumn, $hasPurchaseQuantityLimitColumn, $hasAttributePriceTables, $allColors) {
+        return $products->map(function (ShopProduct $product) use ($languageCodes, $hasAvailabilityColumn, $hasPurchaseQuantityLimitColumn, $hasPurchaseQuantityLimitValueColumn, $hasRelatedProductsTable, $hasAttributePriceTables, $allColors) {
             $category = $product->category;
             $parentCategory = $category?->parent ?: $category;
             $priceOptions = $hasAttributePriceTables ? $this->formatProductPriceOptions($product) : [];
@@ -853,6 +856,10 @@ class ShopFrontendController extends Controller
                 'isNew' => $product->is_new,
                 'isTemporarilyUnavailable' => $hasAvailabilityColumn ? $product->is_temporarily_unavailable : false,
                 'purchaseQuantityLimited' => $hasPurchaseQuantityLimitColumn ? $product->purchase_quantity_limited : false,
+                'purchaseQuantityLimit' => $hasPurchaseQuantityLimitValueColumn ? $product->purchase_quantity_limit : null,
+                'relatedProductIds' => $hasRelatedProductsTable
+                    ? $product->relatedProducts->pluck('id')->values()->all()
+                    : [],
                 'status' => $product->status,
                 'categoryKey' => $parentCategory?->slug,
                 'categoryChildIndex' => $category && $category->parent_id ? $category->sort_order : null,
@@ -905,13 +912,24 @@ class ShopFrontendController extends Controller
                 }
 
                 if (Schema::hasColumn('shop_products', 'purchase_quantity_limited')) {
-                    $productPayload['purchase_quantity_limited'] = (bool)($payload['purchaseQuantityLimited'] ?? false);
+                    $limit = !empty($payload['purchaseQuantityLimit']) ? (int) $payload['purchaseQuantityLimit'] : null;
+                    $productPayload['purchase_quantity_limited'] = $limit !== null || (bool)($payload['purchaseQuantityLimited'] ?? false);
+                }
+
+                if (Schema::hasColumn('shop_products', 'purchase_quantity_limit')) {
+                    $productPayload['purchase_quantity_limit'] = !empty($payload['purchaseQuantityLimit'])
+                        ? (int) $payload['purchaseQuantityLimit']
+                        : null;
                 }
 
                 $product = ShopProduct::query()->updateOrCreate(
                     ['id' => $id],
                     $productPayload
                 );
+
+                if (Schema::hasTable('shop_product_related_products')) {
+                    $this->syncProductRelatedProducts($product, $payload['relatedProductIds'] ?? []);
+                }
 
                 $this->syncProductTranslations($product, $titles, $languages);
             }
@@ -920,6 +938,23 @@ class ShopFrontendController extends Controller
                 ->whereNotIn('id', $activeProductIds)
                 ->update(['status' => false]);
         });
+    }
+
+    private function syncProductRelatedProducts(ShopProduct $product, array $relatedProductIds): void
+    {
+        $payload = [];
+
+        foreach ($relatedProductIds as $index => $relatedProductId) {
+            $relatedProductId = (int) $relatedProductId;
+
+            if ($relatedProductId <= 0 || $relatedProductId === (int) $product->id) {
+                continue;
+            }
+
+            $payload[$relatedProductId] = ['sort_order' => $index];
+        }
+
+        $product->relatedProducts()->sync($payload);
     }
 
     private function formatProductPriceOptions(ShopProduct $product): array
