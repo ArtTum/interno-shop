@@ -60,7 +60,7 @@ const productColors = computed(() => {
 
 const selectedProductColor = computed(() => selectedColor.value || productColors.value[0] || null)
 const visiblePriceOptionGroups = computed(() => currentProductPriceOptions.value
-  .filter((group) => ['height', 'unit'].includes(group.key)))
+  .filter((group) => ['height', 'length', 'unit', 'size', 'power'].includes(group.key)))
 
 // Price from selected attribute option (first group wins)
 const displayPrice = computed(() => {
@@ -103,6 +103,7 @@ const selectedOptionDetails = computed(() => {
 function attrGroupLabel(key: string): string {
   const map: Record<string, string> = {
     height: copy.value.optionHeight,
+    length: copy.value.optionHeight,
     unit: copy.value.optionUnitLong,
     size: copy.value.optionSize,
     power: copy.value.optionPower

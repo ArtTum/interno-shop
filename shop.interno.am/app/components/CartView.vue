@@ -80,6 +80,7 @@ function clearCheckoutError(field: keyof typeof checkoutForm) {
 function cartOptionLabel(option: { key: string, label: string }) {
   const labels: Record<string, string> = {
     height: copy.value.optionHeight,
+    length: copy.value.optionHeight,
     unit: copy.value.optionUnitLong,
     size: copy.value.optionSize,
     power: copy.value.optionPower
