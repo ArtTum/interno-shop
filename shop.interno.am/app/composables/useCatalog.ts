@@ -281,7 +281,8 @@ const translations = {
     loading: 'Բեռնվում է…',
     optionCode: 'կոդ',
     optionColor: 'Գույն',
-    optionHeight: 'Երկարություն',
+    optionHeight: 'Բարձրություն',
+    optionLength: 'Երկարություն',
     optionMaterial: 'Նյութ',
     optionPiece: 'Հատիկ',
     optionPower: 'Հզորություն',
@@ -390,7 +391,8 @@ const translations = {
     loading: 'Loading…',
     optionCode: 'Code',
     optionColor: 'Color',
-    optionHeight: 'Length',
+    optionHeight: 'Height',
+    optionLength: 'Length',
     optionMaterial: 'Material',
     optionPiece: 'Piece',
     optionPower: 'Power',
@@ -499,7 +501,8 @@ const translations = {
     loading: 'Загрузка…',
     optionCode: 'Код',
     optionColor: 'Цвет',
-    optionHeight: 'Длина',
+    optionHeight: 'Высота',
+    optionLength: 'Длина',
     optionMaterial: 'Материал',
     optionPiece: 'Штука',
     optionPower: 'Мощность',
@@ -1135,8 +1138,8 @@ export function useCatalog() {
 
   function priceOptionGroupLabel(key: string) {
     const labels: Record<string, string> = {
-      height: copy.value.optionHeight,
-      length: copy.value.optionHeight,
+      height: copy.value.optionLength,
+      length: copy.value.optionLength,
       unit: copy.value.optionUnitLong,
       size: copy.value.optionSize,
       power: copy.value.optionPower

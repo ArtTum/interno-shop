@@ -17,6 +17,7 @@ type Craftsman = {
 const {
   cartCount,
   copy,
+  currentLanguageCode,
   fetchCraftsmen,
   localizedPath,
   selectCraftsmanForCheckout
@@ -39,6 +40,41 @@ const areFiltersOpen = ref(true)
 const isLoading = ref(false)
 const isEmptyCartModalOpen = ref(false)
 let searchTimer: ReturnType<typeof setTimeout> | null = null
+
+const craftsmanValueTranslations: Record<string, Record<string, string>> = {
+  'Երևան': { en: 'Yerevan', ru: 'Ереван' },
+  'Արաբկիր': { en: 'Arabkir', ru: 'Арабкир' },
+  'Կենտրոն': { en: 'Kentron', ru: 'Кентрон' },
+  'Կոտայք': { en: 'Kotayk', ru: 'Котайк' },
+  'Աբովյան': { en: 'Abovyan', ru: 'Абовян' },
+  'Արմավիր': { en: 'Armavir', ru: 'Армавир' },
+  'Էջմիածին': { en: 'Ejmiatsin', ru: 'Эчмиадзин' },
+  'Շիրակ': { en: 'Shirak', ru: 'Ширак' },
+  'Գյումրի': { en: 'Gyumri', ru: 'Гюмри' },
+  'Արագածոտն': { en: 'Aragatsotn', ru: 'Арагацотн' },
+  'Արարատ': { en: 'Ararat', ru: 'Арарат' },
+  'Գեղարքունիք': { en: 'Gegharkunik', ru: 'Гегаркуник' },
+  'Լոռի': { en: 'Lori', ru: 'Лори' },
+  'Տավուշ': { en: 'Tavush', ru: 'Тавуш' },
+  'Վայոց ձոր': { en: 'Vayots Dzor', ru: 'Вайоц Дзор' },
+  'Սյունիք': { en: 'Syunik', ru: 'Сюник' },
+  'Ձգվող առաստաղներ': { en: 'Stretch ceilings', ru: 'Натяжные потолки' },
+  'ՄԴՖ շրիշակ': { en: 'MDF skirting', ru: 'МДФ плинтус' },
+  'Ալյումինե պրոֆիլ': { en: 'Aluminum profile', ru: 'Алюминиевый профиль' },
+  'Լուսավորություն': { en: 'Lighting', ru: 'Освещение' },
+  'Պրոֆիլ': { en: 'Profile', ru: 'Профиль' },
+  'Ցանց': { en: 'Mesh', ru: 'Сетка' },
+  'Փայտանյութ': { en: 'Wood material', ru: 'Деревянные материалы' },
+  'Փող': { en: 'Tube', ru: 'Труба' }
+}
+
+function localizedCraftsmanValue(value?: string | null) {
+  if (!value) {
+    return ''
+  }
+
+  return craftsmanValueTranslations[value]?.[currentLanguageCode.value] || value
+}
 
 async function loadCraftsmen() {
   isLoading.value = true
@@ -117,21 +153,21 @@ onMounted(loadCraftsmen)
         <span>{{ copy.craftsmenRegion }}</span>
         <select v-model="query.region">
           <option value="">{{ copy.craftsmenAll }}</option>
-          <option v-for="region in filters.regions" :key="region" :value="region">{{ region }}</option>
+          <option v-for="region in filters.regions" :key="region" :value="region">{{ localizedCraftsmanValue(region) }}</option>
         </select>
       </label>
       <label>
         <span>{{ copy.craftsmenCity }}</span>
         <select v-model="query.city">
           <option value="">{{ copy.craftsmenAll }}</option>
-          <option v-for="city in filters.cities" :key="city" :value="city">{{ city }}</option>
+          <option v-for="city in filters.cities" :key="city" :value="city">{{ localizedCraftsmanValue(city) }}</option>
         </select>
       </label>
       <label>
         <span>{{ copy.craftsmenField }}</span>
         <select v-model="query.field">
           <option value="">{{ copy.craftsmenAll }}</option>
-          <option v-for="field in filters.fields" :key="field" :value="field">{{ field }}</option>
+          <option v-for="field in filters.fields" :key="field" :value="field">{{ localizedCraftsmanValue(field) }}</option>
         </select>
       </label>
     </div>
@@ -148,13 +184,13 @@ onMounted(loadCraftsmen)
         <div class="craftsman-main">
           <div class="craftsman-code-row">
             <strong class="craftsman-code">{{ craftsman.code }}</strong>
-            <span v-if="craftsman.work_field" class="craftsman-field-tag">{{ craftsman.work_field }}</span>
+            <span v-if="craftsman.work_field" class="craftsman-field-tag">{{ localizedCraftsmanValue(craftsman.work_field) }}</span>
           </div>
           <h2 class="craftsman-name">{{ craftsman.name }}</h2>
           <div class="craftsman-meta">
-            <span v-if="craftsman.work_region">{{ craftsman.work_region }}</span>
+            <span v-if="craftsman.work_region">{{ localizedCraftsmanValue(craftsman.work_region) }}</span>
             <span v-if="craftsman.work_city" class="meta-sep">&middot;</span>
-            <span v-if="craftsman.work_city">{{ craftsman.work_city }}</span>
+            <span v-if="craftsman.work_city">{{ localizedCraftsmanValue(craftsman.work_city) }}</span>
             <span v-if="craftsman.phone" class="meta-sep">&middot;</span>
             <a v-if="craftsman.phone" :href="`tel:${craftsman.phone}`" class="craftsman-phone">{{ craftsman.phone }}</a>
             <span v-if="craftsman.has_whatsapp || craftsman.has_viber" class="craftsman-badges">

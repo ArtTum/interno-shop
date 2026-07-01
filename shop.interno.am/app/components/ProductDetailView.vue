@@ -102,8 +102,8 @@ const selectedOptionDetails = computed(() => {
 // Labels for attribute groups — reactive to current language via copy
 function attrGroupLabel(key: string): string {
   const map: Record<string, string> = {
-    height: copy.value.optionHeight,
-    length: copy.value.optionHeight,
+    height: copy.value.optionLength,
+    length: copy.value.optionLength,
     unit: copy.value.optionUnitLong,
     size: copy.value.optionSize,
     power: copy.value.optionPower
@@ -278,6 +278,16 @@ function addCurrentProductToCart() {
         </div>
 
         <form class="product-options" @submit.prevent>
+          <label v-if="currentProduct.options?.size" class="option-field">
+            <span>{{ copy.optionSize }}</span>
+            <input type="text" :value="currentProduct.options.size" disabled />
+          </label>
+
+          <label v-if="currentProduct.options?.height" class="option-field">
+            <span>{{ copy.optionHeight }}</span>
+            <input type="text" :value="currentProduct.options.height" disabled />
+          </label>
+
           <label class="option-field">
             <span>{{ copy.optionType }}</span>
             <input type="text" :value="currentProduct.options?.type || '—'" disabled />
