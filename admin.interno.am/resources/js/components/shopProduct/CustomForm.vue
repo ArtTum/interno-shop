@@ -41,10 +41,10 @@ const tabsRoutes = [
 ];
 
 const attributePriceGroups = [
-    {key: 'height', title: 'Length'},
-    {key: 'unit', title: 'Measurement unit'},
-    {key: 'size', title: 'Size'},
-    {key: 'power', title: 'Power'},
+    {key: 'height', title: 'Բոյ', heading: 'Բոյի արժեք'},
+    {key: 'unit', title: 'Չափի միավոր', heading: 'Միավորի արժեք'},
+    {key: 'size', title: 'Չափս', heading: 'Չափսի արժեք'},
+    {key: 'power', title: 'Հզորություն', heading: 'Հզորության արժեք'},
 ];
 
 const auth = computed(() => store.getters['auth/getUser']);
@@ -180,7 +180,7 @@ const mainColorOptions = computed(() => {
         .filter((option) => option.value && selectedIds.includes(Number(option.value)));
 
     return [
-        {value: null, label: 'No main color'},
+        {value: null, label: 'Առանց հիմնական գույնի'},
         ...options,
     ];
 });
@@ -247,10 +247,10 @@ const submitForm = () => {
         <div class="border-b border-stroke p-6 max-md:p-4">
             <div class="flex flex-col max-w-[300px]">
                 <CustomSelect
-                    label="Languages"
+                    label="Լեզու"
                     v-model="form.language_id"
                     mode="single"
-                    placeholder="Select language"
+                    placeholder="Ընտրել լեզուն"
                     :disabled="!canEdit"
                     :options="params.languages"
                     :searchable="true"
@@ -285,10 +285,10 @@ const submitForm = () => {
                 <div class="grid grid-cols-4 gap-6 max-xl:grid-cols-2 max-sm:grid-cols-1">
                     <div>
                         <CustomSelect
-                            label="Category"
+                            label="Կատեգորիա"
                             v-model="form.shop_category_id"
                             mode="single"
-                            placeholder="Select"
+                            placeholder="Ընտրել"
                             :disabled="!canEdit"
                             :options="params.categories"
                             :searchable="true"
@@ -302,9 +302,9 @@ const submitForm = () => {
                             :disabled="!canEdit"
                             v-model="form.global_slug"
                             name="global_slug"
-                            label="Global slug"
+                            label="Լինկ"
                             type="text"
-                            placeholder="Enter or will generate automatically"
+                            placeholder="Լրացրեք կամ կգեներացվի ավտոմատ"
                             :error="form.errors?.global_slug"
                         />
                     </div>
@@ -313,21 +313,10 @@ const submitForm = () => {
                             :disabled="!canEdit"
                             v-model="form.option_code"
                             name="option_code"
-                            label="Code"
+                            label="Ապրանքի կոդ"
                             type="text"
-                            placeholder="Enter code"
+                            placeholder="Լրացրեք ապրանքի կոդը"
                             :error="form.errors?.option_code"
-                        />
-                    </div>
-                    <div>
-                        <CustomInput
-                            :disabled="!canEdit"
-                            v-model="form.sort_order"
-                            name="sort_order"
-                            label="Sort order"
-                            type="number"
-                            placeholder="Enter sort order"
-                            :error="form.errors?.sort_order"
                         />
                     </div>
                     <div>
@@ -335,18 +324,18 @@ const submitForm = () => {
                             :disabled="!canEdit"
                             v-model="form.option_size"
                             name="option_size"
-                            label="Size"
+                            label="Չափս"
                             type="text"
-                            placeholder="Enter size"
+                            placeholder="Լրացրեք չափսը"
                             :error="form.errors?.option_size"
                         />
                     </div>
                     <div>
                         <CustomSelect
-                            label="Type"
+                            label="Տեսակ"
                             v-model="form.option_type_id"
                             mode="single"
-                            placeholder="Select type"
+                            placeholder="Ընտրել տեսակը"
                             :disabled="!canEdit"
                             :options="params.optionTypes"
                             :searchable="true"
@@ -357,10 +346,10 @@ const submitForm = () => {
                     </div>
                     <div>
                         <CustomSelect
-                            label="Colors"
+                            label="Գույն"
                             v-model="form.option_color_ids"
                             mode="tags"
-                            placeholder="Select colors"
+                            placeholder="Ընտրել գույները"
                             :disabled="!canEdit"
                             :options="params.optionColors"
                             :searchable="true"
@@ -372,10 +361,10 @@ const submitForm = () => {
                     </div>
                     <div>
                         <CustomSelect
-                            label="Main color"
+                            label="Հիմնական գույն"
                             v-model="form.option_color_id"
                             mode="single"
-                            placeholder="Select main color"
+                            placeholder="Ընտրել հիմնական գույնը"
                             :disabled="!canEdit || !selectedColorIds.length"
                             :options="mainColorOptions"
                             :searchable="true"
@@ -389,9 +378,9 @@ const submitForm = () => {
                             :disabled="!canEdit"
                             v-model="form.option_height"
                             name="option_height"
-                            label="Height"
+                            label="Բարձրություն"
                             type="text"
-                            placeholder="Enter height"
+                            placeholder="Լրացրեք բարձրությունը"
                             :error="form.errors?.option_height"
                         />
                     </div>
@@ -400,9 +389,9 @@ const submitForm = () => {
                             :disabled="!canEdit"
                             v-model="form.option_material"
                             name="option_material"
-                            label="Material"
+                            label="Նյութ"
                             type="text"
-                            placeholder="Enter material"
+                            placeholder="Լրացրեք նյութը"
                             :error="form.errors?.option_material"
                         />
                     </div>
@@ -412,7 +401,7 @@ const submitForm = () => {
                             @change="(value) => form.is_new = value"
                             :value="form.is_new"
                             id="shop_product_is_new"
-                            label="New product"
+                            label="Նորույթ"
                         />
                     </div>
                     <div class="flex items-end pb-2">
@@ -421,7 +410,7 @@ const submitForm = () => {
                             @change="(value) => form.is_temporarily_unavailable = value"
                             :value="form.is_temporarily_unavailable"
                             id="shop_product_temporarily_unavailable"
-                            label="Temporarily unavailable"
+                            label="Ժամանակավորապես անհասանելի է"
                         />
                     </div>
                     <div class="flex items-end pb-2">
@@ -429,9 +418,9 @@ const submitForm = () => {
                             :disabled="!canEdit"
                             v-model="form.purchase_quantity_limit"
                             name="purchase_quantity_limit"
-                            label="Purchase quantity limit"
+                            label="Գնման լիմիտ"
                             type="number"
-                            placeholder="Empty or 0 = no limit"
+                            placeholder="Դատարկ կամ 0 = առանց լիմիտի"
                             :error="form.errors?.purchase_quantity_limit"
                         />
                     </div>
@@ -441,15 +430,15 @@ const submitForm = () => {
                             @change="(value) => form.status = value"
                             :value="form.status"
                             id="shop_product_status"
-                            label="Active"
+                            label="Ակտիվ"
                         />
                     </div>
                     <div class="col-span-2 max-xl:col-span-2 max-sm:col-span-1">
                         <CustomSelect
-                            label="Related products"
+                            label="Լրացնող ապրանքներ"
                             v-model="form.related_product_ids"
                             mode="tags"
-                            placeholder="Select related products"
+                            placeholder="Ընտրել լրացնող ապրանքներ"
                             :disabled="!canEdit"
                             :options="relatedProductOptions"
                             :searchable="true"
@@ -468,14 +457,14 @@ const submitForm = () => {
                         class="rounded-sm border border-stroke bg-white"
                     >
                         <div class="flex items-center justify-between gap-4 border-b border-stroke px-4 py-3">
-                            <h4 class="font-medium text-black">{{ group.title }} prices</h4>
+                            <h4 class="font-medium text-black">{{ group.heading }}</h4>
                             <button
                                 type="button"
                                 class="rounded bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-opacity-80 disabled:opacity-60"
                                 :disabled="!canEdit || !attributeOptions(group.key).length"
                                 @click="addAttributePrice(group.key)"
                             >
-                                Add {{ group.title }} price
+                                Ավելացնել
                             </button>
                         </div>
 
@@ -489,7 +478,7 @@ const submitForm = () => {
                                     v-model="row.attribute_value_id"
                                     mode="single"
                                     :label="group.title"
-                                    placeholder="Select"
+                                    placeholder="Ընտրել"
                                     :disabled="!canEdit"
                                     :options="attributeOptions(group.key, row.attribute_value_id)"
                                     :searchable="true"
@@ -500,22 +489,22 @@ const submitForm = () => {
                                     :disabled="!canEdit"
                                     v-model="row.price"
                                     :name="`${group.key}_price_${index}`"
-                                    label="Price"
+                                    label="Գին"
                                     type="number"
-                                    placeholder="Enter price"
+                                    placeholder="Լրացրեք գինը"
                                 />
                                 <button
                                     v-if="canEdit"
                                     type="button"
                                     class="mt-8 flex h-9 w-9 items-center justify-center rounded border border-danger text-danger hover:bg-danger hover:text-white"
-                                    title="Remove"
+                                    title="Հեռացնել"
                                     @click="removeAttributePrice(group.key, index)"
                                 >
                                     <font-awesome-icon :icon="['fas', 'trash-can']"/>
                                 </button>
                             </div>
                             <p v-if="!attributeRows(group.key).length" class="text-sm text-gray-500">
-                                No {{ group.title }} price added.
+                                Ավելացված արժեք չկա։
                             </p>
                         </div>
                     </div>

@@ -361,9 +361,8 @@ class ShopFrontendController extends Controller
             $config['menuGroups'] = $databaseCategories;
         }
 
-        $databaseProducts = $this->readProductsFromDatabase($config['languages'] ?? []);
-
-        if (!empty($databaseProducts)) {
+        if (Schema::hasTable('shop_products') && Schema::hasTable('shop_product_translations')) {
+            $databaseProducts = $this->readProductsFromDatabase($config['languages'] ?? []);
             $config['products'] = $databaseProducts;
         }
 

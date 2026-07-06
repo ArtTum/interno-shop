@@ -23,6 +23,10 @@ const touchStartX = ref(0)
 const detailQuantity = ref(1)
 const selectedColor = ref<any | null>(null)
 const selectedPriceOptions = ref<Record<string, { id: number | string, name: string, label: string, price: string }>>({})
+type DetailParameter =
+  | { type: 'text', key: string, label: string, value: string }
+  | { type: 'select', key: string, label: string, group: { key: string, values: Array<{ id: number | string, name: string, label: string, price: string }> } }
+  | { type: 'color', key: string, label: string }
 
 const isCurrentProductUnavailable = computed(() => Boolean(currentProduct.value?.isTemporarilyUnavailable))
 
@@ -61,6 +65,17 @@ const productColors = computed(() => {
 const selectedProductColor = computed(() => selectedColor.value || productColors.value[0] || null)
 const visiblePriceOptionGroups = computed(() => currentProductPriceOptions.value
   .filter((group) => ['height', 'length', 'unit', 'size', 'power'].includes(group.key)))
+
+const orderedPriceOptionGroups = computed(() => {
+  const order = ['height', 'length', 'unit', 'size', 'power']
+
+  return [...visiblePriceOptionGroups.value].sort((first, second) => {
+    const firstIndex = order.indexOf(first.key)
+    const secondIndex = order.indexOf(second.key)
+
+    return (firstIndex === -1 ? order.length : firstIndex) - (secondIndex === -1 ? order.length : secondIndex)
+  })
+})
 
 // Price from selected attribute option (first group wins)
 const displayPrice = computed(() => {
@@ -111,6 +126,41 @@ function attrGroupLabel(key: string): string {
 
   return map[key] || (key.charAt(0).toUpperCase() + key.slice(1))
 }
+
+const productParameters = computed<DetailParameter[]>(() => {
+  const product = currentProduct.value
+  const options = product?.options || {}
+  const params: DetailParameter[] = []
+  const addTextParam = (key: string, label: string, value?: string | null) => {
+    if (value) {
+      params.push({ type: 'text', key, label, value })
+    }
+  }
+  const addSelectParam = (group: (typeof orderedPriceOptionGroups.value)[number] | undefined) => {
+    if (group) {
+      params.push({ type: 'select', key: `price-${group.key}`, label: attrGroupLabel(group.key), group })
+    }
+  }
+
+  addTextParam('code', copy.value.optionCode, options.code)
+  addTextParam('material', copy.value.optionMaterial, options.material)
+  addTextParam('type', copy.value.optionType, options.type)
+  addTextParam('size', copy.value.optionSize, options.size)
+  addTextParam('height', copy.value.optionHeight, options.height)
+
+  addSelectParam(orderedPriceOptionGroups.value.find((group) => ['height', 'length'].includes(group.key)))
+  addSelectParam(orderedPriceOptionGroups.value.find((group) => group.key === 'unit'))
+
+  orderedPriceOptionGroups.value
+    .filter((group) => !['height', 'length', 'unit'].includes(group.key))
+    .forEach(addSelectParam)
+
+  if (productColors.value.length) {
+    params.push({ type: 'color', key: 'color', label: copy.value.optionColor })
+  }
+
+  return params
+})
 
 watch(
   productColors,
@@ -249,79 +299,58 @@ function addCurrentProductToCart() {
         <h1 id="product-title">{{ currentProduct.title[currentLanguageCode] || currentProduct.title.hy }}</h1>
         <p v-if="productShortDescription" class="product-short-description">{{ productShortDescription }}</p>
         <div v-if="productDescription" class="product-description" v-html="productDescription"></div>
-        <p v-if="isCurrentProductUnavailable" class="detail-unavailable">{{ copy.temporarilyUnavailable }}</p>
-        <form class="product-code-options" @submit.prevent>
-          <label class="option-field option-wide">
-            <span>{{ copy.optionCode }}</span>
-            <input type="text" :value="currentProduct.options?.code || copy.optionCode" disabled />
-          </label>
-        </form>
+        <form v-if="productParameters.length" class="product-parameters" @submit.prevent>
+          <template v-for="parameter in productParameters" :key="parameter.key">
+            <label v-if="parameter.type === 'text'" class="option-field">
+              <span>{{ parameter.label }}</span>
+              <input type="text" :value="parameter.value" disabled />
+            </label>
 
-        <div v-if="visiblePriceOptionGroups.length" class="price-options">
-          <div v-for="group in visiblePriceOptionGroups" :key="group.key" class="price-option-group">
-            <label :for="`attr-${group.key}`" class="price-option-label">{{ attrGroupLabel(group.key) }}</label>
-            <select
-              :id="`attr-${group.key}`"
-              class="price-option-select"
-              :value="selectedPriceOptions[group.key]?.id"
-              @change="selectPriceOption(group.key, ($event.target as HTMLSelectElement).value)"
-            >
-              <option
-                v-for="option in group.values"
-                :key="option.id"
-                :value="option.id"
+            <div v-else-if="parameter.type === 'select'" class="price-option-group">
+              <label :for="`attr-${parameter.group.key}`" class="price-option-label">{{ parameter.label }}</label>
+              <select
+                :id="`attr-${parameter.group.key}`"
+                class="price-option-select"
+                :value="selectedPriceOptions[parameter.group.key]?.id"
+                @change="selectPriceOption(parameter.group.key, ($event.target as HTMLSelectElement).value)"
               >
-                {{ option.label || option.name }} — {{ Number(option.price).toLocaleString() }} &#1423;
-              </option>
-            </select>
-          </div>
-        </div>
-
-        <form class="product-options" @submit.prevent>
-          <label v-if="currentProduct.options?.size" class="option-field">
-            <span>{{ copy.optionSize }}</span>
-            <input type="text" :value="currentProduct.options.size" disabled />
-          </label>
-
-          <label v-if="currentProduct.options?.height" class="option-field">
-            <span>{{ copy.optionHeight }}</span>
-            <input type="text" :value="currentProduct.options.height" disabled />
-          </label>
-
-          <label class="option-field">
-            <span>{{ copy.optionType }}</span>
-            <input type="text" :value="currentProduct.options?.type || '—'" disabled />
-          </label>
-
-          <label class="option-field">
-            <span>{{ copy.optionMaterial }}</span>
-            <input type="text" :value="currentProduct.options?.material || '—'" disabled />
-          </label>
-
-          <div v-if="productColors.length" class="color-options" aria-label="Colors">
-            <span>{{ copy.optionColor }}</span>
-            <div class="color-dots-row">
-              <button
-                v-for="color in productColors"
-                :key="color.id"
-                type="button"
-                class="color-dot"
-                :class="{ 'is-active': selectedProductColor?.id === color.id }"
-                :style="{ background: color.value }"
-                :aria-label="color.name"
-                :aria-pressed="selectedProductColor?.id === color.id"
-                :title="color.name"
-                @click="selectedColor = color"
-              />
-              <span v-if="selectedProductColor" class="color-name-label">{{ selectedProductColor.name }}</span>
+                <option
+                  v-for="option in parameter.group.values"
+                  :key="option.id"
+                  :value="option.id"
+                >
+                  {{ option.label || option.name }} — {{ Number(option.price).toLocaleString() }} &#1423;
+                </option>
+              </select>
             </div>
-          </div>
+
+            <div v-else class="color-options" aria-label="Colors">
+              <span>{{ parameter.label }}</span>
+              <div class="color-dots-row">
+                <button
+                  v-for="color in productColors"
+                  :key="color.id"
+                  type="button"
+                  class="color-dot"
+                  :class="{ 'is-active': selectedProductColor?.id === color.id }"
+                  :style="{ background: color.value }"
+                  :aria-label="color.name"
+                  :aria-pressed="selectedProductColor?.id === color.id"
+                  :title="color.name"
+                  @click="selectedColor = color"
+                />
+                <span v-if="selectedProductColor" class="color-name-label">{{ selectedProductColor.name }}</span>
+              </div>
+            </div>
+          </template>
         </form>
 
         <div class="purchase-row">
           <div class="detail-price">
             {{ Number(displayPrice).toLocaleString() }} <span aria-hidden="true">&#1423;</span>
           </div>
+
+          <span v-if="isCurrentProductUnavailable" class="detail-stock-status">{{ copy.outOfStock }}</span>
 
           <div class="purchase-actions">
             <div class="quantity-control" aria-label="Quantity">
@@ -335,7 +364,7 @@ function addCurrentProductToCart() {
               :class="{ 'is-added': recentlyAddedProductId === currentProduct.id }"
               @click="addCurrentProductToCart"
             >
-              {{ isCurrentProductUnavailable ? copy.temporarilyUnavailable : (recentlyAddedProductId === currentProduct.id ? copy.added : copy.add) }}
+              {{ recentlyAddedProductId === currentProduct.id ? copy.added : copy.add }}
             </button>
           </div>
         </div>

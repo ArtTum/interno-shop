@@ -14,8 +14,8 @@ const { addToCart, copy, currentLanguageCode, openProduct, productPath, recently
     @keydown.enter="openProduct(product)"
     @keydown.space.prevent="openProduct(product)"
   >
-    <div class="badges">
-      <span v-if="product.isTemporarilyUnavailable" class="unavailable">{{ copy.temporarilyUnavailable }}</span>
+    <div class="badges" :class="{ 'is-unavailable': product.isTemporarilyUnavailable }">
+      <span v-if="product.isTemporarilyUnavailable" class="unavailable">{{ copy.outOfStock }}</span>
       <span v-else-if="product.isNew" class="new">{{ copy.new }}</span>
     </div>
 
@@ -42,7 +42,7 @@ const { addToCart, copy, currentLanguageCode, openProduct, productPath, recently
     <div class="product-actions">
       <span class="price">{{ product.price }} <span aria-hidden="true">&#1423;</span></span>
       <button type="button" :disabled="product.isTemporarilyUnavailable" :class="{ 'is-added': recentlyAddedProductId === product.id }" @click.stop="addToCart(product)">
-        {{ product.isTemporarilyUnavailable ? copy.temporarilyUnavailable : (recentlyAddedProductId === product.id ? copy.added : copy.add) }}
+        {{ recentlyAddedProductId === product.id ? copy.added : copy.add }}
       </button>
     </div>
   </article>

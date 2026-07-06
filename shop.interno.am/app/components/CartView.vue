@@ -10,6 +10,7 @@ const {
   copy,
   currentLanguageCode,
   localizedPath,
+  productPath,
   removeFromCart,
   searchCraftsmen,
   selectedCraftsman: storedCraftsman,
@@ -207,12 +208,16 @@ watch(() => route.query.checkout, (checkout) => {
             </svg>
           </button>
 
-          <div class="cart-item-media">
+          <NuxtLink class="cart-item-media" :to="productPath(item.product)">
             <img :src="item.product.image" :alt="item.product.title[currentLanguageCode]" />
-          </div>
+          </NuxtLink>
 
           <div class="cart-item-info">
-            <h2>{{ item.product.title[currentLanguageCode] }}</h2>
+            <h2>
+              <NuxtLink class="cart-product-title-link" :to="productPath(item.product)">
+                {{ item.product.title[currentLanguageCode] }}
+              </NuxtLink>
+            </h2>
 
             <dl class="cart-item-options">
               <div><dt>{{ copy.optionCode }}</dt><dd>{{ item.product.options?.code || '—' }}</dd></div>
@@ -275,12 +280,18 @@ watch(() => route.query.checkout, (checkout) => {
       <div class="cart-recommendations">
         <h2>{{ copy.recommendationsTitle }}</h2>
         <article v-for="product in cartRecommendations" :key="product.id" class="cart-recommendation">
-          <img :src="product.image" :alt="product.title[currentLanguageCode]" />
+          <NuxtLink class="cart-recommendation-media" :to="productPath(product)">
+            <img :src="product.image" :alt="product.title[currentLanguageCode]" />
+          </NuxtLink>
           <div>
-            <h3>{{ product.title[currentLanguageCode] }}</h3>
+            <h3>
+              <NuxtLink class="cart-recommendation-title-link" :to="productPath(product)">
+                {{ product.title[currentLanguageCode] }}
+              </NuxtLink>
+            </h3>
             <p>{{ product.price }} <span aria-hidden="true">&#1423;</span></p>
             <button type="button" :disabled="product.isTemporarilyUnavailable" @click="addToCart(product)">
-              {{ product.isTemporarilyUnavailable ? copy.temporarilyUnavailable : copy.addToCartLong }}
+              {{ copy.addToCartLong }}
             </button>
           </div>
         </article>

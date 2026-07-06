@@ -32,34 +32,34 @@ const params = ref({
 });
 
 const statusOptions = [
-    {value: -1, label: 'All'},
-    {value: 1, label: 'Active'},
-    {value: 0, label: 'Inactive'},
+    {value: -1, label: 'Բոլորը'},
+    {value: 1, label: 'Ակտիվ'},
+    {value: 0, label: 'Ոչ ակտիվ'},
 ];
 
 const newOptions = [
-    {value: -1, label: 'All'},
-    {value: 1, label: 'Is new'},
-    {value: 0, label: 'Is not new'},
+    {value: -1, label: 'Բոլորը'},
+    {value: 1, label: 'Նորույթ'},
+    {value: 0, label: 'Նորույթ չէ'},
 ];
 
 const availabilityOptions = [
-    {value: -1, label: 'All'},
-    {value: 0, label: 'Available'},
-    {value: 1, label: 'Temporarily unavailable'},
+    {value: -1, label: 'Բոլորը'},
+    {value: 0, label: 'Հասանելի է'},
+    {value: 1, label: 'Ժամանակավորապես անհասանելի է'},
 ];
 
 const pageData = computed(() => store.getters['shopProduct/getPageData']);
 const categoryOptions = computed(() => [
-    {value: -1, label: 'All categories'},
+    {value: -1, label: 'Բոլոր կատեգորիաները'},
     ...(pageData.value.categories || []).filter((category) => category.value),
 ]);
 const optionTypeOptions = computed(() => [
-    {value: -1, label: 'All types'},
+    {value: -1, label: 'Բոլոր տեսակները'},
     ...(pageData.value.optionTypes || []).filter((type) => type.value),
 ]);
 const optionColorOptions = computed(() => [
-    {value: -1, label: 'All colors'},
+    {value: -1, label: 'Բոլոր գույները'},
     ...(pageData.value.optionColors || []).filter((color) => color.value),
 ]);
 
@@ -215,7 +215,7 @@ fetchPageData();
                     <CustomSelect
                         v-model="params.language_id"
                         mode="single"
-                        label="Language"
+                        label="Լեզու"
                         :options="pageData.languages"
                         :searchable="true"
                         :canClear="false"
@@ -225,7 +225,7 @@ fetchPageData();
                     <CustomSelect
                         v-model="params.category_id"
                         mode="single"
-                        label="Category"
+                        label="Կատեգորիա"
                         :options="categoryOptions"
                         :searchable="true"
                         :canClear="false"
@@ -235,7 +235,7 @@ fetchPageData();
                     <CustomSelect
                         v-model="params.option_type_id"
                         mode="single"
-                        label="Type"
+                        label="Տեսակ"
                         :options="optionTypeOptions"
                         :searchable="true"
                         :canClear="false"
@@ -245,7 +245,7 @@ fetchPageData();
                     <CustomSelect
                         v-model="params.option_color_id"
                         mode="single"
-                        label="Color"
+                        label="Գույն"
                         :options="optionColorOptions"
                         :searchable="true"
                         :canClear="false"
@@ -255,7 +255,7 @@ fetchPageData();
                     <CustomSelect
                         v-model="params.status"
                         mode="single"
-                        label="Status"
+                        label="Կարգավիճակ"
                         :options="statusOptions"
                         :searchable="false"
                         :canClear="false"
@@ -265,7 +265,7 @@ fetchPageData();
                     <CustomSelect
                         v-model="params.availability"
                         mode="single"
-                        label="Availability"
+                        label="Հասանելիություն"
                         :options="availabilityOptions"
                         :searchable="false"
                         :canClear="false"
@@ -275,7 +275,7 @@ fetchPageData();
                     <CustomSelect
                         v-model="params.is_new"
                         mode="single"
-                        label="New"
+                        label="Նորույթ"
                         :options="newOptions"
                         :searchable="false"
                         :canClear="false"
@@ -295,7 +295,7 @@ fetchPageData();
                 placeholder: 'Search ...',
                 tooltip: {
                     button: {showingType: 'info'},
-                    text: 'ID, name, slug, kind, meta title'
+                    text: 'ID, անուն, լինկ, meta title'
                 }
             }"
                 @do-page-fetching="doPageFetching"
@@ -303,19 +303,18 @@ fetchPageData();
                 :pagination="pageData.pagination"
                 :columns="[
                 {title: 'ID', key: 'shop_products.id'},
-                {title: 'Image'},
-                {title: 'Name'},
-                {title: 'Slug'},
-                {title: 'Category'},
-                {title: 'Type'},
-                {title: 'Color'},
-                {title: 'Min price', key: 'shop_products.price'},
-                {title: 'Sort', key: 'sort_order'},
-                {title: 'New'},
-                {title: 'Qty limit'},
-                {title: 'Availability', key: 'availability'},
-                {title: 'Status', key: 'status'},
-                {title: 'Action'},
+                {title: 'Նկար'},
+                {title: 'Անուն'},
+                {title: 'Լինկ'},
+                {title: 'Կատեգորիա'},
+                {title: 'Տեսակ'},
+                {title: 'Գույն'},
+                {title: 'Նվազագույն գին', key: 'shop_products.price'},
+                {title: 'Նորույթ'},
+                {title: 'Գնման լիմիտ'},
+                {title: 'Հասանելիություն', key: 'availability'},
+                {title: 'Կարգավիճակ', key: 'status'},
+                {title: 'Գործողություն'},
             ]"
             >
                 <template v-for="(item, index) in pageData.data" :key="index">
@@ -367,7 +366,7 @@ fetchPageData();
                                     :style="{backgroundColor: color.value || '#ffffff'}"
                                 ></span>
                                 <span>{{ color.name }}</span>
-                                <small v-if="Number(color.id) === Number(item.option_color_id)" class="text-primary">(main)</small>
+                                <small v-if="Number(color.id) === Number(item.option_color_id)" class="text-primary">(հիմնական)</small>
                             </span>
                         </span>
                         <span v-else class="inline-flex items-center gap-2 font-medium text-black">
@@ -382,9 +381,6 @@ fetchPageData();
                     <td class="py-5 px-4 pl-9 xl:pl-11">
                         <span class="font-medium text-black">{{ item.price }}</span>
                     </td>
-                    <td class="py-5 px-4 pl-9 xl:pl-11">
-                        <span class="font-medium text-black">{{ item.sort_order }}</span>
-                    </td>
                     <td class="py-5 px-4">
                         <p
                             class="inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium"
@@ -393,7 +389,7 @@ fetchPageData();
                                 'bg-success text-success': item.is_new
                             }"
                         >
-                            {{ item.is_new ? 'New' : 'No' }}
+                            {{ item.is_new ? 'Նորույթ' : 'Ոչ' }}
                         </p>
                     </td>
                     <td class="py-5 px-4">
@@ -404,7 +400,7 @@ fetchPageData();
                                 'bg-warning text-warning': item.purchase_quantity_limited
                             }"
                         >
-                            {{ item.purchase_quantity_limited ? `Max ${item.purchase_quantity_limit || '-'}` : 'No' }}
+                            {{ item.purchase_quantity_limited ? `Մինչև ${item.purchase_quantity_limit || '-'}` : 'Ոչ' }}
                         </p>
                     </td>
                     <td class="py-5 px-4">
@@ -415,7 +411,7 @@ fetchPageData();
                                 'bg-warning text-warning': item.is_temporarily_unavailable
                             }"
                         >
-                            {{ item.is_temporarily_unavailable ? 'Temporarily unavailable' : 'Available' }}
+                            {{ item.is_temporarily_unavailable ? 'Ժամանակավորապես անհասանելի է' : 'Հասանելի է' }}
                         </p>
                     </td>
                     <td class="py-5 px-4">
@@ -426,7 +422,7 @@ fetchPageData();
                                 'bg-success text-success': item.status
                             }"
                         >
-                            {{ item.status ? 'Active' : 'Inactive' }}
+                            {{ item.status ? 'Ակտիվ' : 'Ոչ ակտիվ' }}
                         </p>
                     </td>
                     <td class="py-5 px-4">
@@ -435,7 +431,7 @@ fetchPageData();
                                 <button
                                     type="button"
                                     class="hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
-                                    title="Move up"
+                                    title="Տեղափոխել վերև"
                                     :disabled="reorderingId !== null"
                                     @click="moveProduct(item.id, 'up')"
                                 >
@@ -444,7 +440,7 @@ fetchPageData();
                                 <button
                                     type="button"
                                     class="hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
-                                    title="Move down"
+                                    title="Տեղափոխել ներքև"
                                     :disabled="reorderingId !== null"
                                     @click="moveProduct(item.id, 'down')"
                                 >
@@ -453,7 +449,7 @@ fetchPageData();
                             </template>
 
                             <RouterLink :to="`/shop-products/update/${item.id}/${params.language_id}`">
-                                <button class="hover:text-primary" title="Edit">
+                                <button class="hover:text-primary" title="Խմբագրել">
                                     <font-awesome-icon :icon="['far', 'pen-to-square']"/>
                                 </button>
                             </RouterLink>
@@ -462,7 +458,7 @@ fetchPageData();
                                 <button
                                     type="button"
                                     class="hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
-                                    title="Copy"
+                                    title="Պատճենել"
                                     :disabled="copyingId !== null"
                                     @click="copyProduct(item.id)"
                                 >
@@ -477,7 +473,7 @@ fetchPageData();
                                         id: item.id
                                     });"
                                     class="hover:text-primary"
-                                    title="Delete"
+                                    title="Ջնջել"
                                 >
                                     <font-awesome-icon :icon="['fas', 'trash-can']"/>
                                 </button>

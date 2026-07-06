@@ -282,7 +282,8 @@ const translations = {
     optionCode: 'կոդ',
     optionColor: 'Գույն',
     optionHeight: 'Բարձրություն',
-    optionLength: 'Երկարություն',
+    outOfStock: 'Առկա չէ',
+    optionLength: 'Բոյ',
     optionMaterial: 'Նյութ',
     optionPiece: 'Հատիկ',
     optionPower: 'Հզորություն',
@@ -292,7 +293,7 @@ const translations = {
     optionType: 'Տեսակ',
     optionTypeName: 'Տեսակի անուն',
     optionUnit: 'Չափ. միավոր',
-    optionUnitLong: 'Չափի միավ.',
+    optionUnitLong: 'Չափի միավոր',
     pay: 'Վճարել',
     phonePlaceholder: '+374 __ ___ ___',
     removeItem: 'Հեռացնել',
@@ -392,6 +393,7 @@ const translations = {
     optionCode: 'Code',
     optionColor: 'Color',
     optionHeight: 'Height',
+    outOfStock: 'Out of stock',
     optionLength: 'Length',
     optionMaterial: 'Material',
     optionPiece: 'Piece',
@@ -402,7 +404,7 @@ const translations = {
     optionType: 'Type',
     optionTypeName: 'Type name',
     optionUnit: 'Unit',
-    optionUnitLong: 'Unit',
+    optionUnitLong: 'Measurement unit',
     pay: 'Pay',
     paymentDue: 'Payment due',
     paymentDueAmount: 'Payment due:',
@@ -502,6 +504,7 @@ const translations = {
     optionCode: 'Код',
     optionColor: 'Цвет',
     optionHeight: 'Высота',
+    outOfStock: 'Нет в наличии',
     optionLength: 'Длина',
     optionMaterial: 'Материал',
     optionPiece: 'Штука',
@@ -512,7 +515,7 @@ const translations = {
     optionType: 'Тип',
     optionTypeName: 'Название типа',
     optionUnit: 'Ед. изм.',
-    optionUnitLong: 'Ед. изм.',
+    optionUnitLong: 'Единица измерения',
     pay: 'Оплатить',
     paymentDue: 'К оплате',
     paymentDueAmount: 'Сумма к оплате:',
@@ -696,6 +699,7 @@ export function useCatalog() {
     return group.children[currentLanguageCode.value] ?? group.children.hy ?? Object.values(group.children)[0] ?? []
   }
   const primaryProducts = computed(() => catalogConfig.value.products
+    .filter((product) => product.status !== false)
     .map((product, index) => ({ product, index }))
     .sort((first, second) => {
       const availabilityDiff = Number(Boolean(first.product.isTemporarilyUnavailable)) - Number(Boolean(second.product.isTemporarilyUnavailable))
