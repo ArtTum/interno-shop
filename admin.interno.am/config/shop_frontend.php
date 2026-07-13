@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'order_mail_to' => env('SHOP_ORDER_MAIL_TO', env('MAIL_FOR_DELIVERY', env('MAIL_FROM_ADDRESS'))),
     'languages' => [
         ['code' => 'hy', 'label' => 'Armenian', 'icon' => '/assets/icons/flag-hy.svg'],
         ['code' => 'en', 'label' => 'English', 'icon' => '/assets/icons/flag-en.svg'],

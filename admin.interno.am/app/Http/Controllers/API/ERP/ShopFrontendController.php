@@ -14,10 +14,13 @@ use App\Models\ShopProduct;
 use App\Models\ShopSeoPage;
 use App\Models\ShopPrivacyPolicySection;
 use App\Models\Social;
+use App\Services\ShopOrderInvoiceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
@@ -80,7 +83,7 @@ class ShopFrontendController extends Controller
         ]));
     }
 
-    public function storeOrder(Request $request): JsonResponse
+    public function storeOrder(Request $request, ShopOrderInvoiceService $invoiceService): JsonResponse
     {
         $payload = $this->decodePayload($request);
 
@@ -125,6 +128,15 @@ class ShopFrontendController extends Controller
             'total' => $payload['total'],
         ]);
 
+        try {
+            $invoiceService->sendInvoice($order);
+        } catch (\Throwable $exception) {
+            Log::error('Shop order invoice email failed.', [
+                'order_id' => $order->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
+
         return $this->withCors(response()->json([
             'success' => true,
             'message' => 'Order created.',
@@ -160,6 +172,16 @@ class ShopFrontendController extends Controller
             'success' => true,
             'data' => $order->toOrderArray(),
         ]));
+    }
+
+    public function orderInvoice(int $id, ShopOrderInvoiceService $invoiceService): Response
+    {
+        $order = ShopOrder::query()->findOrFail($id);
+        $pdf = $invoiceService->makePdf($order);
+
+        return response($pdf, 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="' . $invoiceService->filename($order) . '"');
     }
 
     public function translations(): JsonResponse

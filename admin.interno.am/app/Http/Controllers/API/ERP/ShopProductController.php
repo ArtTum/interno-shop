@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
 
 class ShopProductController extends Controller
@@ -96,6 +97,7 @@ class ShopProductController extends Controller
             'data' => $items,
             'languages' => $this->languageOptions(),
             'categories' => $this->categoryOptions($languageId),
+            'categoryTree' => $this->categoryTreeOptions($languageId),
             'kinds' => $this->kindOptions(),
             'optionTypes' => $this->optionTypeOptions(),
             'optionColors' => $this->optionColorOptions(),
@@ -114,6 +116,7 @@ class ShopProductController extends Controller
             'success' => true,
             'languages' => $this->languageOptions(),
             'categories' => $this->categoryOptions($languageId),
+            'categoryTree' => $this->categoryTreeOptions($languageId),
             'kinds' => $this->kindOptions(),
             'optionTypes' => $this->optionTypeOptions(),
             'optionColors' => $this->optionColorOptions(),
@@ -172,6 +175,7 @@ class ShopProductController extends Controller
             ],
             'languages' => $this->languageOptions(),
             'categories' => $this->categoryOptions($languageId),
+            'categoryTree' => $this->categoryTreeOptions($languageId),
             'kinds' => $this->kindOptions(),
             'optionTypes' => $this->optionTypeOptions(),
             'optionColors' => $this->optionColorOptions(),
@@ -423,6 +427,7 @@ class ShopProductController extends Controller
 
         $data['option_color_ids'] = $this->normalizeColorIds($data['option_color_ids'] ?? [], $data['option_color_id'] ?? null);
         $data['option_color_id'] = $data['option_color_id'] ?? ($data['option_color_ids'][0] ?? null);
+        $this->ensureSelectedCategoryIsSubcategory($data['shop_category_id'] ?? null);
         $data['purchase_quantity_limit'] = !empty($data['purchase_quantity_limit']) ? (int) $data['purchase_quantity_limit'] : null;
         $data['purchase_quantity_limited'] = $data['purchase_quantity_limit'] !== null;
         $data['related_product_ids'] = collect($data['related_product_ids'] ?? [])
@@ -433,6 +438,26 @@ class ShopProductController extends Controller
             ->all();
 
         return $data;
+    }
+
+    private function ensureSelectedCategoryIsSubcategory(?int $categoryId): void
+    {
+        if (!$categoryId) {
+            throw ValidationException::withMessages([
+                'shop_category_id' => ['Խնդրում ենք ընտրել ենթակատեգորիա։'],
+            ]);
+        }
+
+        $isSubcategory = ShopCategory::query()
+            ->whereKey($categoryId)
+            ->whereNotNull('parent_id')
+            ->exists();
+
+        if (!$isSubcategory) {
+            throw ValidationException::withMessages([
+                'shop_category_id' => ['Ընտրել եք միայն կատեգորիա․ խնդրում ենք ընտրել ենթակատեգորիա։'],
+            ]);
+        }
     }
 
     private function saveTranslation(ShopProduct $product, array $data): void
@@ -543,6 +568,37 @@ class ShopProductController extends Controller
                 'value' => $category->id,
                 'label' => ($category->parent_id ? '- ' : '') . ($category->translations->first()?->title ?: $category->slug),
             ]))
+            ->values()
+            ->all();
+    }
+
+    private function categoryTreeOptions(int $languageId): array
+    {
+        return ShopCategory::query()
+            ->where('status', true)
+            ->whereNull('parent_id')
+            ->with([
+                'translations' => fn ($query) => $query->where('language_id', $languageId),
+                'children' => fn ($query) => $query
+                    ->where('status', true)
+                    ->with(['translations' => fn ($query) => $query->where('language_id', $languageId)])
+                    ->orderBy('sort_order')
+                    ->orderBy('id'),
+            ])
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+            ->map(fn (ShopCategory $category) => [
+                'value' => $category->id,
+                'label' => $category->translations->first()?->title ?: $category->slug,
+                'children' => $category->children
+                    ->map(fn (ShopCategory $child) => [
+                        'value' => $child->id,
+                        'label' => $child->translations->first()?->title ?: $child->slug,
+                    ])
+                    ->values()
+                    ->all(),
+            ])
             ->values()
             ->all();
     }

@@ -146,7 +146,7 @@ const privacyUpdatedAt = computed(() => shopPrivacy.value?.updatedAt || '03.06.2
 .privacy-editor-page h1 {
   margin: 0 0 24px;
   color: #142948;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
   font-size: clamp(28px, 4vw, 46px);
   font-weight: 680;
   line-height: 1.08;
@@ -164,7 +164,7 @@ const privacyUpdatedAt = computed(() => shopPrivacy.value?.updatedAt || '03.06.2
 .privacy-editor-content :deep(h4) {
   margin: 28px 0 12px;
   color: #142948;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
   line-height: 1.2;
 }
 

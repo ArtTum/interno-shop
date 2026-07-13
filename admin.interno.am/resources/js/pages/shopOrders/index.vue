@@ -8,11 +8,65 @@ const store = useStore();
 const isLoading = ref(false);
 const expandedOrderId = ref(null);
 const updatingStatusId = ref(null);
+const downloadingInvoiceId = ref(null);
+const filters = ref({
+    orderNumber: '',
+    customer: '',
+    craftsman: '',
+    amountFrom: '',
+    amountTo: '',
+    status: '',
+});
 
 const STATUSES = ['new', 'processing', 'completed', 'cancelled'];
 const orders = computed(() => store.getters['shopFrontend/getOrders'] || []);
-const totalAmount = computed(() => orders.value.reduce((sum, order) => sum + Number(order.total || 0), 0));
-const newOrdersCount = computed(() => orders.value.filter(o => (o.status || 'new') === 'new').length);
+
+const normalizeSearch = (value) => String(value || '').trim().toLowerCase();
+
+const filteredOrders = computed(() => {
+    const orderNumber = normalizeSearch(filters.value.orderNumber).replace(/^#/, '');
+    const customer = normalizeSearch(filters.value.customer);
+    const craftsmanFilter = normalizeSearch(filters.value.craftsman);
+    const amountFrom = filters.value.amountFrom !== '' ? Number(filters.value.amountFrom) : null;
+    const amountTo = filters.value.amountTo !== '' ? Number(filters.value.amountTo) : null;
+    const status = filters.value.status;
+
+    return orders.value.filter((order) => {
+        const customerFields = [
+            customerName(order),
+            order.customer?.phone,
+            order.customer?.email,
+            order.customer?.address,
+        ].join(' ');
+        const craftsmanData = craftsmanInfo(order);
+        const craftsmanFields = [craftsmanData.code, craftsmanData.name, craftsmanData.label].join(' ');
+        const total = Number(order.total || 0);
+
+        if (orderNumber && !String(order.id || '').includes(orderNumber)) return false;
+        if (customer && !normalizeSearch(customerFields).includes(customer)) return false;
+        if (craftsmanFilter && !normalizeSearch(craftsmanFields).includes(craftsmanFilter)) return false;
+        if (amountFrom !== null && !Number.isNaN(amountFrom) && total < amountFrom) return false;
+        if (amountTo !== null && !Number.isNaN(amountTo) && total > amountTo) return false;
+        if (status && (order.status || 'new') !== status) return false;
+
+        return true;
+    });
+});
+
+const totalAmount = computed(() => filteredOrders.value.reduce((sum, order) => sum + Number(order.total || 0), 0));
+const newOrdersCount = computed(() => filteredOrders.value.filter(o => (o.status || 'new') === 'new').length);
+const hasActiveFilters = computed(() => Object.values(filters.value).some(value => String(value || '').trim() !== ''));
+
+const resetFilters = () => {
+    filters.value = {
+        orderNumber: '',
+        customer: '',
+        craftsman: '',
+        amountFrom: '',
+        amountTo: '',
+        status: '',
+    };
+};
 
 const fetchOrders = async () => {
     isLoading.value = true;
@@ -119,6 +173,27 @@ const changeStatus = async (order, status) => {
     }
 };
 
+const downloadInvoice = async (order) => {
+    if (downloadingInvoiceId.value === order.id) return;
+    downloadingInvoiceId.value = order.id;
+
+    try {
+        const response = await store.dispatch('shopFrontend/downloadOrderInvoice', order.id);
+        const url = window.URL.createObjectURL(new Blob([response.data], {type: 'application/pdf'}));
+        const link = document.createElement('a');
+
+        link.href = url;
+        link.target = '_blank';
+        link.download = `interno-invoice-${String(order.id).padStart(6, '0')}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    } finally {
+        downloadingInvoiceId.value = null;
+    }
+};
+
 const statusClass = (status) => {
     const map = {
         new: 'bg-blue-50 text-blue-700 border border-blue-200',
@@ -155,6 +230,89 @@ fetchOrders();
                 </button>
             </div>
 
+            <!-- Filters -->
+            <div class="rounded-xl border border-stroke bg-white px-6 py-5 shadow-default">
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-base font-bold text-black">Filters</h3>
+                        <p class="text-xs text-gray-400">
+                            Showing {{ filteredOrders.length }} of {{ orders.length }} orders
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg border border-stroke px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                        :disabled="!hasActiveFilters"
+                        @click="resetFilters"
+                    >
+                        <font-awesome-icon :icon="['far', 'xmark']" />
+                        Clear filters
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
+                    <label class="block">
+                        <span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-400">Order #</span>
+                        <input
+                            v-model.trim="filters.orderNumber"
+                            type="search"
+                            class="w-full rounded-lg border border-stroke px-3 py-2 text-sm outline-none transition focus:border-primary"
+                            placeholder="#125"
+                        >
+                    </label>
+                    <label class="block">
+                        <span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-400">Customer</span>
+                        <input
+                            v-model.trim="filters.customer"
+                            type="search"
+                            class="w-full rounded-lg border border-stroke px-3 py-2 text-sm outline-none transition focus:border-primary"
+                            placeholder="Name, phone, email"
+                        >
+                    </label>
+                    <label class="block">
+                        <span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-400">Craftsman</span>
+                        <input
+                            v-model.trim="filters.craftsman"
+                            type="search"
+                            class="w-full rounded-lg border border-stroke px-3 py-2 text-sm outline-none transition focus:border-primary"
+                            placeholder="Code or name"
+                        >
+                    </label>
+                    <label class="block">
+                        <span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-400">Amount from</span>
+                        <input
+                            v-model.trim="filters.amountFrom"
+                            type="number"
+                            min="0"
+                            step="1"
+                            class="w-full rounded-lg border border-stroke px-3 py-2 text-sm outline-none transition focus:border-primary"
+                            placeholder="0"
+                        >
+                    </label>
+                    <label class="block">
+                        <span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-400">Amount to</span>
+                        <input
+                            v-model.trim="filters.amountTo"
+                            type="number"
+                            min="0"
+                            step="1"
+                            class="w-full rounded-lg border border-stroke px-3 py-2 text-sm outline-none transition focus:border-primary"
+                            placeholder="50000"
+                        >
+                    </label>
+                    <label class="block">
+                        <span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-400">Status</span>
+                        <select
+                            v-model="filters.status"
+                            class="w-full rounded-lg border border-stroke px-3 py-2 text-sm outline-none transition focus:border-primary"
+                        >
+                            <option value="">All statuses</option>
+                            <option v-for="s in STATUSES" :key="s" :value="s">{{ s }}</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+
             <!-- Stats -->
             <div class="grid grid-cols-3 gap-4 max-md:grid-cols-1">
                 <div class="rounded-xl border border-stroke bg-white px-6 py-5 shadow-default flex items-center gap-4">
@@ -163,7 +321,7 @@ fetchOrders();
                     </div>
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Total Orders</p>
-                        <strong class="mt-0.5 block text-2xl font-bold text-black">{{ orders.length }}</strong>
+                        <strong class="mt-0.5 block text-2xl font-bold text-black">{{ filteredOrders.length }}</strong>
                     </div>
                 </div>
                 <div class="rounded-xl border border-stroke bg-white px-6 py-5 shadow-default flex items-center gap-4">
@@ -199,12 +357,12 @@ fetchOrders();
                                 <th class="py-3.5 px-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-500">Items</th>
                                 <th class="py-3.5 px-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-500">Total</th>
                                 <th class="py-3.5 px-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-500">Status</th>
-                                <th class="py-3.5 px-4 w-14"></th>
+                                <th class="py-3.5 px-4 w-24"></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <template v-if="orders.length">
-                                <template v-for="order in orders" :key="order.id">
+                            <template v-if="filteredOrders.length">
+                                <template v-for="order in filteredOrders" :key="order.id">
                                     <!-- Main Row -->
                                     <tr
                                         class="border-b border-stroke transition-colors"
@@ -247,14 +405,25 @@ fetchOrders();
                                             </div>
                                         </td>
                                         <td class="py-4 px-4 text-right">
-                                            <button
-                                                type="button"
-                                                class="flex h-8 w-8 items-center justify-center rounded-lg border border-stroke text-gray-500 hover:border-primary hover:text-primary transition"
-                                                :title="expandedOrderId === order.id ? 'Hide details' : 'Show details'"
-                                                @click="toggleDetails(order.id)"
-                                            >
-                                                <font-awesome-icon :icon="['far', expandedOrderId === order.id ? 'chevron-up' : 'chevron-down']" class="text-xs" />
-                                            </button>
+                                            <div class="flex justify-end gap-2">
+                                                <button
+                                                    type="button"
+                                                    class="flex h-8 w-8 items-center justify-center rounded-lg border border-stroke text-gray-500 hover:border-primary hover:text-primary transition disabled:opacity-50"
+                                                    :disabled="downloadingInvoiceId === order.id"
+                                                    title="Open invoice PDF"
+                                                    @click="downloadInvoice(order)"
+                                                >
+                                                    <font-awesome-icon :icon="['far', downloadingInvoiceId === order.id ? 'rotate-right' : 'file-pdf']" class="text-xs" :class="{'animate-spin': downloadingInvoiceId === order.id}" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    class="flex h-8 w-8 items-center justify-center rounded-lg border border-stroke text-gray-500 hover:border-primary hover:text-primary transition"
+                                                    :title="expandedOrderId === order.id ? 'Hide details' : 'Show details'"
+                                                    @click="toggleDetails(order.id)"
+                                                >
+                                                    <font-awesome-icon :icon="['far', expandedOrderId === order.id ? 'chevron-up' : 'chevron-down']" class="text-xs" />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
 
@@ -354,7 +523,7 @@ fetchOrders();
                             <tr v-else>
                                 <td colspan="8" class="py-16 text-center text-gray-400">
                                     <font-awesome-icon :icon="['far', 'inbox']" class="text-4xl mb-3 block mx-auto opacity-30" />
-                                    {{ isLoading ? 'Loading orders…' : 'No orders yet.' }}
+                                    {{ isLoading ? 'Loading orders…' : (orders.length ? 'No orders match these filters.' : 'No orders yet.') }}
                                 </td>
                             </tr>
                         </tbody>

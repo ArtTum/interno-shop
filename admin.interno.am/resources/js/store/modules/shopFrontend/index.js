@@ -35,6 +35,13 @@ const actions = {
         return res.data.data;
     },
 
+    async downloadOrderInvoice(context, id) {
+        return await baseHttp.get(`shop-frontend/orders/${id}/invoice`, {
+            responseType: 'blob',
+            params: {dontNeedLoading: true},
+        });
+    },
+
     async fetchTranslations(context, params = {}) {
         const res = await baseHttp.get('shop-frontend/translations', {params});
         return res.data.data;

@@ -606,8 +606,8 @@ function selectedOptionsKey(item: Pick<CartItem, 'selectedOptions' | 'selectedOp
   return item.selectedOptionLabel || ''
 }
 
-function cartItemKey(item: Pick<CartItem, 'productId' | 'color' | 'effectivePrice' | 'selectedOptions' | 'selectedOptionLabel'>) {
-  return `${item.productId}:${colorKey(item.color)}:${item.effectivePrice ?? ''}:${selectedOptionsKey(item)}`
+function cartItemKey(item: Pick<CartItem, 'productId' | 'color' | 'selectedOptions' | 'selectedOptionLabel'>) {
+  return `${item.productId}:${colorKey(item.color)}:${selectedOptionsKey(item)}`
 }
 
 export function useCatalog() {
@@ -866,7 +866,6 @@ export function useCatalog() {
     return cartItemKey({
       productId: item.productId,
       color,
-      effectivePrice: item.effectivePrice,
       selectedOptionLabel: item.selectedOptionLabel,
       selectedOptions: item.selectedOptions
     })
@@ -886,7 +885,22 @@ export function useCatalog() {
 
     return allProducts.value.find((product) => product.id === productId) ?? null
   })
-  const currentProductImage = computed(() => selectedProductImage.value || currentProduct.value?.image || currentProduct.value?.gallery?.[0] || '')
+  const currentProductImage = computed(() => {
+    const product = currentProduct.value
+
+    if (!product) {
+      return ''
+    }
+
+    const images = Array.from(new Set([
+      product.image,
+      ...(product.gallery || [])
+    ].filter(Boolean)))
+
+    return selectedProductImage.value && images.includes(selectedProductImage.value)
+      ? selectedProductImage.value
+      : (images[0] || '')
+  })
   const detailThumbnails = computed(() => {
     if (!currentProduct.value) {
       return []
@@ -931,7 +945,15 @@ export function useCatalog() {
         const product = allProducts.value.find((candidate) => candidate.id === item.productId)
         const color = item.color || productColors(product)[0] || null
 
-        return product ? { ...item, color, key: cartKeyForItem(item), product } : null
+        return product
+          ? {
+              ...item,
+              color,
+              effectivePrice: currentCartItemPrice(product, item),
+              key: cartKeyForItem(item),
+              product
+            }
+          : null
       })
       .filter((item): item is CartItem & { key: string, product: Product } => Boolean(item))
   })
@@ -1171,6 +1193,81 @@ export function useCatalog() {
       .sort((first, second) => first.price - second.price)[0] || null
   }
 
+  function normalizeOptionMatchValue(value?: number | string | null) {
+    return String(value ?? '').trim().toLowerCase()
+  }
+
+  function optionMatchesStoredSelection(option: ProductPriceOption, storedValue?: string | null) {
+    const normalizedStoredValue = normalizeOptionMatchValue(storedValue)
+
+    if (!normalizedStoredValue) {
+      return false
+    }
+
+    return [
+      option.id,
+      option.name,
+      option.label,
+      option.value
+    ].some((value) => normalizeOptionMatchValue(value) === normalizedStoredValue)
+  }
+
+  function currentPriceOptionForCartItem(product: Product, item: CartItem) {
+    const selectedOptions = item.selectedOptions || []
+
+    for (const selectedOption of selectedOptions) {
+      const values = product.priceOptions?.[selectedOption.key]
+
+      if (!Array.isArray(values)) {
+        continue
+      }
+
+      const matchedOption = values.find((option) => optionMatchesStoredSelection(option, selectedOption.value))
+      const price = Number(matchedOption?.price)
+
+      if (Number.isFinite(price)) {
+        return {
+          key: selectedOption.key,
+          option: matchedOption,
+          price
+        }
+      }
+    }
+
+    if (item.selectedOptionLabel) {
+      const selectedLabel = item.selectedOptionLabel
+
+      for (const [key, values] of Object.entries(product.priceOptions || {})) {
+        if (!Array.isArray(values)) {
+          continue
+        }
+
+        const matchedOption = values.find((option) => optionMatchesStoredSelection(option, selectedLabel))
+        const price = Number(matchedOption?.price)
+
+        if (Number.isFinite(price)) {
+          return {
+            key,
+            option: matchedOption,
+            price
+          }
+        }
+      }
+    }
+
+    return null
+  }
+
+  function currentCartItemPrice(product: Product, item: CartItem) {
+    const currentOption = currentPriceOptionForCartItem(product, item)
+
+    if (currentOption) {
+      return currentOption.price
+    }
+
+    return Number(product.price)
+  }
+
   function addToCart(
     product: Product,
     selectedColor: ProductColor | null = null,
@@ -1202,7 +1299,6 @@ export function useCatalog() {
     const key = cartItemKey({
       productId: product.id,
       color,
-      effectivePrice: priceToStore,
       selectedOptionLabel: optionLabelToStore,
       selectedOptions: optionsToStore
     })

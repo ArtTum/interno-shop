@@ -1882,7 +1882,7 @@ h2 {
 
 .cart-item-info h2 {
   margin-bottom: 14px;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
   font-size: 22px;
   font-weight: 680;
   line-height: 1.12;
@@ -1949,7 +1949,7 @@ h2 {
 
 .cart-line-price strong {
   color: #142948;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
   font-size: 20px;
   font-weight: 760;
   white-space: nowrap;
@@ -1991,7 +1991,7 @@ h2 {
 
 .cart-total-card strong {
   color: #142948;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
   font-size: 20px;
   font-weight: 760;
 }
@@ -2015,7 +2015,7 @@ h2 {
 
 .cart-recommendations h2 {
   margin-bottom: 14px;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
   font-size: 16px;
 }
 
@@ -2124,7 +2124,7 @@ h2 {
 .checkout-dialog h2 {
   margin-bottom: 22px;
   color: #142948;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
   font-size: 18px;
   font-weight: 680;
   text-align: center;
@@ -2333,7 +2333,7 @@ h2 {
 .product-detail-info h1 {
   max-width: 620px;
   margin-bottom: 28px;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
   font-size: 28px;
   font-weight: 680;
   line-height: 1.15;
@@ -2458,7 +2458,7 @@ h2 {
   align-items: center;
   gap: 6px;
   color: #142948;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
   font-size: 30px;
   font-weight: 680;
   line-height: 1;

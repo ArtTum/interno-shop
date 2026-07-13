@@ -192,6 +192,66 @@ const relatedProductOptions = computed(() => {
         .filter((option) => Number(option.value) !== currentProductId);
 });
 
+const expandedCategoryIds = ref([]);
+const categoryTree = computed(() => props.params.categoryTree || []);
+const selectedSubcategory = computed(() => {
+    const selectedId = Number(form.value.shop_category_id || 0);
+
+    if (!selectedId) {
+        return null;
+    }
+
+    for (const category of categoryTree.value) {
+        const child = (category.children || []).find((item) => Number(item.value) === selectedId);
+
+        if (child) {
+            return {parent: category, child};
+        }
+    }
+
+    return null;
+});
+const selectedParentCategory = computed(() => {
+    const selectedId = Number(form.value.shop_category_id || 0);
+
+    if (!selectedId) {
+        return null;
+    }
+
+    return categoryTree.value.find((category) => Number(category.value) === selectedId) || null;
+});
+const categoryError = computed(() => {
+    const error = form.value.errors?.shop_category_id;
+
+    return Array.isArray(error) ? error[0] : error;
+});
+
+const isCategoryExpanded = (categoryId) => expandedCategoryIds.value.includes(Number(categoryId));
+
+const toggleCategory = (categoryId) => {
+    const normalizedId = Number(categoryId);
+
+    expandedCategoryIds.value = isCategoryExpanded(normalizedId)
+        ? expandedCategoryIds.value.filter((id) => id !== normalizedId)
+        : [...expandedCategoryIds.value, normalizedId];
+};
+
+const selectSubcategory = (subcategoryId) => {
+    if (!canEdit.value) {
+        return;
+    }
+
+    form.value.shop_category_id = subcategoryId;
+};
+
+watch([categoryTree, () => form.value.shop_category_id], () => {
+    const parentId = selectedSubcategory.value?.parent?.value || selectedParentCategory.value?.value;
+
+    if (parentId && !isCategoryExpanded(parentId)) {
+        expandedCategoryIds.value = [...expandedCategoryIds.value, Number(parentId)];
+    }
+}, {immediate: true});
+
 watch(() => form.value.option_color_ids, () => {
     if (!Array.isArray(form.value.option_color_ids)) {
         form.value.option_color_ids = form.value.option_color_id
@@ -284,7 +344,71 @@ const submitForm = () => {
             <div v-if="activeTab === 'general'">
                 <div class="grid grid-cols-4 gap-6 max-xl:grid-cols-2 max-sm:grid-cols-1">
                     <div>
+                        <label class="mb-2 block text-sm font-medium text-black">Կատեգորիա *</label>
+                        <div
+                            class="overflow-hidden rounded-lg border bg-white"
+                            :class="categoryError || selectedParentCategory ? 'border-danger' : 'border-stroke'"
+                        >
+                            <div
+                                v-for="category in categoryTree"
+                                :key="category.value"
+                                class="border-b border-stroke last:border-b-0"
+                            >
+                                <button
+                                    type="button"
+                                    class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-semibold text-black transition hover:bg-gray-50"
+                                    :disabled="!canEdit"
+                                    @click="toggleCategory(category.value)"
+                                >
+                                    <span>{{ category.label }}</span>
+                                    <span
+                                        class="text-xs text-gray-400 transition"
+                                        :class="{'rotate-180': isCategoryExpanded(category.value)}"
+                                    >
+                                        ▼
+                                    </span>
+                                </button>
+
+                                <div v-if="isCategoryExpanded(category.value)" class="border-t border-stroke bg-gray-50/60 p-2">
+                                    <button
+                                        v-for="subcategory in category.children || []"
+                                        :key="subcategory.value"
+                                        type="button"
+                                        class="mb-1 flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition last:mb-0"
+                                        :class="Number(form.shop_category_id) === Number(subcategory.value)
+                                            ? 'bg-primary text-white shadow-sm'
+                                            : 'bg-white text-gray-700 hover:bg-primary/10 hover:text-primary'"
+                                        :disabled="!canEdit"
+                                        @click="selectSubcategory(subcategory.value)"
+                                    >
+                                        <span>{{ subcategory.label }}</span>
+                                        <font-awesome-icon
+                                            v-if="Number(form.shop_category_id) === Number(subcategory.value)"
+                                            :icon="['far', 'check']"
+                                            class="text-xs"
+                                        />
+                                    </button>
+                                    <div
+                                        v-if="!(category.children || []).length"
+                                        class="rounded-md bg-white px-3 py-2 text-xs text-gray-400"
+                                    >
+                                        Այս կատեգորիայում ենթակատեգորիա չկա
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p v-if="selectedSubcategory" class="mt-1 text-xs text-gray-500">
+                            Ընտրված է՝ {{ selectedSubcategory.parent.label }} › {{ selectedSubcategory.child.label }}
+                        </p>
+                        <p v-else-if="selectedParentCategory" class="mt-1 text-xs text-danger">
+                            Ընտրել եք միայն կատեգորիա․ խնդրում ենք բացել ու ընտրել ենթակատեգորիա։
+                        </p>
+                        <p v-else class="mt-1 text-xs text-gray-400">
+                            Սեղմեք կատեգորիայի վրա և ընտրեք դրա ենթակատեգորիան։
+                        </p>
+                        <p v-if="categoryError" class="mt-1 text-xs text-danger">{{ categoryError }}</p>
                         <CustomSelect
+                            v-if="false"
                             label="Կատեգորիա"
                             v-model="form.shop_category_id"
                             mode="single"

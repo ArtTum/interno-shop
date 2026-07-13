@@ -1080,7 +1080,7 @@ h2 {
 
 .cart-recommendations h2 {
   margin-bottom: 14px;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
   font-size: 16px;
 }
 
@@ -1177,7 +1177,7 @@ h2 {
 .craftsmen-head h1 {
   margin: 0 0 8px;
   color: #13233d;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
   font-size: 30px;
   font-weight: 700;
   letter-spacing: 0;
@@ -1526,7 +1526,7 @@ h2 {
 .checkout-dialog h2 {
   margin-bottom: 22px;
   color: #142948;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
   font-size: 18px;
   font-weight: 680;
   text-align: center;
@@ -1695,7 +1695,7 @@ h2 {
   max-width: 760px;
   margin-bottom: 18px;
   color: #142948;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
   font-size: 24px;
   font-weight: 680;
   line-height: 1.32;
@@ -1833,7 +1833,7 @@ h2 {
 .product-detail-info h1 {
   max-width: 620px;
   margin-bottom: 14px;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
   font-size: 28px;
   font-weight: 680;
   line-height: 1.15;
@@ -2063,7 +2063,7 @@ h2 {
   align-items: center;
   gap: 6px;
   color: #142948;
-  font-family: auto;
+  font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
   font-size: 30px;
   font-weight: 680;
   line-height: 1;
@@ -3462,7 +3462,7 @@ h2 {
   .product-detail-info h1 {
     margin-bottom: 20px;
     color: #151515;
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
     font-size: 15px;
     font-weight: 680;
     line-height: 1.42;
@@ -3594,7 +3594,7 @@ h2 {
     background: transparent;
     color: #142948;
     box-shadow: none;
-    font-family: auto;
+    font-family: Inter, "Noto Sans Armenian", "Segoe UI", Arial, sans-serif;
     font-size: 19px;
     font-weight: 760;
     line-height: 1;
