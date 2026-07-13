@@ -19,7 +19,7 @@
             <div style="font-size:13px;color:#667085;">{{ $labels['invoice'] }}</div>
             <div style="font-size:20px;font-weight:700;color:#153966;">{{ $invoiceNumber }}</div>
             <div style="margin-top:8px;font-size:13px;color:#667085;">{{ $labels['grandTotal'] }}</div>
-            <div style="font-size:22px;font-weight:700;color:#153966;">{{ number_format($total, 0, '.', ' ') }} ֏</div>
+            <div style="font-size:22px;font-weight:700;color:#153966;">{{ number_format($total, 0, '.', ' ') }} {{ $currencyLabel }}</div>
         </div>
 
         <p style="margin:0;color:#6b4d0f;background:#fff8e6;border:1px solid #f4d58d;border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.5;">

@@ -243,8 +243,8 @@
                 @endforeach
             </td>
             <td class="number">{{ $item['quantity'] }}</td>
-            <td class="number">{{ number_format($item['unitPrice'], 0, '.', ' ') }} ֏</td>
-            <td class="number"><strong>{{ number_format($item['lineTotal'], 0, '.', ' ') }} ֏</strong></td>
+            <td class="number">{{ number_format($item['unitPrice'], 0, '.', ' ') }} {{ $currencyLabel }}</td>
+            <td class="number"><strong>{{ number_format($item['lineTotal'], 0, '.', ' ') }} {{ $currencyLabel }}</strong></td>
         </tr>
     @endforeach
     </tbody>
@@ -252,7 +252,7 @@
 
 <div class="total-box">
     <div class="total-label">{{ $labels['grandTotal'] }}</div>
-    <div class="total-value">{{ number_format($total, 0, '.', ' ') }} ֏</div>
+    <div class="total-value">{{ number_format($total, 0, '.', ' ') }} {{ $currencyLabel }}</div>
 </div>
 
 <div class="note">{{ $deliveryNote }}</div>

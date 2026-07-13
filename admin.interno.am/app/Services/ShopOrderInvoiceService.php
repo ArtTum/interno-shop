@@ -83,6 +83,7 @@ class ShopOrderInvoiceService
                 ->values()
                 ->all(),
             'total' => (float)$order->total,
+            'currencyLabel' => 'AMD',
             'company' => [
                 'name' => 'INTERNO',
                 'subtitle' => 'Creative Interior Solutions',
